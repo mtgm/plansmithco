@@ -1,41 +1,55 @@
 // api/glb.js
 const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { NodeHttpHandler } = require("@aws-sdk/node-http-handler");
+const https = require("https");
 const { pipeline } = require("stream");
 const { promisify } = require("util");
 const pump = promisify(pipeline);
 
+// --- S3 (R2) istemcisi ---
+// Not: Burada S3 API endpoint'i kullanıyoruz. r2.dev adresi tarayıcı içindir;
+// SDK ile imzalı istekler için doğru uç nokta budur.
 const s3 = new S3Client({
   region: "auto",
-  endpoint: "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev",
+  endpoint: `https://${process.env.CF_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  forcePathStyle: true,
   credentials: {
     accessKeyId: process.env.R2_ACCESS_KEY_ID,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
   },
-  forcePathStyle: true, // R2 için gerekli
+  requestHandler: new NodeHttpHandler({
+    httpsAgent: new https.Agent({
+      keepAlive: true,
+      maxSockets: 50,
+      // Bazı bölgelerde TLS negotiation sorunlarını kesmek için:
+      minVersion: "TLSv1.2",
+    }),
+  }),
 });
 
 module.exports = async (req, res) => {
   try {
-    // Çoklu model: /api/glb?key=dosya.glb
     const url = new URL(req.url, `https://${req.headers.host}`);
-    const Key = url.searchParams.get("key") || process.env.R2_KEY || "model.glb";
-    const Bucket = process.env.R2_BUCKET;
+    const Bucket = process.env.R2_BUCKET; // web-ar-test (birebir!)
+    const Key = url.searchParams.get("key") || process.env.R2_KEY || "SBR-v2.glb";
 
-    // R2'den OBJeyi çek
     const obj = await s3.send(new GetObjectCommand({ Bucket, Key }));
 
-    // İçerik tipini düzgün ayarla (GLB)
     res.setHeader("Content-Type", obj.ContentType || "model/gltf-binary");
     if (obj.ContentLength) res.setHeader("Content-Length", String(obj.ContentLength));
-    // İstersen önbelleği kapat
     res.setHeader("Cache-Control", "no-store");
 
-    // Body bir stream; doğrudan kullanıcıya akıt
     await pump(obj.Body, res);
   } catch (e) {
-    console.error("R2 proxy error:", e);
-    // Hata türüne göre basit cevaplar:
-    if (e.$metadata?.httpStatusCode === 404) return res.status(404).send("Not Found");
-    return res.status(500).send("GLB stream failed");
+    // Geçici: hata ayrıntısını görmemiz için geri döndürüyorum
+    res.status(500).json({
+      ok: false,
+      name: e.name,
+      code: e.Code || e.code,
+      message: e.message,
+      hint:
+        "R2_BUCKET (web-ar-test) birebir mi? key tam adıyla SBR-v2.glb mı? " +
+        "CF_ACCOUNT_ID, R2_ACCESS_KEY_ID/SECRET_ACCESS_KEY doğru mu?",
+    });
   }
 };
