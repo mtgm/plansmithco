@@ -3,30 +3,22 @@
   <head>
     <title>PlanSmithCo | AR Model Viewer</title>
     <meta charset="utf-8">
-    <meta name="description" content="AR destekli 3D model görüntüleyici">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link type="text/css" href="./styles.css" rel="stylesheet"/>
+    <!-- ✅ mutlak yol -->
+    <link rel="stylesheet" href="/styles.css">
     <style>
-      body {
-        margin: 0;
-        background: #fff;
-        overflow: hidden;
-      }
-      model-viewer {
-        width: 100vw;
-        height: 100vh;
-        --poster-color: transparent;
-      }
+      html,body{height:100%;margin:0;background:#fff;overflow:hidden}
+      model-viewer{width:100vw;height:100vh;--poster-color:transparent}
     </style>
   </head>
   <body>
-    <!-- <model-viewer> HTML element -->
+
     <model-viewer id="mv"
       ar
       ar-modes="webxr scene-viewer quick-look"
       camera-controls
       tone-mapping="neutral"
-      poster="poster.webp"
+      poster="/poster.webp"                 <!-- ✅ mutlak yol -->
       shadow-intensity="0.45"
       shadow-softness="0.95"
       camera-orbit="0deg 75deg auto"
@@ -34,19 +26,16 @@
       min-field-of-view="15deg"
       max-field-of-view="75deg"
       exposure="1.2"
-      autoplay
-      style="background-color:white;"
-    >
+      autoplay>
       <div class="progress-bar hide" slot="progress-bar">
         <div class="update-bar"></div>
       </div>
       <button slot="ar-button" id="ar-button">View in your space</button>
       <div id="ar-prompt">
-        <img src="ar_hand_prompt.png">
+        <img src="/ar_hand_prompt.png" alt="AR prompt">   <!-- ✅ mutlak yol -->
       </div>
     </model-viewer>
 
-    <!-- 🔹 Model yükleme scripti -->
     <script>
       (async () => {
         const u = new URL(location.href);
@@ -61,19 +50,13 @@
           const j = await r.json();
           if (j.ok) key = j.key;
         }
-
-        // Varsayılan model
         key = key || "SBR-v2.glb";
-
-        const mv = document.getElementById("mv");
-        mv.setAttribute("src", `/api/glb?key=${encodeURIComponent(key)}`);
-
-        // Dinamik başlık (örnek: plansmithco / sbrv2)
-        document.title = `PlanSmithCo | ${sku || key}`;
+        document.getElementById("mv")
+          .setAttribute("src", `/api/glb?key=${encodeURIComponent(key)}`);
       })();
     </script>
 
-    <script src="script.js"></script>
+    <script src="/script.js"></script>   <!-- ✅ mutlak yol -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
   </body>
 </html>
