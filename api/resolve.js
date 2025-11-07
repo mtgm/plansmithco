@@ -1,4 +1,4 @@
-// api/resolve.js (diagnostic sürümü — geçici)
+// api/resolve.js
 const fs = require("fs");
 const path = require("path");
 
@@ -8,12 +8,8 @@ module.exports = (req, res) => {
     const skuParam = (url.searchParams.get("sku") || "").trim();
     if (!skuParam) return res.status(400).json({ ok: false, error: "Missing SKU" });
 
-    const sku = skuParam.toUpperCase();
     const jsonPath = path.join(process.cwd(), "data", "models.json");
-
-    // diagnostic: dosya var mı?
-    const exists = fs.existsSync(jsonPath);
-    if (!exists) {
+    if (!fs.existsSync(jsonPath)) {
       return res.status(500).json({ ok: false, error: "models.json missing", path: jsonPath });
     }
 
@@ -25,12 +21,20 @@ module.exports = (req, res) => {
       return res.status(500).json({ ok:false, error: "models.json parse error", message: e.message });
     }
 
-    const key = models[sku];
-    if (!key) return res.status(404).json({ ok: false, error: "Model not found", sku, models_keys: Object.keys(models) });
+    // Normalize keys to lowercase for case-insensitive lookup
+    const normalized = {};
+    Object.keys(models).forEach(k => {
+      normalized[k.toLowerCase()] = models[k];
+    });
 
-    return res.status(200).json({ ok: true, sku, key });
+    const key = normalized[skuParam.toLowerCase()];
+    if (!key) {
+      return res.status(404).json({ ok: false, error: "Model not found", sku: skuParam, available: Object.keys(models) });
+    }
+
+    return res.status(200).json({ ok: true, sku: skuParam, key });
   } catch (err) {
-    console.error("resolve.js diagnostic error:", err);
+    console.error("resolve.js error:", err);
     return res.status(500).json({ ok: false, error: "ResolveFailed", message: err.message });
   }
 };
