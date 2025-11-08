@@ -1,6 +1,6 @@
 {
-  "rewrites": [
-    { "source": "/m/:sku", "destination": "/index.html" }
+  "routes": [
+    { "src": "/m/(.*)", "dest": "/index.html" }
   ],
   "cleanUrls": true
 }
