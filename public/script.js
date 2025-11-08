@@ -1,13 +1,9 @@
-// Handles loading the events for <model-viewer>'s slotted progress bar
-const onProgress = (event) => {
-  const progressBar = event.target.querySelector('.progress-bar');
-  const updatingBar = event.target.querySelector('.update-bar');
-  updatingBar.style.width = `${event.detail.totalProgress * 100}%`;
-  if (event.detail.totalProgress === 1) {
-    progressBar.classList.add('hide');
-    event.target.removeEventListener('progress', onProgress);
-  } else {
-    progressBar.classList.remove('hide');
-  }
-};
-document.querySelector('model-viewer').addEventListener('progress', onProgress);
+const mv = document.getElementById('mv');
+const bar = document.querySelector('.update-bar');
+const wrap = document.querySelector('.progress-bar');
+
+mv.addEventListener('progress', (e) => {
+  const f = Math.min(1, e.detail.totalProgress || 0);
+  bar.style.width = `${f * 100}%`;
+  if (f >= 1) wrap.classList.add('hide'); else wrap.classList.remove('hide');
+});
