@@ -4,7 +4,6 @@
     <title>PlanSmithCo | AR Model Viewer</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- ✅ mutlak yol -->
     <link rel="stylesheet" href="/styles.css">
     <style>
       html,body{height:100%;margin:0;background:#fff;overflow:hidden}
@@ -12,13 +11,12 @@
     </style>
   </head>
   <body>
-
     <model-viewer id="mv"
       ar
       ar-modes="webxr scene-viewer quick-look"
       camera-controls
       tone-mapping="neutral"
-      poster="/poster.webp"                 <!-- ✅ mutlak yol -->
+      poster="/poster.webp"
       shadow-intensity="0.45"
       shadow-softness="0.95"
       camera-orbit="0deg 75deg auto"
@@ -27,13 +25,9 @@
       max-field-of-view="75deg"
       exposure="1.2"
       autoplay>
-      <div class="progress-bar hide" slot="progress-bar">
-        <div class="update-bar"></div>
-      </div>
+      <div class="progress-bar hide" slot="progress-bar"><div class="update-bar"></div></div>
       <button slot="ar-button" id="ar-button">View in your space</button>
-      <div id="ar-prompt">
-        <img src="/ar_hand_prompt.png" alt="AR prompt">   <!-- ✅ mutlak yol -->
-      </div>
+      <div id="ar-prompt"><img src="/ar_hand_prompt.png" alt="AR prompt"></div>
     </model-viewer>
 
     <script>
@@ -51,12 +45,11 @@
           if (j.ok) key = j.key;
         }
         key = key || "SBR-v2.glb";
-        document.getElementById("mv")
-          .setAttribute('src', `/file/${encodeURIComponent(key)}`);      
+        document.getElementById("mv").setAttribute("src", `/file/${encodeURIComponent(key)}`);
       })();
     </script>
 
-    <script src="/script.js"></script>   <!-- ✅ mutlak yol -->
+    <script src="/script.js"></script>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
   </body>
 </html>
