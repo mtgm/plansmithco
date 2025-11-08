@@ -1,5 +1,6 @@
 {
   "rewrites": [
-    { "source": "/m/:sku", "destination": "/index.html" }
+    { "source": "/m/:sku", "destination": "/index.html" },
+    { "source": "/file/:key*", "destination": "/api/file?key=:key" }
   ]
 }
