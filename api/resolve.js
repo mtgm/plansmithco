@@ -1,58 +1,26 @@
-// api/resolve.js
-import fs from "fs";
-import path from "path";
+// CommonJS
+const fs = require("fs");
+const path = require("path");
 
-export default async function handler(req, res) {
+/**
+ * GET /api/resolve?sku=SBRV2
+ * -> { ok:true, sku:"SBRV2", key:"SBR-v2.glb" }
+ */
+module.exports = (req, res) => {
   try {
     const url = new URL(req.url, `https://${req.headers.host}`);
-    const skuParam = (url.searchParams.get("sku") || "").trim();
-    if (!skuParam) {
-      return res.status(400).json({ ok: false, error: "Missing SKU" });
-    }
+    const rawSku = (url.searchParams.get("sku") || "").trim();
+    if (!rawSku) return res.status(400).json({ ok: false, error: "Missing sku" });
 
-    const jsonPath = path.join(process.cwd(), "data", "models.json");
+    const sku = rawSku.toUpperCase();
+    const file = path.join(process.cwd(), "data", "models.json");
+    const map = JSON.parse(fs.readFileSync(file, "utf8"));
 
-    if (!fs.existsSync(jsonPath)) {
-      return res.status(500).json({ ok: false, error: "models.json missing" });
-    }
+    const key = map[sku];
+    if (!key) return res.status(404).json({ ok: false, error: "NotFound", sku });
 
-    const raw = fs.readFileSync(jsonPath, "utf8");
-    let models;
-    try {
-      models = JSON.parse(raw);
-    } catch (e) {
-      return res.status(500).json({
-        ok: false,
-        error: "models.json parse error",
-        message: e.message
-      });
-    }
-
-    // Case-insensitive eşle
-    const lookup = {};
-    for (const [k, v] of Object.entries(models)) {
-      lookup[k.toLowerCase()] = v;
-    }
-
-    const key = lookup[skuParam.toLowerCase()];
-    if (!key) {
-      return res.status(404).json({
-        ok: false,
-        error: "Model not found",
-        sku: skuParam
-      });
-    }
-
-    return res.status(200).json({
-      ok: true,
-      sku: skuParam,
-      key // Örn: "SBR-v2.glb"
-    });
-  } catch (err) {
-    return res.status(500).json({
-      ok: false,
-      error: "ResolveFailed",
-      message: err.message
-    });
+    return res.status(200).json({ ok: true, sku, key });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
   }
-}
+};
