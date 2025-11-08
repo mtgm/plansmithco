@@ -1,11 +1,8 @@
 {
-  "type": "module",
-  "name": "r2-vercel-starter",
-  "version": "1.0.1",
-  "description": "Signed URL proxy to Cloudflare R2 for model-viewer / WebAR",
-  "license": "MIT",
+  "name": "plansmithco-ar",
+  "version": "1.0.0",
+  "private": true,
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.708.0",
-    "@aws-sdk/s3-request-presigner": "^3.708.0"
+    "@aws-sdk/client-s3": "^3.708.0"
   }
 }
