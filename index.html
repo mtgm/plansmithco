@@ -52,7 +52,8 @@
         }
         key = key || "SBR-v2.glb";
         document.getElementById("mv")
-          .setAttribute('src', `/api/file?key=${encodeURIComponent(key)}`);      })();
+          .setAttribute('src', `/file/${encodeURIComponent(key)}`);      
+      })();
     </script>
 
     <script src="/script.js"></script>   <!-- ✅ mutlak yol -->
