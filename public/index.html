@@ -30,31 +30,26 @@
 <script>
   (async () => {
     const u = new URL(location.href);
-
-    // /m/SOMETHING yolundan SKU al
-    const m = u.pathname.match(/^\/m\/([^\/#?]+)/i);
+    const m = u.pathname.match(/^\/m\/([^\/#?]+)/);
     const skuFromPath = m ? m[1] : null;
 
-    // ?sku=SOMETHING ile de çalışsın
     const qs = new URLSearchParams(u.search);
     const sku = skuFromPath || qs.get("sku");
+    let key   = qs.get("key");
 
-    let key = qs.get("key");
     if (!key && sku) {
       const r = await fetch(`/api/resolve?sku=${encodeURIComponent(sku)}`);
-      if (r.ok) {
-        const j = await r.json();
-        if (j.ok) key = j.key;
-      }
+      const j = await r.json();
+      if (j.ok) key = j.key;
     }
 
-    // fallback
-    key = key || "SBR-v2.glb";
+    key = key || "SBR-v2.glb"; // fallback
 
     document.getElementById("mv")
-      .setAttribute("src", `/api/glb?key=${encodeURIComponent(key)}`);
+      .setAttribute("src", `/file/${encodeURIComponent(key)}`);
   })();
 </script>
+
 
   </body>
 </html>
