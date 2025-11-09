@@ -1,44 +1,50 @@
-// CommonJS
 const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
-/**
- * Cloudflare R2'ye PATH-STYLE ile bağlan (TLS/SNI sorunsuz).
- */
-const r2 = new S3Client({
+// --- R2 ayarları env'den gelir
+const {
+  R2_ACCOUNT_ID,
+  R2_ACCESS_KEY_ID,
+  R2_SECRET_ACCESS_KEY,
+  R2_BUCKET
+} = process.env;
+
+// Tek bir S3 Client (R2 endpoint'ine)
+const client = new S3Client({
   region: "auto",
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
   credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY
-  },
-  forcePathStyle: true
+    accessKeyId: R2_ACCESS_KEY_ID,
+    secretAccessKey: R2_SECRET_ACCESS_KEY
+  }
 });
 
-function mimeFor(key) {
-  return key.toLowerCase().endsWith(".glb")
-    ? "model/gltf-binary"
-    : "application/octet-stream";
-}
-
-/**
- * GET /api/glb?key=SBR-v2.glb
- * R2’den stream eder; dosya adı GitHub/R2’de görünmez.
- */
 module.exports = async (req, res) => {
   try {
     const url = new URL(req.url, `https://${req.headers.host}`);
-    const key = (url.searchParams.get("key") || "").trim();
-    if (!key) return res.status(400).send("missing key");
+    const key = url.searchParams.get("key");
+    if (!key) return res.status(400).json({ ok: false, error: "Missing key" });
 
-    const obj = await r2.send(new GetObjectCommand({
-      Bucket: process.env.R2_BUCKET,
-      Key: key
-    }));
+    // 10 dakika imzalı URL
+    const command = new GetObjectCommand({ Bucket: R2_BUCKET, Key: key });
+    const signed = await getSignedUrl(client, command, { expiresIn: 600 });
 
-    res.setHeader("Content-Type", mimeFor(key));
-    res.setHeader("Cache-Control", "public, max-age=600");
-    obj.Body.pipe(res);
-  } catch (e) {
-    res.status(500).json({ ok: false, error: e.message });
+    // İmzalı URL'den dosyayı çek ve istemciye aktar (R2 linki gözükmez)
+    const upstream = await fetch(signed);
+    if (!upstream.ok) {
+      return res.status(upstream.status).json({ ok: false, error: "UpstreamError" });
+    }
+
+    // İçerik tipini koru (GLB)
+    const ct = upstream.headers.get("content-type") || "model/gltf-binary";
+    res.setHeader("Content-Type", ct);
+    res.setHeader("Cache-Control", "no-store");
+    // İstersen indirmeyi engellemek için:
+    res.setHeader("Content-Disposition", `inline; filename="${key}"`);
+
+    const buf = Buffer.from(await upstream.arrayBuffer());
+    res.status(200).send(buf);
+  } catch (err) {
+    res.status(500).json({ ok: false, error: "ProxyFailed", message: err.message });
   }
 };
