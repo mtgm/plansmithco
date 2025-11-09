@@ -5,7 +5,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- mevcut stil dosyan kalsın -->
     <link rel="stylesheet" href="/styles.css">
 
     <style>
@@ -13,12 +12,12 @@
       model-viewer{width:100vw;height:100vh;--poster-color:transparent}
       #brand{position:fixed;left:12px;bottom:12px;font:600 12px/1 ui-sans-serif,system-ui;opacity:.6;z-index:40}
 
-      /* Her zaman görünen yedek AR butonu */
+      /* Tek butonumuz */
       .psco-ar-btn{
         position:fixed;left:50%;bottom:18px;transform:translateX(-50%);
         padding:10px 16px;border:0;border-radius:12px;background:#111;color:#fff;
         font:600 14px ui-sans-serif,system-ui;box-shadow:0 6px 20px rgba(0,0,0,.25);
-        z-index:50;cursor:pointer
+        z-index:50;cursor:pointer;
       }
     </style>
   </head>
@@ -39,37 +38,28 @@
       <div class="progress-bar hide" slot="progress-bar">
         <div class="update-bar"></div>
       </div>
-
-      <!-- Model-Viewer’ın kendi AR butonu (destek yoksa otomatik gizlenir) -->
-      <button slot="ar-button" id="ar-button">View in your space</button>
-
       <div id="ar-prompt"><img src="/ar_hand_prompt.png" alt=""></div>
     </model-viewer>
 
-    <!-- Her zaman görünen yedek AR butonu -->
+    <!-- sadece bizim sabit butonumuz -->
     <button id="open-ar" class="psco-ar-btn" type="button">View in your space</button>
-
     <div id="brand">@PlanSmithCo</div>
 
-    <!-- model-viewer bileşeni -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
 
-    <!-- Yükleme/resolve mantığı (mevcut sistemle uyumlu) -->
     <script>
       (async () => {
         try {
           const mv = document.getElementById('mv');
-          if (!mv) { console.error('mv element not found'); return; }
+          if (!mv) return;
 
           const url = new URL(location.href);
-          // /m/<SKU> yakala
           const m = url.pathname.match(/^\/m\/([^\/#?]+)/);
           const skuFromPath = m ? m[1] : null;
-
-          const qs  = new URLSearchParams(url.search);
+          const qs = new URLSearchParams(url.search);
           const sku = skuFromPath || qs.get('sku') || 'SBRV2';
 
-          // /api/resolve ile anahtarı al
+          // API'den model anahtarını al
           let key = qs.get('key');
           if (!key) {
             const res = await fetch(`/api/resolve?sku=${encodeURIComponent(sku)}`);
@@ -77,35 +67,30 @@
             if (json && json.ok && json.key) key = json.key;
           }
 
-          // güvenli fallback
+          // yedek
           key = key || 'SBR-v2.glb';
 
           const fileUrl = `/file/${encodeURIComponent(key)}`;
-          // Absolutlaştırıp global’e koyuyoruz; fallback AR için lazım
           const ABS_FILE_URL = new URL(fileUrl, location.origin).href;
           window.ABS_FILE_URL = ABS_FILE_URL;
 
-          // modeli yükle
           mv.src = fileUrl;
-
-          // hata log’u
-          mv.addEventListener('error', (e) => {
-            console.error('[viewer] model-viewer error:', e?.detail || e);
-          });
         } catch (err) {
-          console.error('[viewer] fatal:', err);
+          console.error('Fatal viewer error:', err);
         }
       })();
 
-      // Yedek AR açma: önce model-viewer.activateAR(), olmazsa Android Scene Viewer intent
+      // AR açma fonksiyonu (tek buton)
       async function openAR() {
         const mv = document.getElementById('mv');
         try {
           if (mv && mv.canActivateAR && typeof mv.activateAR === 'function') {
-            await mv.activateAR();           // WebXR / Quick Look / Scene Viewer – cihaz ne destekliyorsa
+            await mv.activateAR(); // Model-Viewer destekliyse doğrudan açar
             return;
           }
-          if (window.ABS_FILE_URL) {        // Android fallback: Scene Viewer intent
+
+          // Android fallback (Scene Viewer)
+          if (window.ABS_FILE_URL) {
             const title = 'PlanSmithCo';
             const intent =
               `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(window.ABS_FILE_URL)}&mode=ar_preferred&title=${encodeURIComponent(title)}` +
@@ -119,7 +104,6 @@
       document.getElementById('open-ar')?.addEventListener('click', openAR);
     </script>
 
-    <!-- (opsiyonel) kendi scriptin -->
     <script src="/script.js"></script>
   </body>
 </html>
