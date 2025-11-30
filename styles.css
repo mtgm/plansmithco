@@ -1,69 +1,130 @@
-/* styles.css */
+/* styles.css - Premium UI */
+:root {
+  --primary-color: #111; /* Siyah Premium */
+  --bg-color: #f9f9f9;
+  --text-color: #333;
+}
+
 body {
   margin: 0;
-  background-color: #f9f9f9;
+  padding: 0;
+  background-color: var(--bg-color);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   height: 100vh;
   width: 100vw;
-  overflow: hidden; /* Sayfanın kaymasını engelle */
+  overflow: hidden;
 }
 
+/* --- 1. YÜKLEME EKRANI (LOADER) --- */
+#loader-container {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; /* En üstte */
+  transition: opacity 0.5s ease-out; /* Kayboluş efekti */
+}
+
+/* Logo Animasyonu */
+.brand-logo {
+  width: 120px; /* Logo boyutu */
+  height: auto;
+  object-fit: contain;
+  margin-bottom: 20px;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+.loading-text {
+  font-size: 14px;
+  color: #888;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Nefes Alma Efekti */
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Loader Gizleme Sınıfı */
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* --- 2. MODEL VIEWER --- */
 model-viewer {
   width: 100%;
   height: 100%;
   --poster-color: transparent;
-  background-color: #fff;
+  background-color: var(--bg-color);
 }
 
-/* Yükleniyor ve Hata Mesajları */
-#status-container {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  text-align: center;
-  pointer-events: none; /* Tıklamayı engellemesin */
-}
-
-.status-msg {
-  background: rgba(0, 0, 0, 0.75);
-  color: white;
-  padding: 16px 24px;
-  border-radius: 50px;
-  font-size: 14px;
-  font-weight: 600;
-  backdrop-filter: blur(5px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  display: none; /* JS ile açacağız */
-}
-
-.error-msg {
-  background: rgba(220, 53, 69, 0.9);
-}
-
-/* AR Butonu - Apple Tarzı */
+/* --- 3. AR BUTONU --- */
 #ar-btn {
   display: none; /* JS ile açılacak */
   position: fixed;
   bottom: 40px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 0;
-  width: 200px;
-  height: 50px;
-  background: #111;
+  
+  background-color: var(--primary-color);
   color: #fff;
-  border-radius: 30px;
+  
+  padding: 14px 28px;
+  border-radius: 50px; /* Hap şeklinde */
   border: none;
+  
+  font-size: 16px;
   font-weight: 600;
-  font-size: 15px;
+  letter-spacing: 0.5px;
+  
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2); /* Premium Gölge */
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
   z-index: 100;
   transition: transform 0.2s, box-shadow 0.2s;
+  
+  /* İçerik hizalama */
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 #ar-btn:active {
-  transform: translateX(-50%) scale(0.95);
+  transform: translateX(-50%) scale(0.95); /* Tıklama efekti */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* AR İkonu (Buton içi) */
+#ar-btn::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M3 4c0-1.1.9-2 2-2h4v2H5v4H3V4zm0 16c0 1.1.9 2 2 2h4v-2H5v-4H3v4zm18-16c0-1.1-.9-2-2-2h-4v2h4v4h2V4zm0 16c0 1.1-.9 2-2 2h-4v-2h4v-4h2v4zM12 7l-5 3v5l5 3 5-3v-5l-5-3zm-3 4.35l3 1.8 3-1.8V15l-3 1.8-3-1.8v-3.65z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* Hata Mesajı Kutusu */
+#error-toast {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ff3b30;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  box-shadow: 0 5px 20px rgba(255, 59, 48, 0.3);
+  z-index: 2000;
+  font-size: 14px;
 }

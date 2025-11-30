@@ -1,67 +1,66 @@
-// script.js
+// app.js - UI ve Logic
 
 const mv = document.getElementById('mv');
-const statusBox = document.getElementById('status-msg');
+const loader = document.getElementById('loader-container');
 const arBtn = document.getElementById('ar-btn');
+const errorToast = document.getElementById('error-toast');
 
-// Yardımcı: Mesaj Göster
-function showStatus(msg, isError = false) {
-  statusBox.textContent = msg;
-  statusBox.style.display = 'block';
-  
-  if (isError) {
-    statusBox.classList.add('error-msg');
-  } else {
-    statusBox.classList.remove('error-msg');
-    // Hata değilse 2 sn sonra gizle
-    setTimeout(() => { statusBox.style.display = 'none'; }, 2000);
-  }
+// Hata Gösterici
+function showError(msg) {
+  errorToast.textContent = msg;
+  errorToast.style.display = 'block';
+  // Loader varsa onu da gizle ki hatayı görelim
+  if(loader) loader.style.display = 'none';
 }
 
-// Ana Başlatıcı
 async function init() {
   const url = new URL(window.location.href);
-  
-  // 1. SKU Bulma (/m/MODEL veya ?sku=MODEL)
   let sku = url.searchParams.get('sku');
-  const pathMatch = url.pathname.match(/\/m\/([^\/]+)/);
-  if (pathMatch) sku = pathMatch[1];
+  const match = url.pathname.match(/\/m\/([^\/]+)/);
+  if (match) sku = match[1];
 
-  if (!sku) {
-    return showStatus("HATA: Ürün kodu (SKU) bulunamadı.", true);
-  }
-
-  showStatus("Ürün yükleniyor...");
+  if (!sku) return showError("Error: Product SKU missing.");
 
   try {
-    // 2. Güvenli API'den Link İste
-    const apiResponse = await fetch(`/api/engine?sku=${sku}`);
-    const data = await apiResponse.json();
-
-    if (!data.ok) {
-      throw new Error(data.error || "Sunucu hatası");
-    }
-
-    // 3. Modeli Yükle (İmzalı URL)
-    const safeUrl = data.url;
-    mv.src = safeUrl;
+    // 1. Motor'dan Linki Al
+    const res = await fetch(`/api/engine?sku=${sku}`);
+    if (!res.ok) throw new Error("Product not found or access denied.");
     
-    // Android AR için linki sakla
-    window.arFileUrl = safeUrl;
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error);
 
-    // Yükleme tamamlanınca butonu göster
-    mv.addEventListener('load', () => {
-      arBtn.style.display = 'block';
-      showStatus("Hazır!");
-    }, { once: true });
+    // 2. Modeli Yükle
+    mv.src = data.url;
+    window.arFileUrl = data.url;
+
+    // 3. Texture Varsa Uygula
+    const tex = url.searchParams.get('tex');
+    if (tex) {
+      mv.addEventListener('load', async () => {
+         // Burası texture kodu, şimdilik basit tutuyoruz
+         console.log("Texture requested:", tex);
+      }, { once: true });
+    }
 
   } catch (err) {
     console.error(err);
-    showStatus(err.message, true);
+    showError(err.message);
   }
 }
 
-// AR Butonu Olayı
+// MODEL YÜKLENİNCE NE OLACAK?
+// Model-viewer 'load' eventini tetiklediğinde Loader'ı kaldır.
+mv.addEventListener('load', () => {
+  // 1. Loader'ı yavaşça yok et (CSS transition ile)
+  loader.classList.add('hidden');
+  
+  // 2. AR Butonunu göster
+  arBtn.style.display = 'flex';
+  
+  console.log("Model loaded successfully.");
+});
+
+// AR BUTONUNA TIKLANINCA
 arBtn.addEventListener('click', () => {
   if (mv.canActivateAR) {
     mv.activateAR();
@@ -70,7 +69,7 @@ arBtn.addEventListener('click', () => {
     const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(window.arFileUrl)}&mode=ar_preferred#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
     window.location.href = intent;
   } else {
-    alert("Cihazınız AR desteklemiyor.");
+    alert("AR is not supported on this device.");
   }
 });
 
