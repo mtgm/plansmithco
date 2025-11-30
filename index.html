@@ -10,7 +10,7 @@
 
     <div id="loader-container">
       <img src="/poster.webp" alt="PlanSmithCo" class="brand-logo">
-      <div class="loading-text">Loading (Low Res)...</div>
+      <div class="loading-text">Loading...</div>
     </div>
 
     <div id="error-toast"></div>
@@ -18,19 +18,16 @@
     <model-viewer id="mv"
       ar
       ar-modes="webxr scene-viewer quick-look"
-      
-      /* GÖRÜNTÜ AYARLARI (En Hafif) */
-      tone-mapping="neutral"
-      environment-image="neutral"
-      shadow-intensity="0"     exposure="1"
-      minimum-render-scale="0.5" /* KAMERA */
       camera-controls
-      disable-zoom
-      auto-rotate
-      
-      /* YÜKLEME */
+      tone-mapping="neutral"
       poster="/poster.webp"
-      loading="eager">
+      shadow-intensity="0.45"
+      shadow-softness="0.95"
+      camera-orbit="0deg 75deg auto"
+      field-of-view="45deg"
+      min-field-of-view="15deg"
+      max-field-of-view="75deg"
+      exposure="1.2">
     </model-viewer>
 
     <button id="ar-btn" style="display: none;">View in your space</button>
