@@ -1,7 +1,7 @@
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-// Veritabanı
+// MODEL VERİTABANI
 const MODEL_DB = {
   "SBRV2": "SBR-v2.glb",
   "CHAIRV1": "chair-v1.glb",
@@ -21,32 +21,25 @@ export default async function handler(req, res) {
   try {
     const url = new URL(req.url, `https://${req.headers.host}`);
     const sku = url.searchParams.get("sku")?.toUpperCase();
-    
-    // DEBUG: Konsola yazdıralım (Vercel Loglarında görünür)
-    console.log(`İstek geldi. SKU: ${sku}`);
 
     if (!sku || !MODEL_DB[sku]) {
-      return res.status(404).json({ ok: false, error: "MODEL BULUNAMADI (YENI KOD)", sku });
+      return res.status(404).json({ ok: false, error: "Model Not Found" });
     }
 
     const fileKey = MODEL_DB[sku];
 
+    // İmzalı Link Oluştur (60 Dakika geçerli)
     const command = new GetObjectCommand({
       Bucket: process.env.R2_BUCKET,
       Key: fileKey,
     });
 
-    const signedUrl = await getSignedUrl(client, command, { expiresIn: 60 });
+    const signedUrl = await getSignedUrl(client, command, { expiresIn: 3600 });
 
-    return res.status(200).json({ ok: true, url: signedUrl, debug: "BU YENI KOD!" });
+    return res.status(200).json({ ok: true, url: signedUrl });
 
   } catch (error) {
-    console.error("KRITIK HATA:", error);
-    // Hatanın ne olduğunu tam olarak görelim
-    return res.status(500).json({ 
-      ok: false, 
-      error: "R2 BAGLANTISI BASARISIZ", 
-      detay: error.message 
-    });
+    console.error("Engine Error:", error);
+    return res.status(500).json({ ok: false, error: error.message });
   }
 }
