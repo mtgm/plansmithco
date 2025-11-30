@@ -1,10 +1,7 @@
 {
   "cleanUrls": true,
-  "routes": [
-    { "src": "^/m/([^/]+)$", "dest": "/index.html" },
-    { "src": "^/file/(.*)$", "dest": "/api/file?key=$1" }
   "rewrites": [
-    { "source": "/m/(.*)", "destination": "/" },
-    { "source": "/file/(.*)", "destination": "/api/glb?key=$1" }
+    { "source": "/m/(.*)", "destination": "/index.html" },
+    { "source": "/file/(.*)", "destination": "/api/glb.js?key=$1" }
   ]
 }
