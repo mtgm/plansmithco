@@ -1,6 +1,69 @@
-.progress-bar { display: block; width: 33%; height: 4px; position: absolute; left: 50%; top: 20px; transform: translateX(-50%); border-radius: 999px; background: rgba(0,0,0,.1); overflow: hidden }
-.progress-bar.hide { display: none }
-.update-bar { height: 100%; width: 0%; background: rgba(0,0,0,.4); transition: width .3s }
-#ar-button { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); padding: 10px 16px; border-radius: 999px; border: 0; background: #111; color: #fff }
-#ar-prompt { position: absolute; right: 20px; bottom: 20px; opacity: .7 }
-#ar-prompt img { width: 38px; height: 38px }
+/* styles.css */
+body {
+  margin: 0;
+  background-color: #f9f9f9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden; /* Sayfanın kaymasını engelle */
+}
+
+model-viewer {
+  width: 100%;
+  height: 100%;
+  --poster-color: transparent;
+  background-color: #fff;
+}
+
+/* Yükleniyor ve Hata Mesajları */
+#status-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  text-align: center;
+  pointer-events: none; /* Tıklamayı engellemesin */
+}
+
+.status-msg {
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  display: none; /* JS ile açacağız */
+}
+
+.error-msg {
+  background: rgba(220, 53, 69, 0.9);
+}
+
+/* AR Butonu - Apple Tarzı */
+#ar-btn {
+  display: none; /* JS ile açılacak */
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0;
+  width: 200px;
+  height: 50px;
+  background: #111;
+  color: #fff;
+  border-radius: 30px;
+  border: none;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  z-index: 100;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#ar-btn:active {
+  transform: translateX(-50%) scale(0.95);
+}
