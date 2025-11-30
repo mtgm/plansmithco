@@ -1,35 +1,21 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>PlanSmithCo AR</title>
+    <title>AR Viewer</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-      body { margin: 0; background: #f5f5f5; font-family: sans-serif; height: 100vh; overflow: hidden; }
+      body { margin: 0; background-color: #f5f5f5; font-family: sans-serif; height: 100vh; overflow: hidden; }
       model-viewer { width: 100%; height: 100%; }
-      
-      #error-toast {
-        display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-        background: #d32f2f; color: white; padding: 12px 24px; border-radius: 8px; 
-        font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 9999;
-      }
-      
-      #ar-btn {
-        display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-        padding: 12px 24px; background: #111; color: #fff; border-radius: 30px;
-        border: none; font-weight: 600; font-size: 14px; cursor: pointer; 
-        box-shadow: 0 4px 12px rgba(0,0,0,0.25); z-index: 100;
-      }
+      #error-toast { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #d32f2f; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 600; z-index: 9999; }
+      #ar-btn { display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); padding: 12px 24px; background: #111; color: #fff; border-radius: 30px; border: none; font-weight: 600; cursor: pointer; z-index: 100; }
     </style>
   </head>
   <body>
 
     <div id="error-toast"></div>
     
-    <model-viewer id="mv"
-      ar ar-modes="webxr scene-viewer quick-look"
-      camera-controls tone-mapping="neutral" shadow-intensity="1">
-    </model-viewer>
+    <model-viewer id="mv" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" shadow-intensity="1"></model-viewer>
 
     <button id="ar-btn">Mekanımda Gör</button>
 
@@ -46,58 +32,53 @@
         console.error(msg);
       }
 
-      // --- TEXTURE DEĞİŞTİRME ---
+      // --- TEXTURE AYARI ---
       async function applyTexture(textureKey) {
         if (!textureKey) return;
         try {
+          // Texture dosyasını proxy üzerinden çek
           const textureUrl = `/api/glb?key=${encodeURIComponent(textureKey)}`;
           const texture = await mv.createTexture(textureUrl);
           const material = mv.model.materials[0];
-          if (material) {
-            material.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
-          }
-        } catch (e) {
-          console.warn("Doku hatası:", e);
-        }
+          if (material) material.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
+        } catch (e) { console.warn("Doku hatası:", e); }
       }
 
       // --- ANA MANTIK ---
       async function init() {
         const url = new URL(window.location.href);
         
-        // 1. SKU'yu URL'den al
+        // SKU Çözümleme (/m/SKU veya ?sku=SKU)
         let sku = url.searchParams.get('sku');
         const pathMatch = url.pathname.match(/\/m\/([^\/]+)/);
         if (pathMatch) sku = pathMatch[1];
 
-        if (!sku) return showError("SKU belirtilmedi!");
+        if (!sku) return showError("SKU eksik!");
         sku = sku.toUpperCase();
 
         try {
-          // 2. models.json dosyasını CANLI ÇEK (Cache busting ile)
-          // Bu kısım senin istediğin otomasyonun kalbidir.
-          const dbResponse = await fetch(`/models.json?t=${Date.now()}`);
+          // ÖNEMLİ: models.json dosyasını tarayıcıdan çekiyoruz.
+          // ?t=... parametresi "cache" (önbellek) sorununu engeller, her zaman en yeniyi çeker.
+          const dbRes = await fetch(`/models.json?t=${Date.now()}`);
           
-          if (!dbResponse.ok) throw new Error("Veritabanı (models.json) okunamadı.");
+          if (!dbRes.ok) throw new Error("Veritabanı dosyası (models.json) okunamadı.");
           
-          const db = await dbResponse.json();
-          const modelKey = db[sku];
+          const db = await dbRes.json();
+          const modelKey = db[sku]; // JSON içinden dosya adını bul
 
-          if (!modelKey) {
-            return showError(`Bu SKU (${sku}) sistemde kayıtlı değil.`);
-          }
+          if (!modelKey) throw new Error(`Model bulunamadı: ${sku}`);
 
-          // 3. Modeli Yükle (R2 Proxy üzerinden)
+          // R2 Proxy Bağlantısı
           const fileUrl = `/api/glb?key=${encodeURIComponent(modelKey)}`;
           
           mv.src = fileUrl;
-          window.arFileUrl = new URL(fileUrl, window.location.origin).href;
+          window.arFileUrl = new URL(fileUrl, window.location.origin).href; // Android AR için
           arBtn.style.display = 'block';
 
-          // 4. Texture varsa uygula
+          // Texture varsa uygula
           const tex = url.searchParams.get('tex');
           if (tex) {
-            mv.addEventListener('load', () => applyTexture(tex), { once: true });
+             mv.addEventListener('load', () => applyTexture(tex), { once: true });
           }
 
         } catch (err) {
@@ -105,16 +86,10 @@
         }
       }
 
-      // --- AR BUTONU ---
       arBtn.addEventListener('click', () => {
-        if (mv.canActivateAR) {
-          mv.activateAR();
-        } else if (window.arFileUrl) {
-          const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(window.arFileUrl)}&mode=ar_preferred#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
-          window.location.href = intent;
-        } else {
-          alert("AR desteklenmiyor.");
-        }
+        if (mv.canActivateAR) mv.activateAR();
+        else if (window.arFileUrl) location.href = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(window.arFileUrl)}&mode=ar_preferred#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+        else alert("AR desteklenmiyor.");
       });
 
       init();
