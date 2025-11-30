@@ -1,13 +1,10 @@
 {
   "cleanUrls": true,
+  "routes": [
+    { "src": "^/m/([^/]+)$", "dest": "/index.html" },
+    { "src": "^/file/(.*)$", "dest": "/api/file?key=$1" }
   "rewrites": [
-    { "source": "/m/(.*)", "destination": "/index.html" },
-    { "source": "/api/resolve", "destination": "/api/resolve.js" },
-    { "source": "/file/(.*)", "destination": "/api/glb.js?key=$1" }
-  ],
-  "functions": {
-    "api/resolve.js": {
-      "includeFiles": "data/models.json"
-    }
-  }
+    { "source": "/m/(.*)", "destination": "/" },
+    { "source": "/file/(.*)", "destination": "/api/glb?key=$1" }
+  ]
 }
