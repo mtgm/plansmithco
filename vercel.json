@@ -1,7 +1,7 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/m/(.*)", "destination": "/public/index.html" },
+    { "source": "/m/(.*)", "destination": "/index.html" },
     { "source": "/file/(.*)", "destination": "/api/glb.js?key=$1" }
   ]
 }
