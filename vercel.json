@@ -1,6 +1,7 @@
 {
+  "cleanUrls": true,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/engine.js" },
+    { "source": "/api/engine", "destination": "/api/engine.js" },
     { "source": "/m/(.*)", "destination": "/index.html" }
   ]
 }
