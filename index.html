@@ -1,109 +1,142 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>PlanSmithCo | AR Model Viewer</title>
+    <title>AR Viewer</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <link rel="stylesheet" href="/styles.css">
-
     <style>
-      html,body{height:100%;margin:0;background:#fff;overflow:hidden}
-      model-viewer{width:100vw;height:100vh;--poster-color:transparent}
-      #brand{position:fixed;left:12px;bottom:12px;font:600 12px/1 ui-sans-serif,system-ui;opacity:.6;z-index:40}
+      body { margin: 0; background-color: #f0f0f0; font-family: sans-serif; height: 100vh; overflow: hidden; }
+      model-viewer { width: 100%; height: 100%; }
+      
+      /* Hata Mesajı Kutusu */
+      #error-box {
+        display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        text-align: center; max-width: 80%; z-index: 999;
+      }
+      #error-box h3 { color: red; margin-top: 0; }
 
-      /* Tek butonumuz */
-      .psco-ar-btn{
-        position:fixed;left:50%;bottom:18px;transform:translateX(-50%);
-        padding:10px 16px;border:0;border-radius:12px;background:#111;color:#fff;
-        font:600 14px ui-sans-serif,system-ui;box-shadow:0 6px 20px rgba(0,0,0,.25);
-        z-index:50;cursor:pointer;
+      /* AR Butonu */
+      #ar-btn {
+        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+        padding: 12px 24px; background: #000; color: #fff; border-radius: 30px;
+        border: none; font-weight: bold; font-size: 16px; cursor: pointer; z-index: 100;
+        display: none; /* JS ile açılacak */
       }
     </style>
   </head>
   <body>
+
+    <div id="error-box">
+      <h3>HATA</h3>
+      <p id="error-msg">Bir sorun oluştu.</p>
+    </div>
+
     <model-viewer id="mv"
-      ar
-      ar-modes="webxr scene-viewer quick-look"
-      camera-controls
-      tone-mapping="neutral"
-      poster="/poster.webp"
-      shadow-intensity="0.45"
-      shadow-softness="0.95"
-      camera-orbit="0deg 75deg auto"
-      field-of-view="45deg"
-      min-field-of-view="15deg"
-      max-field-of-view="75deg"
-      exposure="1.2">
-      <div class="progress-bar hide" slot="progress-bar">
-        <div class="update-bar"></div>
-      </div>
-      <div id="ar-prompt"><img src="/ar_hand_prompt.png" alt=""></div>
+      ar ar-modes="webxr scene-viewer quick-look"
+      camera-controls tone-mapping="neutral" shadow-intensity="1">
     </model-viewer>
 
-    <!-- sadece bizim sabit butonumuz -->
-    <button id="open-ar" class="psco-ar-btn" type="button">View in your space</button>
-    <div id="brand">@PlanSmithCo</div>
+    <button id="ar-btn">AR ile Görüntüle</button>
 
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
-
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    
     <script>
-      (async () => {
+      const mv = document.getElementById('mv');
+      const errorBox = document.getElementById('error-box');
+      const errorMsg = document.getElementById('error-msg');
+      const arBtn = document.getElementById('ar-btn');
+
+      // Hata gösterme fonksiyonu
+      function showError(msg) {
+        errorBox.style.display = 'block';
+        errorMsg.textContent = msg;
+        console.error(msg);
+      }
+
+      // 1. DOKU DEĞİŞTİRME MANTIĞI
+      async function applyTexture(textureKey) {
+        if(!textureKey) return;
         try {
-          const mv = document.getElementById('mv');
-          if (!mv) return;
-
-          const url = new URL(location.href);
-          const m = url.pathname.match(/^\/m\/([^\/#?]+)/);
-          const skuFromPath = m ? m[1] : null;
-          const qs = new URLSearchParams(url.search);
-          const sku = skuFromPath || qs.get('sku') || 'SBRV2';
-
-          // API'den model anahtarını al
-          let key = qs.get('key');
-          if (!key) {
-            const res = await fetch(`/api/resolve?sku=${encodeURIComponent(sku)}`);
-            const json = await res.json();
-            if (json && json.ok && json.key) key = json.key;
-          }
-
-          // yedek
-          key = key || 'SBR-v2.glb';
-
-          const fileUrl = `/file/${encodeURIComponent(key)}`;
-          const ABS_FILE_URL = new URL(fileUrl, location.origin).href;
-          window.ABS_FILE_URL = ABS_FILE_URL;
-
-          mv.src = fileUrl;
-        } catch (err) {
-          console.error('Fatal viewer error:', err);
-        }
-      })();
-
-      // AR açma fonksiyonu (tek buton)
-      async function openAR() {
-        const mv = document.getElementById('mv');
-        try {
-          if (mv && mv.canActivateAR && typeof mv.activateAR === 'function') {
-            await mv.activateAR(); // Model-Viewer destekliyse doğrudan açar
-            return;
-          }
-
-          // Android fallback (Scene Viewer)
-          if (window.ABS_FILE_URL) {
-            const title = 'PlanSmithCo';
-            const intent =
-              `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(window.ABS_FILE_URL)}&mode=ar_preferred&title=${encodeURIComponent(title)}` +
-              `#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
-            location.href = intent;
+          console.log("Doku yükleniyor:", textureKey);
+          // Texture'ı proxy üzerinden çek
+          const textureUrl = `/file/${encodeURIComponent(textureKey)}`;
+          const texture = await mv.createTexture(textureUrl);
+          
+          // İlk materyali bul ve değiştir
+          const material = mv.model.materials[0];
+          if (material) {
+            material.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
+            console.log("Doku uygulandı.");
           }
         } catch (e) {
-          console.error('AR açılamadı:', e);
+          console.warn("Doku hatası:", e);
         }
       }
-      document.getElementById('open-ar')?.addEventListener('click', openAR);
-    </script>
 
-    <script src="/script.js"></script>
+      // 2. ANA YÜKLEME AKIŞI
+      async function init() {
+        const url = new URL(window.location.href);
+        
+        // SKU'yu URL'den söküp al (hem /m/SKU hem ?sku=SKU destekler)
+        let sku = url.searchParams.get('sku');
+        const pathMatch = url.pathname.match(/\/m\/([^\/]+)/);
+        if (pathMatch) sku = pathMatch[1];
+
+        if (!sku) {
+          // Varsayılan SBRV2'yi BURADA bilerek yüklüyoruz ki test edebilesin.
+          // İstemiyorsan burayı silip showError("SKU bulunamadı") yazabilirsin.
+          sku = 'SBRV2'; 
+          console.log("SKU belirtilmedi, varsayılan (SBRV2) kullanılıyor.");
+        }
+
+        console.log("İstenen SKU:", sku);
+
+        try {
+          // API'ye sor
+          const res = await fetch(`/api/resolve?sku=${encodeURIComponent(sku)}`);
+          
+          if (!res.ok) {
+            throw new Error(`API Hatası: ${res.status} (Model veritabanında yok)`);
+          }
+
+          const data = await res.json();
+          if (!data.key) throw new Error("API geçerli bir key döndürmedi.");
+
+          // Modeli Yükle
+          const fileUrl = `/file/${encodeURIComponent(data.key)}`;
+          mv.src = fileUrl;
+          
+          // Global değişken (Android AR için)
+          window.arFileUrl = new URL(fileUrl, window.location.origin).href;
+          
+          // Butonu göster
+          arBtn.style.display = 'block';
+
+          // Texture varsa uygula (?tex=mese.jpg)
+          const tex = url.searchParams.get('tex');
+          if (tex) {
+            mv.addEventListener('load', () => applyTexture(tex), { once: true });
+          }
+
+        } catch (err) {
+          showError(err.message);
+        }
+      }
+
+      // 3. AR BUTON MANTIĞI
+      arBtn.addEventListener('click', () => {
+        if (mv.canActivateAR) {
+          mv.activateAR();
+        } else if (window.arFileUrl) {
+          const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(window.arFileUrl)}&mode=ar_preferred#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+          window.location.href = intent;
+        } else {
+          alert("AR bu cihazda desteklenmiyor.");
+        }
+      });
+
+      init();
+    </script>
   </body>
 </html>
