@@ -30,7 +30,7 @@ body {
 
 /* Logo Animasyonu */
 .brand-logo {
-  width: 120px; /* Logo boyutu */
+  width: 360px; /* Logo boyutu */
   height: auto;
   object-fit: contain;
   margin-bottom: 20px;
