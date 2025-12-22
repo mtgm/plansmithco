@@ -52,17 +52,26 @@ mv.addEventListener('load', () => {
   arBtn.style.display = 'flex';
 });
 
-// AR Butonu
+// ... (Üst kısımlar aynı kalsın) ...
+
+// AR Butonu - GÜÇLENDİRİLMİŞ KİLİT MODU
 arBtn.addEventListener('click', () => {
-  if (mv.canActivateAR) {
-    mv.activateAR();
-  } else if (window.arFileUrl) {
-    // ANDROID INTENT (Güncellendi: resizable=false eklendi)
-    // Bu kod Android'de de ölçeği 1:1 kilitler.
+  const isAndroid = /android/i.test(navigator.userAgent);
+
+  if (isAndroid && window.arFileUrl) {
+    // ANDROID: Standart AR'ı atla, KİLİTLİ Linki Zorla
+    // resizable=false -> Büyütme/Küçültme engellenir.
+    // mode=ar_preferred -> Direkt odaya yerleştirir.
     const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(window.arFileUrl)}&mode=ar_preferred&resizable=false&title=PlanSmithCo#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
     window.location.href = intent;
-  } else {
-    alert("AR not supported.");
+  } 
+  else if (mv.canActivateAR) {
+    // IPHONE (iOS): Apple kısıtlı izin verir.
+    // HTML'deki ar-scale="fixed" komutuna güvenmek zorundayız.
+    mv.activateAR();
+  } 
+  else {
+    alert("AR not supported on this device.");
   }
 });
 
