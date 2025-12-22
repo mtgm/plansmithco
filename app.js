@@ -18,26 +18,23 @@ async function init() {
   if (!sku) return showError("SKU Missing.");
 
   try {
-    // 1. Motor'dan MODEL Linkini Al
+    // 1. Model Linki
     const modelRes = await fetch(`/api/engine?sku=${sku}`);
     if (!modelRes.ok) throw new Error("Product not found.");
     const modelData = await modelRes.json();
     if (!modelData.ok) throw new Error(modelData.error);
 
-    // 2. Motor'dan HDR SAHNE Linkini Al (YENİ KISIM)
+    // 2. HDR (Varsa)
     const envRes = await fetch(`/api/engine?type=env`);
     const envData = await envRes.json();
 
     // 3. Modeli Yükle
     mv.src = modelData.url;
-    window.arFileUrl = modelData.url;
+    window.arFileUrl = modelData.url; // Android Intent için linki sakla
 
-    // 4. HDR Varsa Uygula (YENİ KISIM)
+    // 4. HDR Uygula
     if (envData.ok) {
-        // environmentImage: Işıklandırmayı değiştirir
         mv.environmentImage = envData.url;
-        // Eğer arka planda da resmi görmek istersen şu satırın başındaki // işaretini kaldır:
-        // mv.skyboxImage = envData.url;
     }
 
   } catch (err) {
@@ -46,32 +43,31 @@ async function init() {
   }
 }
 
-// Model yüklendiği an loader'ı kaldır
 mv.addEventListener('load', () => {
   loader.classList.add('hidden');
   arBtn.style.display = 'flex';
 });
 
-// ... (Üst kısımlar aynı kalsın) ...
+// --- KRİTİK BÖLGE: AR BUTONU ---
+arBtn.addEventListener('click', (event) => {
+  // Olayı durdur, kontrolü biz alıyoruz
+  event.preventDefault();
+  event.stopPropagation();
 
-// AR Butonu - GÜÇLENDİRİLMİŞ KİLİT MODU
-arBtn.addEventListener('click', () => {
   const isAndroid = /android/i.test(navigator.userAgent);
 
   if (isAndroid && window.arFileUrl) {
-    // ANDROID: Standart AR'ı atla, KİLİTLİ Linki Zorla
-    // resizable=false -> Büyütme/Küçültme engellenir.
-    // mode=ar_preferred -> Direkt odaya yerleştirir.
-    const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(window.arFileUrl)}&mode=ar_preferred&resizable=false&title=PlanSmithCo#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+    // ANDROID: WebXR'ı bypass et. Scene Viewer'ı ZORLA.
+    // S.Browser_fallback_url parametresi, eğer SceneViewer açılmazsa geri dönmesini sağlar.
+    const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(window.arFileUrl)}&mode=ar_preferred&resizable=false&title=PlanSmithCo#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(window.location.href)};end;`;
     window.location.href = intent;
   } 
   else if (mv.canActivateAR) {
-    // IPHONE (iOS): Apple kısıtlı izin verir.
-    // HTML'deki ar-scale="fixed" komutuna güvenmek zorundayız.
+    // IPHONE (iOS): Apple'ın insafına kalıyoruz (Genelde fixed çalışır)
     mv.activateAR();
   } 
   else {
-    alert("AR not supported on this device.");
+    alert("Cihazınız AR desteklemiyor.");
   }
 });
 

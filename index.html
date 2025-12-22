@@ -16,23 +16,20 @@
     <div id="error-toast"></div>
 
     <model-viewer id="mv"
-      ar
-      ar-modes="webxr scene-viewer quick-look"
-      ar-scale="fixed"
-      ar-placement="floor"
-
-      camera-controls
-      disable-zoom 
-      interaction-prompt="none"
-
-      shadow-intensity="1"
-      exposure="1"
-      tone-mapping="commerce"
-
-      loading="eager"
-      poster="/poster.webp">      
-      
-    </model-viewer>
+  ar
+  ar-scale="fixed"
+  ar-placement="floor"
+  /* DİKKAT: Sıralama değişti. scene-viewer en başta! */
+  ar-modes="scene-viewer webxr quick-look" 
+  camera-controls
+  disable-zoom 
+  interaction-prompt="none"
+  shadow-intensity="1"
+  exposure="1"
+  tone-mapping="commerce"
+  loading="eager"
+  poster="/poster.webp">
+</model-viewer>
 
     <button id="ar-btn" style="display: none;">View in your space</button>
 
