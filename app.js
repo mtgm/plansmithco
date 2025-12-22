@@ -48,26 +48,36 @@ mv.addEventListener('load', () => {
   arBtn.style.display = 'flex';
 });
 
-// --- KRİTİK BÖLGE: AR BUTONU ---
-arBtn.addEventListener('click', (event) => {
-  // Olayı durdur, kontrolü biz alıyoruz
-  event.preventDefault();
-  event.stopPropagation();
+// ... üstteki kodlar aynı ...
 
+// AR Butonu Tıklama Olayı
+arBtn.addEventListener('click', (event) => {
+  // 1. Android Kontrolü
   const isAndroid = /android/i.test(navigator.userAgent);
 
   if (isAndroid && window.arFileUrl) {
-    // ANDROID: WebXR'ı bypass et. Scene Viewer'ı ZORLA.
-    // S.Browser_fallback_url parametresi, eğer SceneViewer açılmazsa geri dönmesini sağlar.
-    const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(window.arFileUrl)}&mode=ar_preferred&resizable=false&title=PlanSmithCo#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(window.location.href)};end;`;
+    // Manuel Müdahale Ediyoruz, o yüzden parametreleri biz vermeliyiz!
+    event.preventDefault(); // Standart davranışı durdur
+
+    const title = "PlanSmithCo";
+    
+    // İŞTE SİHİRLİ NOKTA: resizable=false
+    // Bu parametre olmazsa, HTML'de ne yazarsa yazsın Android kilidi takmaz.
+    const intent = `intent://arvr.google.com/scene-viewer/1.0` +
+                   `?file=${encodeURIComponent(window.arFileUrl)}` +
+                   `&mode=ar_preferred` +
+                   `&resizable=false` +  // <-- KİLİT BURADA
+                   `&title=${encodeURIComponent(title)}` +
+                   `#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+
     window.location.href = intent;
   } 
   else if (mv.canActivateAR) {
-    // IPHONE (iOS): Apple'ın insafına kalıyoruz (Genelde fixed çalışır)
+    // iOS (iPhone) Tarafı
+    // iPhone için özel link oluşturamayız, Apple izin vermez.
+    // Mecburen kütüphanenin fonksiyonunu çağırıyoruz.
+    // Bu fonksiyon HTML'deki ar-scale="fixed" yazısını okur ve uygular.
     mv.activateAR();
-  } 
-  else {
-    alert("Cihazınız AR desteklemiyor.");
   }
 });
 
