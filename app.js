@@ -18,16 +18,27 @@ async function init() {
   if (!sku) return showError("SKU Missing.");
 
   try {
-    // 1. Motor'dan Linki Al
-    const res = await fetch(`/api/engine?sku=${sku}`);
-    if (!res.ok) throw new Error("Product not found.");
-    
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error);
+    // 1. Motor'dan MODEL Linkini Al
+    const modelRes = await fetch(`/api/engine?sku=${sku}`);
+    if (!modelRes.ok) throw new Error("Product not found.");
+    const modelData = await modelRes.json();
+    if (!modelData.ok) throw new Error(modelData.error);
 
-    // 2. Modeli Yükle
-    mv.src = data.url;
-    window.arFileUrl = data.url;
+    // 2. Motor'dan HDR SAHNE Linkini Al (YENİ KISIM)
+    const envRes = await fetch(`/api/engine?type=env`);
+    const envData = await envRes.json();
+
+    // 3. Modeli Yükle
+    mv.src = modelData.url;
+    window.arFileUrl = modelData.url;
+
+    // 4. HDR Varsa Uygula (YENİ KISIM)
+    if (envData.ok) {
+        // environmentImage: Işıklandırmayı değiştirir
+        mv.environmentImage = envData.url;
+        // Eğer arka planda da resmi görmek istersen şu satırın başındaki // işaretini kaldır:
+        // mv.skyboxImage = envData.url;
+    }
 
   } catch (err) {
     console.error(err);
@@ -46,7 +57,9 @@ arBtn.addEventListener('click', () => {
   if (mv.canActivateAR) {
     mv.activateAR();
   } else if (window.arFileUrl) {
-    const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(window.arFileUrl)}&mode=ar_preferred&title=PlanSmithCo#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+    // ANDROID INTENT (Güncellendi: resizable=false eklendi)
+    // Bu kod Android'de de ölçeği 1:1 kilitler.
+    const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(window.arFileUrl)}&mode=ar_preferred&resizable=false&title=PlanSmithCo#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
     window.location.href = intent;
   } else {
     alert("AR not supported.");

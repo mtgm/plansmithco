@@ -18,16 +18,20 @@
     <model-viewer id="mv"
       ar
       ar-modes="webxr scene-viewer quick-look"
+      ar-scale="fixed"
+      ar-placement="floor"
+
       camera-controls
-      tone-mapping="neutral"
-      poster="/poster.webp"
-      shadow-intensity="0.45"
-      shadow-softness="0.95"
-      camera-orbit="0deg 75deg auto"
-      field-of-view="45deg"
-      min-field-of-view="15deg"
-      max-field-of-view="75deg"
-      exposure="1.2">
+      disable-zoom 
+      interaction-prompt="none"
+
+      shadow-intensity="1"
+      exposure="1"
+      tone-mapping="commerce"
+
+      loading="eager"
+      poster="/poster.webp">      
+      
     </model-viewer>
 
     <button id="ar-btn" style="display: none;">View in your space</button>

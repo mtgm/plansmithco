@@ -1,12 +1,15 @@
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-// MODEL VERİTABANI
 const MODEL_DB = {
   "SBRV2": "SBR-v2.glb",
   "CHAIRV1": "chair-v1.glb",
   "PLANTERV1": "planter.glb"
+  // Diğer modellerin...
 };
+
+// Varsayılan HDR Sahnesi
+const DEFAULT_ENV = "environments/studio.hdr"; 
 
 const client = new S3Client({
   region: "auto",
@@ -21,17 +24,27 @@ export default async function handler(req, res) {
   try {
     const url = new URL(req.url, `https://${req.headers.host}`);
     const sku = url.searchParams.get("sku")?.toUpperCase();
+    const type = url.searchParams.get("type"); // 'env' isteği için
 
+    // A. ORTAM (HDR) İSTEĞİ
+    if (type === 'env') {
+      const command = new GetObjectCommand({
+        Bucket: process.env.R2_BUCKET,
+        Key: DEFAULT_ENV
+      });
+      // HDR dosyaları büyük olabilir, link 1 saat geçerli olsun
+      const signedUrl = await getSignedUrl(client, command, { expiresIn: 3600 });
+      return res.status(200).json({ ok: true, url: signedUrl });
+    }
+
+    // B. MODEL İSTEĞİ
     if (!sku || !MODEL_DB[sku]) {
       return res.status(404).json({ ok: false, error: "Model Not Found" });
     }
 
-    const fileKey = MODEL_DB[sku];
-
-    // İmzalı Link Oluştur (60 Dakika geçerli)
     const command = new GetObjectCommand({
       Bucket: process.env.R2_BUCKET,
-      Key: fileKey,
+      Key: MODEL_DB[sku],
     });
 
     const signedUrl = await getSignedUrl(client, command, { expiresIn: 3600 });
