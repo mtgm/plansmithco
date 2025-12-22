@@ -18,21 +18,18 @@ async function init() {
   if (!sku) return showError("SKU Missing.");
 
   try {
-    // 1. Model Linki
+    // 1. Model ve HDR Linklerini Al
     const modelRes = await fetch(`/api/engine?sku=${sku}`);
     if (!modelRes.ok) throw new Error("Product not found.");
     const modelData = await modelRes.json();
-    if (!modelData.ok) throw new Error(modelData.error);
-
-    // 2. HDR (Varsa)
+    
     const envRes = await fetch(`/api/engine?type=env`);
     const envData = await envRes.json();
 
-    // 3. Modeli Yükle
+    // 2. Modeli Yükle
     mv.src = modelData.url;
-    window.arFileUrl = modelData.url; // Android Intent için linki sakla
-
-    // 4. HDR Uygula
+    
+    // 3. HDR Varsa Uygula
     if (envData.ok) {
         mv.environmentImage = envData.url;
     }
@@ -43,42 +40,11 @@ async function init() {
   }
 }
 
+// Sadece model yüklendiğinde butonu görünür yapıyoruz.
+// Tıklama olayını (Click Event) ARTIK YAZMIYORUZ. Kütüphane kendi halledecek.
 mv.addEventListener('load', () => {
   loader.classList.add('hidden');
-  arBtn.style.display = 'flex';
-});
-
-// ... üstteki kodlar aynı ...
-
-// AR Butonu Tıklama Olayı
-arBtn.addEventListener('click', (event) => {
-  // 1. Android Kontrolü
-  const isAndroid = /android/i.test(navigator.userAgent);
-
-  if (isAndroid && window.arFileUrl) {
-    // Manuel Müdahale Ediyoruz, o yüzden parametreleri biz vermeliyiz!
-    event.preventDefault(); // Standart davranışı durdur
-
-    const title = "PlanSmithCo";
-    
-    // İŞTE SİHİRLİ NOKTA: resizable=false
-    // Bu parametre olmazsa, HTML'de ne yazarsa yazsın Android kilidi takmaz.
-    const intent = `intent://arvr.google.com/scene-viewer/1.0` +
-                   `?file=${encodeURIComponent(window.arFileUrl)}` +
-                   `&mode=ar_preferred` +
-                   `&resizable=false` +  // <-- KİLİT BURADA
-                   `&title=${encodeURIComponent(title)}` +
-                   `#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
-
-    window.location.href = intent;
-  } 
-  else if (mv.canActivateAR) {
-    // iOS (iPhone) Tarafı
-    // iPhone için özel link oluşturamayız, Apple izin vermez.
-    // Mecburen kütüphanenin fonksiyonunu çağırıyoruz.
-    // Bu fonksiyon HTML'deki ar-scale="fixed" yazısını okur ve uygular.
-    mv.activateAR();
-  }
+  arBtn.style.display = 'flex'; // Butonu görünür yap
 });
 
 init();
