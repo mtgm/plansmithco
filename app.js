@@ -18,21 +18,25 @@ async function init() {
   if (!sku) return showError("SKU Missing.");
 
   try {
-    // 1. Model ve HDR Linklerini Al
+    // 1. Sadece Modeli Çekiyoruz
     const modelRes = await fetch(`/api/engine?sku=${sku}`);
     if (!modelRes.ok) throw new Error("Product not found.");
     const modelData = await modelRes.json();
     
+    /* HDR GEÇİCİ OLARAK İPTAL EDİLDİ
+       Çünkü siteyi çökertiyor. Önce modelin ölçeğini görelim.
+    
     const envRes = await fetch(`/api/engine?type=env`);
     const envData = await envRes.json();
+    */
 
     // 2. Modeli Yükle
     mv.src = modelData.url;
     
-    // 3. HDR Varsa Uygula
-    if (envData.ok) {
+    /* if (envData.ok) {
         mv.environmentImage = envData.url;
     }
+    */
 
   } catch (err) {
     console.error(err);
@@ -40,11 +44,11 @@ async function init() {
   }
 }
 
-// Sadece model yüklendiğinde butonu görünür yapıyoruz.
-// Tıklama olayını (Click Event) ARTIK YAZMIYORUZ. Kütüphane kendi halledecek.
+// Yükleme tamamlanınca logoyu kaldır
 mv.addEventListener('load', () => {
-  loader.classList.add('hidden');
-  arBtn.style.display = 'flex'; // Butonu görünür yap
+  // .style.display kullanımı en garantisidir
+  loader.style.display = 'none'; 
+  arBtn.style.display = 'flex';
 });
 
 init();
