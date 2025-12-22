@@ -24,19 +24,19 @@ async function init() {
     const modelData = await modelRes.json();
     
     /* HDR GEÇİCİ OLARAK İPTAL EDİLDİ
-       Çünkü siteyi çökertiyor. Önce modelin ölçeğini görelim.
+       Çünkü siteyi çökertiyor. Önce modelin ölçeğini görelim.*/
     
     const envRes = await fetch(`/api/engine?type=env`);
     const envData = await envRes.json();
-    */
+    
 
     // 2. Modeli Yükle
     mv.src = modelData.url;
     
-    /* if (envData.ok) {
+     if (envData.ok) {
         mv.environmentImage = envData.url;
     }
-    */
+    
 
   } catch (err) {
     console.error(err);

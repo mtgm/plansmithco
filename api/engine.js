@@ -9,7 +9,7 @@ const MODEL_DB = {
 };
 
 // Varsayılan HDR Sahnesi
-const DEFAULT_ENV = "environments/studio_v2.hdr"; 
+const DEFAULT_ENV = "environments/studio.jpg"; 
 
 const client = new S3Client({
   region: "auto",
