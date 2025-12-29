@@ -128,3 +128,14 @@ model-viewer {
   z-index: 2000;
   font-size: 14px;
 }
+
+#ar-btn {
+    /* Varsayılan genellikle 12px-16px civarıdır. */
+    /* Bunu artırarak yukarı taşırsın. */
+    bottom: 100px; 
+    
+    /* Eğer sağdan/soldan hizalama sorunu yaşarsan: */
+    left: 50%;
+    transform: translateX(-50%);
+    position: absolute; /* Model-viewer bunu genelde override eder ama garanti olsun */
+}
