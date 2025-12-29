@@ -4,6 +4,9 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 const MODEL_DB = {
   "SBRV2": "SBR-v2.glb",
   "CHAIRV1": "chair-v1.glb",
+  "1X2V1": "1x2v1.glb",
+  "1X2V2": "1x2V2.glb",
+  "1X2V3": "1x2V3.glb",
   "PLANTERV1": "planter.glb"
   // Diğer modellerin...
 };
