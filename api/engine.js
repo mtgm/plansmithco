@@ -46,7 +46,7 @@ export default async function handler(req, res) {
       Bucket: process.env.R2_BUCKET,
       Key: MODEL_DB[sku], 
       // Modeller için binary zorlaması devam ediyor (Doğrusu bu):
-      ResponseContentType: 'binary/octet-stream'
+      ResponseContentType: 'model/gltf-binary'
     });
 
     const signedUrl = await getSignedUrl(client, command, { expiresIn: 3600 });
