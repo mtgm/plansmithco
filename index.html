@@ -2,150 +2,239 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PlanSmithCo Showroom</title>
-    <link rel="stylesheet" href="/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
-    /* --- GENEL AYARLAR --- */
+    /* --- MODERN RESET & TEMEL AYARLAR --- */
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.85);
+        --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+        --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.05);
+        --primary-color: #222;
+        --accent-color: #007AFF;
+        --radius-lg: 24px;
+        --radius-md: 16px;
+        --radius-sm: 12px;
+    }
+
     body { 
         margin: 0; 
         height: 100vh; 
         height: 100dvh; 
         display: flex; 
         overflow: hidden; 
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        background-color: #f5f5f5;
+        font-family: 'Inter', sans-serif;
+        background-color: #eef2f6; /* Modern yumuşak gri arka plan */
+        color: #333;
     }
 
-    #main-layout { display: flex; width: 100%; height: 100%; }
+    #main-layout { 
+        display: flex; 
+        width: 100%; 
+        height: 100%; 
+        padding: 15px; /* Kenarlardan boşluk bırakarak "Kutu" hissi verelim */
+        box-sizing: border-box;
+        gap: 15px;
+    }
 
-    /* --- SOL PANEL (MASAÜSTÜ) --- */
+    /* --- SOL PANEL (KATALOG) --- */
     #sidebar {
-        width: 360px; 
-        background: #ffffff; 
-        border-right: 1px solid #e0e0e0;
+        width: 380px; 
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px); /* Buzlu cam efekti */
+        border: var(--glass-border);
+        border-radius: var(--radius-lg);
         display: flex; 
         flex-direction: column; 
         z-index: 10;
-        position: relative;
-        box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+        box-shadow: var(--shadow-soft);
+        overflow: hidden; /* Radyusları korumak için */
     }
 
-    #brand-header { padding: 20px; border-bottom: 1px solid #eee; background: white; text-align: center; flex-shrink: 0; }
+    #brand-header { 
+        padding: 25px 20px; 
+        background: rgba(255,255,255,0.5); 
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
     
-    /* VARYASYON PANELİ (GÜNCELLENDİ) */
-    #variant-section {
-        padding: 15px; 
-        background: #fdfdfd; 
-        border-bottom: 1px solid #eee;
-        display: none; /* JS ile açılır */
-        flex-shrink: 0;
-        /* İçindekileri sağa sola yay */
-        justify-content: space-between; 
-        align-items: center; 
+    .logo-text {
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--primary-color);
+        margin-bottom: 5px;
     }
-
-    .variant-group { display: flex; flex-direction: column; }
-
-    #catalog-list { flex: 1; overflow-y: auto; padding: 15px; background: #fff; }
-
-    /* Ürün Kartı */
-    .product-card {
-        display: flex; align-items: center; gap: 12px; padding: 10px;
-        background: white; border: 1px solid #f0f0f0; border-radius: 10px;
-        margin-bottom: 10px; cursor: pointer; transition: all 0.2s;
-    }
-    .product-card.active { border-color: #007bff; background: #f0f7ff; box-shadow: inset 0 0 0 1px #007bff; }
-    .product-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; background: #eee; }
-    .product-info h3 { margin: 0 0 3px 0; font-size: 14px; color: #222; }
-    .product-info p { margin: 0; font-size: 12px; color: #888; }
-
-    /* Varyasyon Butonları */
-    .variant-title { font-size: 11px; font-weight: 700; color: #666; margin-bottom: 8px; text-transform: uppercase; }
-    .variant-options { display: flex; gap: 10px; flex-wrap: wrap; }
-    .v-btn {
-        width: 38px; height: 38px; border-radius: 50%; border: 2px solid #e0e0e0;
-        cursor: pointer; background-size: cover; background-position: center;
-    }
-    .v-btn.selected { border-color: #007bff; transform: scale(1.1); box-shadow: 0 0 0 2px white, 0 0 0 4px #007bff; }
-
-    /* YENİ MOBİL AR BUTONU (Masaüstünde Gizli) */
-    #mobile-ar-btn {
-        display: none; /* Varsayılan gizli */
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        background-color: #222;
-        color: white;
-        border: none;
-        padding: 0 20px;
-        border-radius: 30px;
-        font-size: 13px;
+    .sub-text {
+        font-size: 12px;
+        color: #666;
         font-weight: 600;
-        cursor: pointer;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-        height: 40px; /* Renk toplarıyla hizalı olsun */
-        transition: transform 0.1s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
     }
-    #mobile-ar-btn:active { transform: scale(0.95); background: #000; }
 
-    /* --- SAĞ PANEL (MODEL) --- */
-    #stage { 
+    #catalog-list { 
+        flex: 1; 
+        overflow-y: auto; 
+        padding: 15px; 
+    }
+
+    /* Ürün Kartı Tasarımı */
+    .product-card {
+        display: flex; align-items: center; gap: 15px; padding: 12px;
+        background: white; 
+        border: 1px solid transparent; 
+        border-radius: var(--radius-md);
+        margin-bottom: 10px; cursor: pointer; 
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+    .product-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    .product-card.active { 
+        border-color: var(--accent-color); 
+        background: #f0f7ff; 
+        box-shadow: 0 0 0 2px rgba(0,122,255,0.1); 
+    }
+    
+    .product-thumb { width: 64px; height: 64px; object-fit: cover; border-radius: var(--radius-sm); background: #f5f5f5; }
+    .product-info h3 { margin: 0 0 4px 0; font-size: 15px; font-weight: 600; color: #222; }
+    .product-info p { margin: 0; font-size: 13px; color: #888; }
+
+    /* --- SAĞ PANEL (MODEL SAHNESİ) --- */
+    #stage-container { 
         flex: 1; 
         position: relative; 
-        background: radial-gradient(circle at 50% 50%, #ffffff 0%, #f0f0f0 100%); 
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-soft);
+        overflow: hidden; /* Köşeleri yuvarlatmak için */
+        display: flex;
+        flex-direction: column;
     }
+
+    #stage {
+        flex: 1;
+        position: relative;
+        background: radial-gradient(circle at 50% 50%, #ffffff 0%, #f4f4f4 100%);
+    }
+
     model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
+
+    /* --- KONTROL BARI (Modelin Altındaki Yüzen Panel) --- */
+    #controls-bar {
+        position: absolute;
+        bottom: 25px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(15px);
+        padding: 12px 20px;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        z-index: 20;
+        border: 1px solid rgba(255,255,255,1);
+        max-width: 90%;
+        transition: all 0.3s ease;
+    }
+
+    .controls-hidden { opacity: 0; pointer-events: none; transform: translate(-50%, 20px) !important; }
+
+    /* Varyasyon Grubu */
+    .variant-group { display: flex; align-items: center; gap: 12px; }
+    .variant-label { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; margin-right: 5px; }
     
+    /* YENİ KARE BUTONLAR (Squircle) */
+    .v-btn {
+        width: 44px; height: 44px; 
+        border-radius: 10px; /* Yuvarlak değil, yumuşak kare */
+        border: 2px solid rgba(0,0,0,0.05);
+        cursor: pointer; 
+        background-size: cover; background-position: center;
+        transition: all 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .v-btn:hover { transform: translateY(-2px); }
+    .v-btn.selected { 
+        border-color: var(--accent-color); 
+        transform: scale(1.1); 
+        box-shadow: 0 4px 12px rgba(0,122,255,0.3); 
+    }
+
+    /* Ayırıcı Çizgi */
+    .divider { width: 1px; height: 30px; background: #ddd; }
+
+    /* AR Butonu (Panelin İçinde) */
+    #inline-ar-btn {
+        background: #222;
+        color: white;
+        border: none;
+        padding: 0 24px;
+        height: 44px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        transition: background 0.2s;
+    }
+    #inline-ar-btn:hover { background: #000; }
+    #inline-ar-btn svg { width: 18px; height: 18px; fill: white; }
+
+    /* Loader */
     #loader-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 5; display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: none; }
     
-    /* Eski Yüzen Buton (Sadece Masaüstü için kalsın, mobilde gizleyeceğiz) */
-    .custom-ar-button { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: #222; color: white; border: none; padding: 12px 28px; border-radius: 30px; font-weight: 600; cursor: pointer; display: none; z-index: 20; }
-
-
-    /* --- MOBİL İÇİN KİLİT TASARIM (BULLETPROOF) --- */
+    /* --- MOBİL UYUMLULUK (RESPONSIVE) --- */
     @media (max-width: 768px) {
-        #main-layout { display: block; position: relative; width: 100%; height: 100%; }
-
-        /* 1. MODEL (Üst Katman) */
-        #stage {
-            position: absolute; top: 0; left: 0; width: 100%; height: 55%; 
-            z-index: 1; border-bottom: 1px solid #ccc;
+        body { background: white; } /* Mobilde tam ekran hissi için */
+        #main-layout { 
+            display: block; 
+            padding: 0; /* Mobilde kenar boşluklarını kaldır */
+            gap: 0;
         }
 
-        /* 2. PANEL (Alt Katman) */
+        /* 1. Üst Kısım: MODEL (%60) */
+        #stage-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 60%;
+            border-radius: 0 0 24px 24px; /* Sadece alt köşeleri yuvarla */
+            z-index: 2;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        /* 2. Alt Kısım: KATALOG (%40) */
         #sidebar {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 45%; 
-            z-index: 2; border-right: none; box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 40%;
+            border-radius: 0; border: none; background: #f9f9f9;
+            z-index: 1;
+            padding-top: 10px;
         }
 
-        #brand-header { display: none; }
+        /* Logo Mobilde daha kompakt olsun */
+        #brand-header { padding: 15px; background: transparent; border: none; }
+        .logo-text { font-size: 18px; }
+        .sub-text { font-size: 10px; }
 
-        /* Varyasyon Kısmı - Panelin en tepesinde sabit */
-        #variant-section {
-            order: -1; 
-            background: #fff;
-            padding: 10px 15px;
-            border-bottom: 1px solid #eee;
-            flex-shrink: 0; 
-            /* Flexbox ZORLAMASI */
-            display: flex !important; 
+        /* Kontrol Barı Mobilde daha yukarıda */
+        #controls-bar {
+            bottom: 20px; /* Modelin içinde, en altta */
+            padding: 8px 12px;
+            width: auto;
+            max-width: 95%;
+            gap: 10px;
         }
-
-        /* YENİ BUTONU GÖSTER */
-        #mobile-ar-btn { display: flex; }
-
-        /* ESKİ BUTONU GİZLE (Modeli kapatmasın) */
-        .custom-ar-button { display: none !important; }
-
-        #catalog-list {
-            flex-grow: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch; 
-            padding: 10px 15px;
-            padding-bottom: 20px; 
-        }
+        
+        .v-btn { width: 40px; height: 40px; border-radius: 8px; }
+        #inline-ar-btn { padding: 0 16px; height: 40px; font-size: 12px; }
+        .variant-label { display: none; } /* Mobilde "Seçenekler" yazısını gizle, yer kazanalım */
     }
     </style>
 </head>
@@ -154,67 +243,73 @@
     <div id="main-layout">
       <div id="sidebar">
         <div id="brand-header">
-           <img src="/poster.webp" alt="Logo" style="height:30px; object-fit:contain;">
-           <div style="font-size: 12px; margin-top:5px; color:#666;">DIJITAL SHOWROOM</div>
+           <span class="logo-text">PlanSmithCo.</span>
+           <span class="sub-text">Digital Showroom</span>
         </div>
         <div id="catalog-list">
            <div style="padding:20px; text-align:center; color:#999;">Katalog yükleniyor...</div>
         </div>
-        
-        <div id="variant-section">
-            <div class="variant-group">
-                <div class="variant-title">SEÇENEKLER</div>
-                <div class="variant-options" id="variant-container"></div>
-            </div>
-            <button id="mobile-ar-btn" onclick="viewer.activateAR()">
-                AR'da Gör 🧊
-            </button>
-        </div>
       </div>
 
-      <div id="stage">
-        <div id="loader-container">
-          <img src="/poster.webp" style="width: 60px;">
-          <div style="margin-top:10px; font-family:sans-serif; color:#333;">Model Hazırlanıyor...</div>
+      <div id="stage-container">
+        <div id="stage">
+            <div id="loader-container">
+                <img src="/poster.webp" style="width: 60px; opacity: 0.5;">
+                <div style="margin-top:10px; font-size:12px; font-weight:600; color:#555;">YÜKLENİYOR...</div>
+            </div>
+
+            <model-viewer id="mv"
+                src=""
+                ar      
+                ar-modes="webxr scene-viewer quick-look"
+                ar-scale="fixed"
+                ar-placement="floor"
+                camera-controls
+                disable-zoom 
+                interaction-prompt="none"
+                environment-image="/studio.hdr"
+                shadow-intensity="1.5"
+                exposure="2.5"
+                tone-mapping="commerce"
+                loading="eager"
+                poster="/poster.webp">
+            </model-viewer>
+
+            <div id="controls-bar" class="controls-hidden">
+                <div class="variant-group" id="variant-container">
+                    </div>
+
+                <div class="divider"></div>
+
+                <button id="inline-ar-btn" onclick="activateAR()">
+                    <svg viewBox="0 0 24 24"><path d="M3 4c0-1.1.9-2 2-2h3.5c.3 0 .5.2.5.5s-.2.5-.5.5H5c-.6 0-1 .4-1 1v3.5c0 .3-.2.5-.5.5S3 7.8 3 7.5V4zm0 12.5c0-.3.2-.5.5-.5s.5.2.5.5V20c0 .6.4 1 1 1h3.5c.3 0 .5.2.5.5s-.2.5-.5.5H5c-1.1 0-2-.9-2-2v-3.5zm16 3.5c0 .3.2.5.5.5s.5-.2.5-.5V16c0-.3.2-.5.5-.5s.5.2.5.5v3.5c0 1.1-.9 2-2 2h-3.5c-.3 0-.5-.2-.5-.5s.2-.5.5-.5H20c.6 0 1-.4 1-1zM20 7.5V4c0-.6-.4-1-1-1h-3.5c-.3 0-.5-.2-.5-.5s.2-.5.5-.5H19c1.1 0 2 .9 2 2v3.5c0 .3-.2.5-.5.5s-.5-.2-.5-.5zM12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z"/></svg>
+                    AR Modu
+                </button>
+            </div>
         </div>
-
-        <model-viewer id="mv"
-          src=""
-          ar      
-          ar-modes="webxr scene-viewer quick-look"
-          ar-scale="fixed"
-          ar-placement="floor"
-          camera-controls
-          disable-zoom 
-          interaction-prompt="none"
-          environment-image="/studio.hdr"
-          shadow-intensity="1"
-          exposure="1.5"
-          tone-mapping="neutral"
-          loading="eager"
-          poster="/poster.webp">
-
-          <button slot="ar-button" id="ar-btn" class="custom-ar-button">
-            View in your space (1:1)
-          </button>
-
-        </model-viewer>
       </div>
     </div>
 
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
-    
+
     <script>
       const viewer = document.getElementById('mv');
       const catalogList = document.getElementById('catalog-list');
-      const variantSection = document.getElementById('variant-section');
+      const controlsBar = document.getElementById('controls-bar');
       const variantContainer = document.getElementById('variant-container');
       const loader = document.getElementById('loader-container');
-      const arBtn = document.getElementById('ar-btn');   
+      const arBtn = document.getElementById('inline-ar-btn');
 
+      // AR Fonksiyonu
+      function activateAR() {
+          if (viewer.canActivateAR) {
+              viewer.activateAR();
+          } else {
+              alert("Cihazınız AR desteklemiyor veya bir hata oluştu.");
+          }
+      }
 
-
-      // --- 2. AŞAMA: ÜRÜNLERİ ÇEK (Showroom) ---
+      // --- ÜRÜNLERİ ÇEK ---
       fetch('products.json')
         .then(res => res.json())
         .then(products => {
@@ -222,7 +317,7 @@
           if(products.length > 0) selectProduct(products[0]);
         })
         .catch(err => {
-            catalogList.innerHTML = `<div style="color:red; text-align:center">Veri hatası: products.json</div>`;
+            catalogList.innerHTML = `<div style="color:red; text-align:center; padding:20px;">Veri hatası</div>`;
             console.error(err);
         });
 
@@ -237,7 +332,7 @@
             <img src="${thumbSrc}" class="product-thumb">
             <div class="product-info">
               <h3>${product.name}</h3>
-              <p>${product.category || 'Ürün'}</p>
+              <p>${product.category || 'Tasarım Serisi'}</p>
             </div>
           `;
           
@@ -251,17 +346,16 @@
       }
 
       function selectProduct(product) {
+        // Varyasyon yoksa barı gizle, varsa göster
         if (!product.variants || product.variants.length === 0) {
-          variantSection.style.display = 'none';
+          controlsBar.classList.add('controls-hidden');
           return;
         }
         
-        // KRİTİK DEĞİŞİKLİK: 'block' yerine 'flex' yapıyoruz
-        // Böylece renkler solda, AR butonu sağda durabiliyor
-        variantSection.style.display = 'flex';
-        
+        controlsBar.classList.remove('controls-hidden');
         variantContainer.innerHTML = '';
 
+        // Seçenekleri oluştur
         product.variants.forEach((variant, index) => {
           const btn = document.createElement('div');
           btn.className = 'v-btn';
@@ -276,14 +370,14 @@
             btn.classList.add('selected');
           };
           variantContainer.appendChild(btn);
+          
+          // İlk varyasyonu otomatik seç
           if (index === 0) btn.click();
         });
       }
 
       async function loadModel(sku) {
         loader.style.display = 'flex';
-        // Masaüstü butonu gizle (Mobil butonu zaten CSS ile yönetiliyor)
-        arBtn.style.display = 'none'; 
         try {
           const response = await fetch(`/api/engine?sku=${sku}`);
           const data = await response.json();
@@ -291,19 +385,19 @@
           if (data.ok) {
             viewer.src = data.url;
           } else {
-            console.error("Model yok:", sku);
+            console.error("Model bulunamadı:", sku);
           }
         } catch (error) {
-          console.error("Hata:", error);
+          console.error("API Hatası:", error);
         }
       }
 
       viewer.addEventListener('load', () => {
         loader.style.display = 'none';
-        // Yükleme bitince masaüstü butonunu göster (Eğer mobildeysek CSS zaten gizliyor)
-        arBtn.style.display = 'flex';
       });
-    </script>
 
+      // Mobilde AR butonu görünürlüğü kontrolü (Opsiyonel: Sadece mobilde gösterilebilir)
+      // Şu an tasarım gereği her yerde gösteriyoruz çünkü çok şık duruyor.
+    </script>
 </body>
 </html>
