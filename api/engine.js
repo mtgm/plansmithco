@@ -11,6 +11,9 @@ const MODEL_DB = {
   // Diğer modellerin...
 };
 
+// Varsayılan HDR Sahnesi
+const DEFAULT_ENV = "environments/studio.hdr"; 
+
 const client = new S3Client({
   region: "auto",
   endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
@@ -28,6 +31,14 @@ export default async function handler(req, res) {
     const url = new URL(req.url, `${protocol}://${host}`);
     
     const sku = url.searchParams.get("sku")?.toUpperCase();
+    const type = url.searchParams.get("type"); // 'env' isteği için
+
+    // A. ORTAM (HDR) İSTEĞİ - GÜNCELLENDİ 🚀
+     if (type === 'env') {
+       // R2'ye gitme, direkt proje içindeki dosyayı ver.
+       // "studio_lite.hdr" dosyasının proje ana dizininde (index.html yanında) olduğundan emin ol.
+       return res.status(200).json({ ok: true, url: "/studio.hdr" });
+    }
 
     // B. MODEL İSTEĞİ
     if (!sku || !MODEL_DB[sku]) {
