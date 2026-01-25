@@ -211,30 +211,37 @@
       const loader = document.getElementById('loader-container');
       const arBtn = document.getElementById('ar-btn');
 
-      // --- 1. AŞAMA: IŞIĞI AYARLA (HDR) ---
+      // --- 1. AŞAMA: ÖZEL STUDIO HDR YÜKLEME ---
+      // "Google ışığını istemiyorum, kendi dosyamı istiyorum" Modu
       loadEnvironment();
 
       async function loadEnvironment() {
-        try {
-            console.log("Işık sistemi başlatılıyor...");
-            viewer.environmentImage = "neutral";
-            
-            const envRes = await fetch('/api/engine?type=env');
-            const envData = await envRes.json();
+          console.log("Özel Studio.hdr yükleniyor...");
+          
+          // DOĞRUDAN ÇAĞIRIYORUZ (En hatasız yöntem)
+          // Dosya ana dizinde olduğu için başına / koymamız yeterli.
+          const customHDR = "/studio.hdr";
 
-            if (envData.ok && envData.url) {
-                console.log("Özel Işık Yüklendi:", envData.url);
-                viewer.environmentImage = envData.url;
-                viewer.exposure = "5"; 
-            } else {
-                console.warn("Özel ışık yok, Neutral modda devam ediliyor.");
-                viewer.exposure = "5"; 
-            }
-        } catch (err) {
-            console.error("Işık yüklenemedi:", err);
-            viewer.environmentImage = "neutral";
-        }
+          // Model Viewer'a dosyayı ver
+          viewer.environmentImage = customHDR;
+          
+          // --- BURASI SENİN OYUN ALANIN ---
+          
+          // 1. IŞIK GÜCÜ (Exposure): 
+          // Bunu artırırsan sahne parlar. (Standart: 1.0, Parlak: 1.5 - 2.0)
+          viewer.exposure = "1.5"; 
+          
+          // 2. RENK TONU (Tone Mapping):
+          // "neutral" = Gerçekçi/Gri (HDR neyse onu gösterir)
+          // "commerce" = Canlı/Sıcak (Renkleri patlatır) -> Müşteri genelde bunu sever.
+          viewer.toneMapping = "neutral"; 
+          
+          // 3. GÖLGE SERTLİĞİ
+          viewer.shadowIntensity = "1";
       }
+      
+
+
 
       // --- 2. AŞAMA: ÜRÜNLERİ ÇEK (Showroom) ---
       fetch('products.json')
