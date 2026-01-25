@@ -1,153 +1,81 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>PlanSmithCo AR Showroom</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlanSmithCo Showroom</title>
     <link rel="stylesheet" href="/styles.css">
     
     <style>
-      /* --- YENİ DÜZEN STİLLERİ (Mevcut styles.css'e dokunmadan eklenenler) --- */
+      /* --- DÜZEN STİLLERİ --- */
       body {
-        margin: 0;
-        height: 100vh;
-        display: flex;
-        overflow: hidden;
+        margin: 0; height: 100vh; display: flex; overflow: hidden;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       }
-
-      /* Kapsayıcı */
-      #main-layout {
-        display: flex;
-        width: 100%;
-        height: 100%;
-      }
-
-      /* SOL PANEL (KATALOG) */
-      #sidebar {
-        width: 350px;
-        background: #fdfdfd;
-        border-right: 1px solid #e0e0e0;
-        display: flex;
-        flex-direction: column;
-        z-index: 10;
-        box-shadow: 2px 0 10px rgba(0,0,0,0.05);
-      }
-
-      #brand-header {
-        padding: 20px;
-        text-align: center;
-        border-bottom: 1px solid #eee;
-        background: white;
-      }
+      #main-layout { display: flex; width: 100%; height: 100%; }
       
-      #brand-header img { max-height: 40px; } /* Logo varsa */
-
-      #catalog-list {
-        flex: 1;
-        overflow-y: auto;
-        padding: 15px;
+      /* SOL PANEL */
+      #sidebar {
+        width: 350px; background: #fdfdfd; border-right: 1px solid #e0e0e0;
+        display: flex; flex-direction: column; z-index: 10;
       }
-
+      #brand-header { padding: 20px; text-align: center; border-bottom: 1px solid #eee; background: white; }
+      #catalog-list { flex: 1; overflow-y: auto; padding: 15px; }
+      
       /* Ürün Kartı */
       .product-card {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px;
-        background: white;
-        border: 1px solid #eee;
-        border-radius: 10px;
-        margin-bottom: 12px;
-        cursor: pointer;
-        transition: all 0.2s;
+        display: flex; align-items: center; gap: 12px; padding: 12px;
+        background: white; border: 1px solid #eee; border-radius: 10px;
+        margin-bottom: 12px; cursor: pointer; transition: all 0.2s;
       }
-      
       .product-card:hover { border-color: #333; transform: translateY(-2px); }
       .product-card.active { border-color: #007bff; background: #f0f7ff; }
-      
-      .product-thumb {
-        width: 60px; height: 60px;
-        object-fit: cover;
-        border-radius: 6px;
-        background: #eee;
-      }
+      .product-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; background: #eee; }
       
       .product-info h3 { margin: 0 0 4px 0; font-size: 14px; color: #333; }
       .product-info p { margin: 0; font-size: 12px; color: #777; }
 
-      /* Varyasyon Paneli */
-      #variant-section {
-        padding: 15px;
-        background: white;
-        border-top: 1px solid #eee;
-        display: none; /* Ürün seçilince açılacak */
-      }
-      
+      /* Varyasyonlar */
+      #variant-section { padding: 15px; background: white; border-top: 1px solid #eee; display: none; }
       .variant-title { font-size: 12px; font-weight: bold; margin-bottom: 8px; color: #555; text-transform: uppercase; }
-      
       .variant-options { display: flex; gap: 8px; flex-wrap: wrap; }
       
-      /* Varyasyon Butonları */
       .v-btn {
-        width: 36px; height: 36px;
-        border-radius: 50%;
-        border: 2px solid #ddd;
-        cursor: pointer;
-        transition: transform 0.2s;
-        background-size: cover;
-        position: relative;
+        width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ddd;
+        cursor: pointer; transition: transform 0.2s; background-size: cover;
       }
       .v-btn:hover { transform: scale(1.1); }
       .v-btn.selected { border-color: #007bff; box-shadow: 0 0 0 2px white, 0 0 0 4px #007bff; transform: scale(1.1); }
 
-      /* SAĞ PANEL (SAHNE) */
-      #stage {
-        flex: 1;
-        position: relative;
-        background: #f5f5f5;
-      }
+      /* SAĞ PANEL */
+      #stage { flex: 1; position: relative; background: #f5f5f5; }
+      model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
 
-      model-viewer {
-        width: 100%;
-        height: 100%;
-        --poster-color: transparent;
-      }
-
-      /* Loader'ı stage içine hapsetmek için override */
+      /* Loader */
       #loader-container {
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(255,255,255,0.9);
-        z-index: 5;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255,255,255,0.9); z-index: 5;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
       }
 
-      /* Mobil Uyumluluk */
       @media (max-width: 768px) {
-        #main-layout { flex-direction: column-reverse; } /* Mobilde model üstte, liste altta olsun */
+        #main-layout { flex-direction: column-reverse; }
         #sidebar { width: 100%; height: 40%; border-right: none; border-top: 1px solid #ddd; }
         #stage { height: 60%; }
       }
     </style>
-  </head>
-  <body>
+</head>
+<body>
 
     <div id="main-layout">
-      
       <div id="sidebar">
         <div id="brand-header">
-           <img src="/poster.webp" alt="PlanSmithCo" style="height:30px; object-fit:contain;">
+           <img src="/poster.webp" alt="Logo" style="height:30px; object-fit:contain;">
            <div style="font-size: 12px; margin-top:5px; color:#666;">DIJITAL SHOWROOM</div>
         </div>
-
         <div id="catalog-list">
            <div style="padding:20px; text-align:center; color:#999;">Katalog yükleniyor...</div>
         </div>
-
         <div id="variant-section">
           <div class="variant-title">SEÇENEKLER</div>
           <div class="variant-options" id="variant-container"></div>
@@ -155,27 +83,23 @@
       </div>
 
       <div id="stage">
-        
-        <div id="loader-container" style="display:none;">
-          <img src="/poster.webp" alt="PlanSmithCo" class="brand-logo" style="width: 60px;">
-          <div class="loading-text" style="margin-top:10px; font-family:sans-serif; color:#333;">Model Hazırlanıyor...</div>
+        <div id="loader-container">
+          <img src="/poster.webp" style="width: 60px;">
+          <div style="margin-top:10px; font-family:sans-serif; color:#333;">Model Hazırlanıyor...</div>
         </div>
-
-        <div id="error-toast"></div>
 
         <model-viewer id="mv"
           src=""
           ar      
-          ar-modes="webxr scene-viewer quick-look"
+          ar-modes="scene-viewer webxr quick-look"
           ar-scale="fixed"
           ar-placement="floor"
           camera-controls
           disable-zoom 
           interaction-prompt="none"
-          shadow-intensity="1"
-          shadow-softness="0.5"
-          exposure="1.5"
-          tone-mapping="neutral"
+          shadow-intensity="1.5"
+          exposure="1.0"
+          tone-mapping="commerce"
           loading="eager"
           poster="/poster.webp">
 
@@ -188,11 +112,10 @@
 
         </model-viewer>
       </div>
-
     </div>
 
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
-    
+
     <script>
       const viewer = document.getElementById('mv');
       const catalogList = document.getElementById('catalog-list');
@@ -201,55 +124,51 @@
       const loader = document.getElementById('loader-container');
       const arBtn = document.getElementById('ar-btn');
 
-      // SAYFA AÇILIR AÇILMAZ: Işığı (HDR) Yükle (Eski App.js Mantığı)
-    loadEnvironment();
+      // --- 1. AŞAMA: IŞIĞI AYARLA (HDR) ---
+      loadEnvironment();
 
-    async function loadEnvironment() {
+      async function loadEnvironment() {
         try {
-            console.log("HDR Işığı İsteniyor...");
-            // 1. Engine.js'e sor: Hangi ışığı kullanayım?
+            console.log("Işık sistemi başlatılıyor...");
+            // Önce varsayılan Google ışığını ver (Hata vermesin diye)
+            viewer.environmentImage = "neutral";
+            
+            // API'den gerçek ışık adresini iste
             const envRes = await fetch('/api/engine?type=env');
             const envData = await envRes.json();
 
-            // 2. Cevap geldiyse viewer'a uygula
             if (envData.ok && envData.url) {
-                console.log("Özel Işık Bulundu:", envData.url);
+                console.log("Özel Işık Yüklendi:", envData.url);
+                // JS ile linki veriyoruz, tarayıcı artık bunu resim olarak işleyecek
                 viewer.environmentImage = envData.url;
-                
-                // HDR gelince parlaklık çok patlamasın diye exposure'u dengeliyoruz
                 viewer.exposure = "1.0"; 
             } else {
-                console.log("Özel ışık yok, varsayılan (neutral) kullanılıyor.");
-                viewer.environmentImage = "neutral";
-                viewer.exposure = "1.5"; // Neutral biraz sönüktür, açalım.
+                console.warn("Özel ışık yok, Neutral modda devam ediliyor.");
+                viewer.exposure = "1.5"; 
             }
         } catch (err) {
-            console.error("Işık Hatası:", err);
-            // Hata olursa sistem çökmesin, Google ışığını aç
+            console.error("Işık yüklenemedi:", err);
             viewer.environmentImage = "neutral";
         }
-    }
+      }
 
-      // 1. Ürünleri Çek
+      // --- 2. AŞAMA: ÜRÜNLERİ ÇEK (Showroom) ---
       fetch('products.json')
         .then(res => res.json())
         .then(products => {
           renderCatalog(products);
-          // İsteğe bağlı: İlk ürünü otomatik aç
           if(products.length > 0) selectProduct(products[0]);
         })
         .catch(err => {
-          catalogList.innerHTML = `<div style="color:red; text-align:center;">Hata: products.json bulunamadı veya bozuk.</div>`;
-          console.error(err);
+            catalogList.innerHTML = `<div style="color:red; text-align:center">Veri hatası: products.json</div>`;
+            console.error(err);
         });
 
-      // 2. Listeyi Oluştur
       function renderCatalog(products) {
         catalogList.innerHTML = '';
         products.forEach(product => {
           const card = document.createElement('div');
           card.className = 'product-card';
-          // Varsa thumb yoksa placeholder
           const thumbSrc = product.thumbnail || '/poster.webp';
           
           card.innerHTML = `
@@ -261,24 +180,19 @@
           `;
           
           card.onclick = () => {
-             // Aktif class değiştirme
              document.querySelectorAll('.product-card').forEach(c => c.classList.remove('active'));
              card.classList.add('active');
              selectProduct(product);
           };
-          
           catalogList.appendChild(card);
         });
       }
 
-      // 3. Ürün Seçimi ve Varyasyonlar
       function selectProduct(product) {
-        // Varyasyon yoksa gizle
         if (!product.variants || product.variants.length === 0) {
           variantSection.style.display = 'none';
           return;
         }
-
         variantSection.style.display = 'block';
         variantContainer.innerHTML = '';
 
@@ -287,64 +201,40 @@
           btn.className = 'v-btn';
           btn.title = variant.name;
 
-          // Tipine göre stil (Renk mi Resim mi?)
-          if (variant.type === 'color') {
-            btn.style.backgroundColor = variant.value;
-          } else if (variant.type === 'image') {
-            btn.style.backgroundImage = `url(${variant.value})`;
-          }
+          if (variant.type === 'color') btn.style.backgroundColor = variant.value;
+          else if (variant.type === 'image') btn.style.backgroundImage = `url(${variant.value})`;
 
           btn.onclick = () => {
             loadModel(variant.sku);
-            // Seçim efekti
             document.querySelectorAll('.v-btn').forEach(b => b.classList.remove('selected'));
             btn.classList.add('selected');
           };
-
           variantContainer.appendChild(btn);
-
-          // İlk varyasyonu otomatik seç
           if (index === 0) btn.click();
         });
       }
 
-      // 4. Modeli Yükle (API Bağlantısı)
       async function loadModel(sku) {
-        // Loader göster
         loader.style.display = 'flex';
-        arBtn.style.display = 'none'; // Yüklenirken AR butonunu gizle
-
+        arBtn.style.display = 'none';
         try {
-          // Senin engine.js servisine istek atıyoruz
           const response = await fetch(`/api/engine?sku=${sku}`);
           const data = await response.json();
 
           if (data.ok) {
             viewer.src = data.url;
-            // USDZ dönüşümü otomatik olsun diyorsan iOS src'yi boş bırak veya aynısını ver
-            // viewer.iosSrc = data.url; 
-            
-            // Yükleme bitince AR butonu görünsün
-             viewer.addEventListener('load', () => {
-               loader.style.display = 'none';
-               arBtn.style.display = 'block';
-             }, { once: true });
-             
           } else {
-            alert('Model bulunamadı: ' + sku);
-            loader.style.display = 'none';
+            console.error("Model yok:", sku);
           }
         } catch (error) {
-          console.error("Yükleme hatası:", error);
-          loader.style.display = 'none';
+          console.error("Hata:", error);
         }
       }
 
-      // Model Yüklenmesi Bittiğinde (App.js'deki Event Listener)
-    viewer.addEventListener('load', () => {
-        loader.style.display = 'none'; // Loader'ı gizle
-        arBtn.style.display = 'flex';  // AR butonunu göster
-    });
+      viewer.addEventListener('load', () => {
+        loader.style.display = 'none';
+        arBtn.style.display = 'flex';
+      });
     </script>
-  </body>
+</body>
 </html>
