@@ -1,0 +1,46 @@
+[
+  {
+    "id": "1X2 Storage Tote Racks",
+    "category": "Storage Tote Racks",
+    "name": "1x2 Storage Tote Rack",
+    "thumbnail": "https://via.placeholder.com/150", 
+    "description": "1x2v1 Storage Tote Rack versiyon 1",
+    "variants": [
+      {
+        "name": "Meşe (Ahşap) v1",
+        "type": "color",
+        "value": "#D2B48C",
+        "sku": "1X2V1" 
+      },
+      {
+        "name": "Meşe (Ahşap) v2",
+        "type": "color",
+        "value": "#FFFFFF",
+        "sku": "1X2V2"
+      },
+      {
+        "name": "Meşe (Ahşap) v3",
+        "type": "color",
+        "value": "#D2B48D",
+        "sku": "1X2V3" 
+      }
+      
+      
+    ]
+  },
+  {
+    "id": "Genel Ürün Kataloğu",
+    "category": "Genel Ürünler",
+    "name": "Planter",
+    "thumbnail": "https://via.placeholder.com/150",
+    "description": "Garden planter for outdoor",
+    "variants": [
+       {
+        "name": "Planter v1",
+        "type": "color",
+        "value": "#D2C48C",
+        "sku": "PLANTERV1" 
+      }
+    ]
+  }
+]
