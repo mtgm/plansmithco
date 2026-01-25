@@ -1,45 +1,70 @@
 [
   {
-    "id": "1X2 Storage Tote Racks",
-    "category": "Storage Tote Racks",
-    "name": "1x2 Storage Tote Rack",
-    "thumbnail": "https://via.placeholder.com/150", 
-    "description": "1x2v1 Storage Tote Rack versiyon 1",
-    "variants": [
+    "id": "cat_storage",
+    "name": "Storage Systems",
+    "thumbnail": "/poster.webp",
+    "products": [
       {
-        "name": "Meşe (Ahşap) v1",
-        "type": "color",
-        "value": "#D2B48C",
-        "sku": "1X2V1" 
-      },
-      {
-        "name": "Meşe (Ahşap) v2",
-        "type": "color",
-        "value": "#FFFFFF",
-        "sku": "1X2V2"
-      },
-      {
-        "name": "Meşe (Ahşap) v3",
-        "type": "color",
-        "value": "#D2B48D",
-        "sku": "1X2V3" 
-      }
-      
-      
-    ]
-  },
-  {
-    "id": "Genel Ürün Kataloğu",
-    "category": "Genel Ürünler",
-    "name": "Planter",
-    "thumbnail": "https://via.placeholder.com/150",
-    "description": "Garden planter for outdoor",
-    "variants": [
-       {
-        "name": "Planter v1",
-        "type": "color",
-        "value": "#D2C48C",
-        "sku": "PLANTERV1" 
+        "sku": "1X2V3",
+        "name": "1x2 Storage Tote Rack V3",
+        "price": 129.00,
+        "description": "Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.",
+        "listingUrl": "https://www.etsy.com/shop/PlanSmithCo",        
+        
+
+        "masterModel": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/models/1x2V3.glb", 
+        
+        "thumbnail": "/poster.webp",
+        
+        "variants": [
+          {
+            "name": "dikme r1",
+            "type": "texture",
+            "sku": "1X2V3",
+            "value": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/dikme_baseColor.png", 
+                        
+            "textureConfig": [
+              {
+                "materialName": "texture-1", 
+                "baseColor": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/dikme_baseColor.png",
+                "normal": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/dikme_normal.png",
+                "orm": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/dikme_occlusionRoughnessMetallic.png"
+              }
+            ]
+          },
+          {
+            "name": "dikme r2",
+            "type": "texture",
+            "sku": "1X2V2",
+            "value": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/koyu gri_baseColor.png", 
+            
+            "textureConfig": [
+                            {
+                "materialName": "texture-1", 
+                "baseColor": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/texture-1_baseColor.png",
+                "normal": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/texture-1_normal.png",
+                "orm": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/texture-1_occlusionRoughnessMetallic.png"
+              }
+              
+            ]
+          },
+          {
+            "name": "dikme r2",
+            "type": "texture",
+            "sku": "1X2V2",
+            "value": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/sarı plastik_baseColor.png", 
+            
+            "textureConfig": [
+                            {
+                "materialName": "texture-1", 
+                "baseColor": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/texture-1_baseColor.png",
+                "normal": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/texture-1_normal.png",
+                "orm": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/texture-1_occlusionRoughnessMetallic.png"
+              }
+              
+            ]
+          }
+        ]
       }
     ]
   }
