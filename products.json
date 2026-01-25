@@ -21,14 +21,14 @@
             "name": "dikme r1",
             "type": "texture",
             "sku": "1X2V3",
-            "value": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/dikme_baseColor.png", 
+            "value": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/web-ar-test/textures/1x2V3/dikme_baseColor.png", 
                         
             "textureConfig": [
               {
                 "materialName": "texture-1", 
-                "baseColor": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/dikme_baseColor.png",
-                "normal": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/dikme_normal.png",
-                "orm": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/dikme_occlusionRoughnessMetallic.png"
+                "baseColor": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/web-ar-test/textures/1x2V3/dikme_baseColor.png",
+                "normal": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/web-ar-test/textures/1x2V3/dikme_normal.png",
+                "orm": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/web-ar-test/textures/1x2V3/dikme_occlusionRoughnessMetallic.png"
               }
             ]
           },
@@ -36,14 +36,14 @@
             "name": "dikme r2",
             "type": "texture",
             "sku": "1X2V2",
-            "value": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/koyu gri_baseColor.png", 
+            "value": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/web-ar-test/textures/1x2V3/koyu gri_baseColor.png", 
             
             "textureConfig": [
                             {
                 "materialName": "texture-1", 
-                "baseColor": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/texture-1_baseColor.png",
-                "normal": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/texture-1_normal.png",
-                "orm": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/texture-1_occlusionRoughnessMetallic.png"
+                "baseColor": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/web-ar-test/textures/1x2V3/texture-1_baseColor.png",
+                "normal": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/web-ar-test/textures/1x2V3/texture-1_normal.png",
+                "orm": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/web-ar-test/textures/1x2V3/texture-1_occlusionRoughnessMetallic.png"
               }
               
             ]
@@ -52,14 +52,14 @@
             "name": "dikme r2",
             "type": "texture",
             "sku": "1X2V2",
-            "value": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/sarı plastik_baseColor.png", 
+            "value": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/web-ar-test/textures/1x2V3/sarı plastik_baseColor.png", 
             
             "textureConfig": [
                             {
                 "materialName": "texture-1", 
-                "baseColor": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/texture-1_baseColor.png",
-                "normal": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/texture-1_normal.png",
-                "orm": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/texture-1_occlusionRoughnessMetallic.png"
+                "baseColor": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/web-ar-test/textures/1x2V3/texture-1_baseColor.png",
+                "normal": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/web-ar-test/textures/1x2V3/texture-1_normal.png",
+                "orm": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/web-ar-test/textures/1x2V3/texture-1_occlusionRoughnessMetallic.png"
               }
               
             ]
