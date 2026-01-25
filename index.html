@@ -212,34 +212,43 @@
       const arBtn = document.getElementById('ar-btn');
 
 
-      // --- 1. AŞAMA: ÖZEL STUDIO HDR YÜKLEME ---
-      // "Google ışığını istemiyorum, kendi dosyamı istiyorum" Modu
+      // --- ZIRHLI IŞIK YÖNETİMİ ---
       loadEnvironment();
 
       async function loadEnvironment() {
-          console.log("Özel Studio.hdr yükleniyor...");
-          
-          // DOĞRUDAN ÇAĞIRIYORUZ (En hatasız yöntem)
-          // Dosya ana dizinde olduğu için başına / koymamız yeterli.
-          const customHDR = "/studio.hdr";
+          console.log("Işık operasyonu başlıyor...");
 
-          // Model Viewer'a dosyayı ver
-          viewer.environmentImage = customHDR;
-          
-          // --- BURASI SENİN OYUN ALANIN ---
-          
-          // 1. IŞIK GÜCÜ (Exposure): 
-          // Bunu artırırsan sahne parlar. (Standart: 1.0, Parlak: 1.5 - 2.0)
-          viewer.exposure = "5"; 
-          
-          // 2. RENK TONU (Tone Mapping):
-          // "neutral" = Gerçekçi/Gri (HDR neyse onu gösterir)
-          // "commerce" = Canlı/Sıcak (Renkleri patlatır) -> Müşteri genelde bunu sever.
+          // 1. ÖNCE AYARLARI BAS (Dosyayı bekleme!)
+          // Dosya bozuk olsa bile sahne PARLAK olsun.
           viewer.toneMapping = "neutral"; 
-          
-          // 3. GÖLGE SERTLİĞİ
+          viewer.exposure = "1.5"; // 5 çok fazla, 2.0 ideal parlaklıktır.
           viewer.shadowIntensity = "1";
+
+          // 2. HDR DOSYASINI YÜKLEMEYİ DENE
+          try {
+              const hdrUrl = "/studio.hdr"; 
+              console.log("HDR yükleniyor:", hdrUrl);
+              
+              // Modele dosyayı veriyoruz
+              viewer.environmentImage = hdrUrl;
+              
+          } catch (err) {
+              // Hata olursa burası çalışır
+              console.error("HDR Yüklenemedi! Yedeğe geçiliyor.", err);
+              // HDR çalışmadıysa mecburen neutral yapalım ama AYARLAR KALSIN
+              viewer.environmentImage = "neutral";
+          }
       }
+
+      // Model Viewer'ın kendi hata yakalayıcısı
+      viewer.addEventListener('error', (error) => {
+          if (error.detail && error.detail.type === 'loadfailure') {
+              console.warn("Viewer HDR'ı yükleyemedi, Neutral moda dönüyoruz.");
+              viewer.environmentImage = "neutral";
+              // Parlaklığı tekrar zorla
+              viewer.exposure = "1.5"; 
+          }
+      });
 
 
 
