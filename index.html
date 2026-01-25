@@ -187,6 +187,7 @@
           camera-controls
           disable-zoom 
           interaction-prompt="none"
+          environment-image="/studio.hdr"
           shadow-intensity="1"
           exposure="1.5"
           tone-mapping="neutral"
@@ -209,46 +210,7 @@
       const variantSection = document.getElementById('variant-section');
       const variantContainer = document.getElementById('variant-container');
       const loader = document.getElementById('loader-container');
-      const arBtn = document.getElementById('ar-btn');
-
-
-      // --- ZIRHLI IŞIK YÖNETİMİ ---
-      loadEnvironment();
-
-      async function loadEnvironment() {
-          console.log("Işık operasyonu başlıyor...");
-
-          // 1. ÖNCE AYARLARI BAS (Dosyayı bekleme!)
-          // Dosya bozuk olsa bile sahne PARLAK olsun.
-          viewer.toneMapping = "neutral"; 
-          viewer.exposure = "1.5"; // 5 çok fazla, 2.0 ideal parlaklıktır.
-          viewer.shadowIntensity = "1";
-
-          // 2. HDR DOSYASINI YÜKLEMEYİ DENE
-          try {
-              const hdrUrl = "/studio.hdr"; 
-              console.log("HDR yükleniyor:", hdrUrl);
-              
-              // Modele dosyayı veriyoruz
-              viewer.environmentImage = hdrUrl;
-              
-          } catch (err) {
-              // Hata olursa burası çalışır
-              console.error("HDR Yüklenemedi! Yedeğe geçiliyor.", err);
-              // HDR çalışmadıysa mecburen neutral yapalım ama AYARLAR KALSIN
-              viewer.environmentImage = "neutral";
-          }
-      }
-
-      // Model Viewer'ın kendi hata yakalayıcısı
-      viewer.addEventListener('error', (error) => {
-          if (error.detail && error.detail.type === 'loadfailure') {
-              console.warn("Viewer HDR'ı yükleyemedi, Neutral moda dönüyoruz.");
-              viewer.environmentImage = "neutral";
-              // Parlaklığı tekrar zorla
-              viewer.exposure = "1.5"; 
-          }
-      });
+      const arBtn = document.getElementById('ar-btn');   
 
 
 
