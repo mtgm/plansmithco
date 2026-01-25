@@ -170,10 +170,6 @@
           ar-scale="fixed"
           ar-placement="floor"
           camera-controls
-
-          environment-image="/api/engine?type=env"
-
-          
           disable-zoom 
           interaction-prompt="none"
           shadow-intensity="1"
@@ -204,6 +200,35 @@
       const variantContainer = document.getElementById('variant-container');
       const loader = document.getElementById('loader-container');
       const arBtn = document.getElementById('ar-btn');
+
+      // SAYFA AÇILIR AÇILMAZ: Işığı (HDR) Yükle (Eski App.js Mantığı)
+    loadEnvironment();
+
+    async function loadEnvironment() {
+        try {
+            console.log("HDR Işığı İsteniyor...");
+            // 1. Engine.js'e sor: Hangi ışığı kullanayım?
+            const envRes = await fetch('/api/engine?type=env');
+            const envData = await envRes.json();
+
+            // 2. Cevap geldiyse viewer'a uygula
+            if (envData.ok && envData.url) {
+                console.log("Özel Işık Bulundu:", envData.url);
+                viewer.environmentImage = envData.url;
+                
+                // HDR gelince parlaklık çok patlamasın diye exposure'u dengeliyoruz
+                viewer.exposure = "1.0"; 
+            } else {
+                console.log("Özel ışık yok, varsayılan (neutral) kullanılıyor.");
+                viewer.environmentImage = "neutral";
+                viewer.exposure = "1.5"; // Neutral biraz sönüktür, açalım.
+            }
+        } catch (err) {
+            console.error("Işık Hatası:", err);
+            // Hata olursa sistem çökmesin, Google ışığını aç
+            viewer.environmentImage = "neutral";
+        }
+    }
 
       // 1. Ürünleri Çek
       fetch('products.json')
@@ -314,6 +339,12 @@
           loader.style.display = 'none';
         }
       }
+
+      // Model Yüklenmesi Bittiğinde (App.js'deki Event Listener)
+    viewer.addEventListener('load', () => {
+        loader.style.display = 'none'; // Loader'ı gizle
+        arBtn.style.display = 'flex';  // AR butonunu göster
+    });
     </script>
   </body>
 </html>
