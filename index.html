@@ -188,7 +188,7 @@
           disable-zoom 
           interaction-prompt="none"
           shadow-intensity="1"
-          exposure="1.5"
+          exposure="5"
           tone-mapping="neutral"
           loading="eager"
           poster="/poster.webp">
@@ -225,10 +225,10 @@
             if (envData.ok && envData.url) {
                 console.log("Özel Işık Yüklendi:", envData.url);
                 viewer.environmentImage = envData.url;
-                viewer.exposure = "1.5"; 
+                viewer.exposure = "5"; 
             } else {
                 console.warn("Özel ışık yok, Neutral modda devam ediliyor.");
-                viewer.exposure = "1.5"; 
+                viewer.exposure = "5"; 
             }
         } catch (err) {
             console.error("Işık yüklenemedi:", err);
