@@ -10,19 +10,15 @@
     /* --- GENEL AYARLAR --- */
     body { 
         margin: 0; 
-        height: 100vh; /* Standart yükseklik */
-        height: 100dvh; /* Mobilde adres çubuğunu hesaba katan dinamik yükseklik */
+        height: 100vh; 
+        height: 100dvh; 
         display: flex; 
         overflow: hidden; 
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         background-color: #f5f5f5;
     }
 
-    #main-layout { 
-        display: flex; 
-        width: 100%; 
-        height: 100%; 
-    }
+    #main-layout { display: flex; width: 100%; height: 100%; }
 
     /* --- SOL PANEL (MASAÜSTÜ) --- */
     #sidebar {
@@ -38,20 +34,21 @@
 
     #brand-header { padding: 20px; border-bottom: 1px solid #eee; background: white; text-align: center; flex-shrink: 0; }
     
+    /* VARYASYON PANELİ (GÜNCELLENDİ) */
     #variant-section {
         padding: 15px; 
         background: #fdfdfd; 
         border-bottom: 1px solid #eee;
         display: none; /* JS ile açılır */
-        flex-shrink: 0; 
+        flex-shrink: 0;
+        /* İçindekileri sağa sola yay */
+        justify-content: space-between; 
+        align-items: center; 
     }
 
-    #catalog-list { 
-        flex: 1; 
-        overflow-y: auto; 
-        padding: 15px; 
-        background: #fff; 
-    }
+    .variant-group { display: flex; flex-direction: column; }
+
+    #catalog-list { flex: 1; overflow-y: auto; padding: 15px; background: #fff; }
 
     /* Ürün Kartı */
     .product-card {
@@ -73,6 +70,26 @@
     }
     .v-btn.selected { border-color: #007bff; transform: scale(1.1); box-shadow: 0 0 0 2px white, 0 0 0 4px #007bff; }
 
+    /* YENİ MOBİL AR BUTONU (Masaüstünde Gizli) */
+    #mobile-ar-btn {
+        display: none; /* Varsayılan gizli */
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        background-color: #222;
+        color: white;
+        border: none;
+        padding: 0 20px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        height: 40px; /* Renk toplarıyla hizalı olsun */
+        transition: transform 0.1s;
+    }
+    #mobile-ar-btn:active { transform: scale(0.95); background: #000; }
+
     /* --- SAĞ PANEL (MODEL) --- */
     #stage { 
         flex: 1; 
@@ -81,62 +98,54 @@
     }
     model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
     
-    /* Loader & AR */
     #loader-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 5; display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: none; }
+    
+    /* Eski Yüzen Buton (Sadece Masaüstü için kalsın, mobilde gizleyeceğiz) */
     .custom-ar-button { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: #222; color: white; border: none; padding: 12px 28px; border-radius: 30px; font-weight: 600; cursor: pointer; display: none; z-index: 20; }
 
 
     /* --- MOBİL İÇİN KİLİT TASARIM (BULLETPROOF) --- */
     @media (max-width: 768px) {
-        /* Flexbox'ı iptal edip Block yapısına geçiyoruz */
         #main-layout { display: block; position: relative; width: 100%; height: 100%; }
 
-        /* 1. MODEL (Üst Katman) - Mutlak Konum */
+        /* 1. MODEL (Üst Katman) */
         #stage {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 55%; /* Ekranın %55'i model */
-            z-index: 1;
-            border-bottom: 1px solid #ccc;
+            position: absolute; top: 0; left: 0; width: 100%; height: 55%; 
+            z-index: 1; border-bottom: 1px solid #ccc;
         }
 
-        /* 2. PANEL (Alt Katman) - Mutlak Konum */
+        /* 2. PANEL (Alt Katman) */
         #sidebar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 45%; /* Ekranın %45'i panel */
-            z-index: 2;
-            border-right: none;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 45%; 
+            z-index: 2; border-right: none; box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
         }
 
-        /* Gereksizleri gizle */
         #brand-header { display: none; }
 
         /* Varyasyon Kısmı - Panelin en tepesinde sabit */
         #variant-section {
-            order: -1; /* En başa al */
+            order: -1; 
             background: #fff;
             padding: 10px 15px;
             border-bottom: 1px solid #eee;
-            /* Flex item özelliği: Asla küçülme */
             flex-shrink: 0; 
+            /* Flexbox ZORLAMASI */
+            display: flex !important; 
         }
 
-        /* Ürün Listesi - Kalan boşlukta kaydır */
+        /* YENİ BUTONU GÖSTER */
+        #mobile-ar-btn { display: flex; }
+
+        /* ESKİ BUTONU GİZLE (Modeli kapatmasın) */
+        .custom-ar-button { display: none !important; }
+
         #catalog-list {
             flex-grow: 1;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch; /* iPhone'da akıcı kaydırma */
+            -webkit-overflow-scrolling: touch; 
             padding: 10px 15px;
-            padding-bottom: 20px; /* En altta biraz boşluk bırak */
+            padding-bottom: 20px; 
         }
-        
-        .custom-ar-button { bottom: 15px; font-size: 13px; padding: 10px 20px; }
     }
     </style>
 </head>
@@ -151,9 +160,15 @@
         <div id="catalog-list">
            <div style="padding:20px; text-align:center; color:#999;">Katalog yükleniyor...</div>
         </div>
+        
         <div id="variant-section">
-          <div class="variant-title">SEÇENEKLER</div>
-          <div class="variant-options" id="variant-container"></div>
+            <div class="variant-group">
+                <div class="variant-title">SEÇENEKLER</div>
+                <div class="variant-options" id="variant-container"></div>
+            </div>
+            <button id="mobile-ar-btn" onclick="viewer.activateAR()">
+                AR'da Gör 🧊
+            </button>
         </div>
       </div>
 
@@ -178,10 +193,7 @@
           loading="eager"
           poster="/poster.webp">
 
-          <button slot="ar-button" id="ar-btn" style="
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: #222; color: white; border: none; padding: 12px 24px;
-            border-radius: 30px; font-weight: bold; cursor: pointer; display: none;">
+          <button slot="ar-button" id="ar-btn" class="custom-ar-button">
             View in your space (1:1)
           </button>
 
@@ -205,16 +217,13 @@
       async function loadEnvironment() {
         try {
             console.log("Işık sistemi başlatılıyor...");
-            // Önce varsayılan Google ışığını ver (Hata vermesin diye)
             viewer.environmentImage = "neutral";
             
-            // API'den gerçek ışık adresini iste
             const envRes = await fetch('/api/engine?type=env');
             const envData = await envRes.json();
 
             if (envData.ok && envData.url) {
                 console.log("Özel Işık Yüklendi:", envData.url);
-                // JS ile linki veriyoruz, tarayıcı artık bunu resim olarak işleyecek
                 viewer.environmentImage = envData.url;
                 viewer.exposure = "1.0"; 
             } else {
@@ -268,7 +277,11 @@
           variantSection.style.display = 'none';
           return;
         }
-        variantSection.style.display = 'block';
+        
+        // KRİTİK DEĞİŞİKLİK: 'block' yerine 'flex' yapıyoruz
+        // Böylece renkler solda, AR butonu sağda durabiliyor
+        variantSection.style.display = 'flex';
+        
         variantContainer.innerHTML = '';
 
         product.variants.forEach((variant, index) => {
@@ -291,7 +304,8 @@
 
       async function loadModel(sku) {
         loader.style.display = 'flex';
-        arBtn.style.display = 'none';
+        // Masaüstü butonu gizle (Mobil butonu zaten CSS ile yönetiliyor)
+        arBtn.style.display = 'none'; 
         try {
           const response = await fetch(`/api/engine?sku=${sku}`);
           const data = await response.json();
@@ -308,6 +322,7 @@
 
       viewer.addEventListener('load', () => {
         loader.style.display = 'none';
+        // Yükleme bitince masaüstü butonunu göster (Eğer mobildeysek CSS zaten gizliyor)
         arBtn.style.display = 'flex';
       });
     </script>
