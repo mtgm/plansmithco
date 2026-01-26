@@ -304,15 +304,18 @@
       const controlsDock = document.getElementById('controls-dock');
       const tabsContainer = document.getElementById('tabs-container');
       const variantsContainer = document.getElementById('active-variants-container');
+      const mobileArBtn = document.getElementById('mobile-ar-btn');
       const loader = document.getElementById('loader-overlay');
       const backBtn = document.getElementById('back-btn');
       const defaultPoster = document.getElementById('default-poster');
+      
+      // Açıklama Toggle Elemanları
       const pDesc = document.getElementById('p-desc');
       const descBtn = document.getElementById('desc-toggle-btn');
 
       let allData = [];
       let selectedProduct = null;
-      // currentMasterUrl değişkenini sildik, artık her seferinde taze yükleme deneyeceğiz.
+      let currentMasterUrl = null;
 
       // 1. Verileri Çek
       fetch('products.json')
@@ -320,7 +323,6 @@
         .then(data => {
           allData = data;
           renderCategories(allData);
-          // Başlangıçta loader'ı gizle
           loader.style.opacity = '0';
         });
 
@@ -343,27 +345,26 @@
           if(category.products.length > 0) selectProduct(category.products[0]);
       }
 
-      // --- GERİ DÖNÜŞ (RESETLEME) ---
+      // --- SIKI RESETLEME (Bug Fix) ---
       window.goBackToCategories = function() {
           categoryGrid.style.display = 'grid';
           productView.style.display = 'none';
           backBtn.style.display = 'none';
           
-          // Modeli temizle
-          viewer.src = ""; 
+          // Modeli ve State'i Zorla Temizle
+          viewer.src = "null"; // Trick: String 'null' vererek viewer'ı resetle
+          currentMasterUrl = null; 
           
-          // Arayüzü gizle
           controlsDock.classList.add('hidden-dock');
+          mobileArBtn.style.display = 'none';
           defaultPoster.style.display = 'flex';
           
-          // Loader açıksa kapat
-          loader.style.opacity = '0';
-          
-          // Açıklamayı kapat
+          // Açıklamayı kapat (Sıfırla)
           pDesc.classList.add('desc-collapsed');
           descBtn.classList.remove('rotate-180');
       }
 
+      // --- AÇIKLAMA AÇ/KAPA ---
       window.toggleDesc = function() {
           pDesc.classList.toggle('desc-collapsed');
           descBtn.classList.toggle('rotate-180');
@@ -387,23 +388,24 @@
       function selectProduct(product) {
           selectedProduct = product;
           
-          // UI Doldur
           document.getElementById('p-title').textContent = product.name;
           pDesc.textContent = product.description || "";
           document.getElementById('p-price').textContent = `$${product.price}`;
           
-          // Yeni ürün seçince açıklamayı kapat
+          // Yeni üründe açıklama hep kapalı başlasın
           pDesc.classList.add('desc-collapsed');
           descBtn.classList.remove('rotate-180');
           
           const buyLink = document.getElementById('buy-link');
-          if(product.listingUrl) { buyLink.href = product.listingUrl; buyLink.style.display = 'flex'; } 
-          else { buyLink.style.display = 'none'; }
+          if(product.listingUrl) {
+              buyLink.href = product.listingUrl;
+              buyLink.style.display = 'flex';
+          } else {
+              buyLink.style.display = 'none';
+          }
 
-          // Varyasyon Sekmelerini Kur
           setupVariantTabs(product);
 
-          // Modeli Yükle
           const masterUrl = product.masterModel ? product.masterModel : `/api/engine?sku=${product.sku}`;
           loadMasterModel(masterUrl);
       }
@@ -429,6 +431,7 @@
                   tabsContainer.appendChild(tabBtn);
                   if (index === 0) tabBtn.click(); 
               });
+
           } else {
               controlsDock.classList.add('hidden-dock');
           }
@@ -437,87 +440,68 @@
       function renderVariantsForGroup(group) {
           variantsContainer.innerHTML = '';
           group.items.forEach((item, index) => {
-              const wrapper = document.createElement('div');
-              wrapper.className = 'variant-item';
-
               const btn = document.createElement('div');
               btn.className = 'v-btn';
+              
               if(item.type === 'color') btn.style.backgroundColor = item.value;
               else btn.style.backgroundImage = `url('${item.value}')`;
 
-              const label = document.createElement('span');
-              label.className = 'v-label';
-              label.innerText = item.name.split('(')[0];
-
-              wrapper.onclick = () => {
-                  variantsContainer.querySelectorAll('.variant-item').forEach(b => b.classList.remove('selected'));
-                  wrapper.classList.add('selected');
+              btn.onclick = () => {
+                  variantsContainer.querySelectorAll('.v-btn').forEach(b => b.classList.remove('selected'));
+                  btn.classList.add('selected');
                   if(item.textureConfig) applyTextureConfig(item.textureConfig);
               };
 
-              if(index === 0) wrapper.classList.add('selected');
-
-              wrapper.appendChild(btn);
-              wrapper.appendChild(label);
-              variantsContainer.appendChild(wrapper);
+              if(index === 0) btn.classList.add('selected');
+              variantsContainer.appendChild(btn);
           });
       }
 
-      // --- GÜVENLİ YÜKLEME MOTORU ---
       async function loadMasterModel(url) {
-          loader.style.opacity = '1';
-          
-          // Posteri gizle ki loader görünsün
-          defaultPoster.style.display = 'none';
+          // BUG FIX: Eğer aynı url olsa bile viewer boşsa (geri dönüp gelince) tekrar yükle
+          if (currentMasterUrl === url && viewer.src !== "null" && viewer.src !== "") {
+              loader.style.opacity = '0';
+              defaultPoster.style.display = 'none';
+              return; 
+          }
 
+          loader.style.opacity = '1';
+          mobileArBtn.style.display = 'none';
+          
           try {
               let finalUrl = url;
-              // API linki kontrolü
               if(url.includes('/api/engine')) {
                   const res = await fetch(url);
                   const data = await res.json();
                   if(data.ok) finalUrl = data.url;
               }
 
-              // Önce src'yi ata
               viewer.src = finalUrl;
+              currentMasterUrl = url;
 
-              // Yükleme tamamlanınca yapılacaklar
-              const onLoad = () => {
+              viewer.addEventListener('load', () => {
                   loader.style.opacity = '0';
-                  // Eğer model yüklendiyse posteri tamamen gizle
-                  defaultPoster.style.display = 'none';
+                  defaultPoster.style.display = 'none'; // Poster gizle
                   
-                  // Texture'ları uygula
+                  if(window.innerWidth <= 900) mobileArBtn.style.display = 'flex';
+                  
                   if(selectedProduct.variantGroups) {
                       selectedProduct.variantGroups.forEach(g => {
                           if(g.items[0].textureConfig) applyTextureConfig(g.items[0].textureConfig);
                       });
                   }
-              };
-
-              // 'load' olayını dinle (once: true ile sadece bir kere çalışır)
-              viewer.addEventListener('load', onLoad, { once: true });
-
-              // SİGORTA: Eğer 3 saniye içinde 'load' tetiklenmezse loader'ı zorla kapat
-              // (Bazen tarayıcı cache'den çok hızlı çeker ve event'i kaçırırız)
-              setTimeout(() => {
-                  if(loader.style.opacity === '1') {
-                      console.log("Zaman aşımı: Loader zorla kapatıldı.");
-                      loader.style.opacity = '0';
-                      // Model görünür değilse posteri aç (Hata durumu)
-                      if (!viewer.loaded) defaultPoster.style.display = 'flex';
-                  }
-              }, 3000);
+              }, { once: true });
 
           } catch (e) {
               console.error(e);
               loader.style.opacity = '0';
-              defaultPoster.style.display = 'flex'; // Hata olursa posteri göster
+              defaultPoster.style.display = 'flex'; 
           }
       }
 
-      function activateAR() { if(viewer.canActivateAR) viewer.activateAR(); }
+      function activateAR() {
+          if(viewer.canActivateAR) viewer.activateAR();
+      }
 
       async function applyTextureConfig(configs) {
           if (!viewer.model) return;
