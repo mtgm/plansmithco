@@ -44,14 +44,13 @@ function openCategory(category) {
     if(category.products.length > 0) selectProduct(category.products[0]);
 }
 
-// --- GERİ DÖNÜŞ FONKSİYONU ---
+// --- GERİ DÖNÜŞ ---
 window.goBackToCategories = function() {
     categoryGrid.style.display = 'grid';
     productView.style.display = 'none';
     backBtn.style.display = 'none';
     
-    // MODELİ SİLMİYORUZ (Cache Koruma)
-    // Sadece arayüzü gizle ve posteri aç
+    // Arayüzü gizle, posteri aç (Model arkada kalsın)
     controlsDock.classList.add('hidden-dock');
     defaultPoster.style.display = 'flex';
     loader.style.opacity = '0';
@@ -155,25 +154,34 @@ function renderVariantsForGroup(group) {
     });
 }
 
-// --- CACHE DOSTU YÜKLEME MOTORU ---
+// --- FİNAL YÜKLEME MOTORU (RESET ÖZELLİKLİ) ---
 async function loadMasterModel(url) {
     
-    // KONTROL: Model zaten hafızada mı?
-    if (currentMasterUrl === url) {
-        console.log("Cache Hit. İndirme yok.");
-        loader.style.opacity = '0';
-        defaultPoster.style.display = 'none'; // Posteri gizle
-        
-        // Texture'ları tekrar uygula
+    // Yardımcı Fonksiyon: Dokuları Varsayılana Sıfırla
+    const resetToDefaults = () => {
         if(selectedProduct.variantGroups) {
-            const firstGroup = selectedProduct.variantGroups[0];
-            if(firstGroup && firstGroup.items[0].textureConfig) {
-               // Varsayılan texture uygulanabilir
-            }
+            selectedProduct.variantGroups.forEach(g => {
+                // Her grubun 0. elemanının (İlk seçenek) dokusunu uygula
+                if(g.items[0] && g.items[0].textureConfig) {
+                    applyTextureConfig(g.items[0].textureConfig);
+                }
+            });
         }
+    };
+
+    // DURUM 1: Model zaten hafızada (Cache Hit)
+    if (currentMasterUrl === url) {
+        console.log("Cache Hit. Model hazır, dokular sıfırlanıyor...");
+        loader.style.opacity = '0';
+        defaultPoster.style.display = 'none'; 
+        
+        // ==> KRİTİK EKLEME: Model değişmese bile dokuları sıfırla!
+        resetToDefaults(); 
+        
         return; 
     }
 
+    // DURUM 2: Yeni Model İndiriliyor
     loader.style.opacity = '1';
     defaultPoster.style.display = 'none';
 
@@ -192,11 +200,9 @@ async function loadMasterModel(url) {
             loader.style.opacity = '0';
             defaultPoster.style.display = 'none';
             
-            if(selectedProduct.variantGroups) {
-                selectedProduct.variantGroups.forEach(g => {
-                    if(g.items[0].textureConfig) applyTextureConfig(g.items[0].textureConfig);
-                });
-            }
+            // İlk yüklemede varsayılanları uygula
+            resetToDefaults(); 
+            
         }, { once: true });
 
     } catch (e) {
