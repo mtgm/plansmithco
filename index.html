@@ -447,6 +447,13 @@
 
       // --- 5. KAPLAMA DEĞİŞTİRME MOTORU (Texture Swapper) ---
       async function applyTextureConfig(configs) {
+
+        // GÜVENLİK KİLİDİ: Model yoksa işlem yapma, hata verme.
+    if (!viewer.model) {
+        console.warn("Model henüz yüklenmediği için kaplama uygulanamadı.");
+        return;
+    }
+    
           const configList = Array.isArray(configs) ? configs : [configs];
 
           for (const cfg of configList) {
