@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PlanSmithCo Showroom</title>
+    <title>PlanSmithCo Configurator</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     
     <style>
@@ -12,11 +12,8 @@
         --bg-color: #f0f2f5; 
         --sidebar-bg: #ffffff;
         --primary-dark: #1e293b; 
-        --primary-light: #334155; 
         --accent-color: #f59e0b; 
         --radius-xl: 16px; 
-        --radius-md: 8px;
-        --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -32,85 +29,63 @@
 
     #main-layout { display: flex; width: 100%; height: 100%; padding: 12px; gap: 12px; }
 
-    /* --- SOL PANEL (NAVİGASYON & BİLGİ) --- */
+    /* --- SOL PANEL --- */
     #sidebar {
         width: 380px; min-width: 320px;
         background: var(--sidebar-bg);
         border: 1px solid #e2e8f0; border-radius: var(--radius-xl);
         display: flex; flex-direction: column;
-        box-shadow: var(--shadow-card); z-index: 10; overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 10;
     }
 
-    /* Header & Navigasyon */
     #brand-header {
         padding: 20px; border-bottom: 1px solid #f1f5f9;
         display: flex; align-items: center; gap: 10px;
     }
     
     #back-btn {
-        display: none; /* Varsayılan gizli */
-        width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0;
+        display: none; width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0;
         background: #fff; cursor: pointer; align-items: center; justify-content: center;
-        transition: all 0.2s;
     }
-    #back-btn:hover { background: #f8fafc; border-color: #cbd5e1; }
 
-    .brand-info { flex: 1; }
     .brand-name { font-size: 18px; font-weight: 800; color: var(--primary-dark); }
     .brand-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent-color); font-weight: 600; background: rgba(245, 158, 11, 0.1); padding: 2px 6px; border-radius: 4px; }
-    
-    .logo-box { width: 40px; height: 40px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; background: #fff; }
+    .logo-box { width: 40px; height: 40px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; background: #fff; margin-left: auto; }
     .logo-box img { width: 60%; }
 
-    /* İçerik Alanı (Kaydırılabilir) */
-    #content-area { flex: 1; overflow-y: auto; padding: 0; position: relative; }
+    #content-area { flex: 1; overflow-y: auto; position: relative; }
 
-    /* 1. VIEW: KATEGORİ IZGARASI */
+    /* Kategori Grid */
     #category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px; }
-    
     .cat-card {
-        aspect-ratio: 1; /* Kare */
-        background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+        aspect-ratio: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        cursor: pointer; transition: all 0.2s; padding: 10px; text-align: center;
+        cursor: pointer; text-align: center;
     }
-    .cat-card:hover { border-color: var(--accent-color); transform: translateY(-2px); background: #fff; }
+    .cat-card:hover { border-color: var(--accent-color); background: #fff; }
     .cat-thumb { width: 40px; height: 40px; margin-bottom: 10px; opacity: 0.6; }
-    .cat-title { font-size: 13px; font-weight: 600; color: var(--primary-dark); }
-    .cat-count { font-size: 10px; color: #94a3b8; margin-top: 4px; }
 
-    /* 2. VIEW: ÜRÜN DETAY & LİSTE (Gizli Başlar) */
+    /* Ürün Detay */
     #product-view { display: none; flex-direction: column; height: 100%; }
-
     #product-detail-area { padding: 24px; border-bottom: 1px solid #f1f5f9; background: #fff; }
-    #p-title { font-size: 22px; font-weight: 700; margin: 0 0 8px 0; line-height: 1.2; color: var(--primary-dark); }
-    #p-desc { font-size: 13px; color: #64748b; margin-bottom: 16px; line-height: 1.5; }
-
-    /* Fiyat ve Aksiyon Alanı */
-    .action-row { display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; }
-    .price-tag { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--primary-dark); }
-    
+    #p-title { font-size: 22px; font-weight: 700; margin: 0 0 8px 0; line-height: 1.2; }
+    #p-desc { font-size: 13px; color: #64748b; margin-bottom: 16px; }
     .buy-btn {
         background: var(--primary-dark); color: white; text-decoration: none;
         font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 6px;
-        transition: background 0.2s; display: flex; align-items: center; gap: 6px;
+        display: flex; align-items: center; gap: 6px; margin-top: 10px; width: fit-content;
     }
-    .buy-btn:hover { background: #0f172a; }
 
-    /* Alt Ürün Listesi */
-    .list-header { padding: 16px 24px 8px; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-    #product-list { padding: 0 16px 20px; }
-
+    /* Alt Liste */
+    #product-list { padding: 10px 16px 20px; }
     .prod-item {
         display: flex; align-items: center; gap: 12px; padding: 10px;
         background: #fff; border: 1px solid transparent; border-radius: 8px;
-        margin-bottom: 6px; cursor: pointer; transition: all 0.2s;
+        margin-bottom: 6px; cursor: pointer;
     }
-    .prod-item:hover { background: #f8fafc; border-color: #cbd5e1; }
-    .prod-item.active { background: #f0f9ff; border-color: var(--primary-dark); box-shadow: 0 0 0 1px var(--primary-dark); }
+    .prod-item:hover { background: #f8fafc; }
+    .prod-item.active { background: #f0f9ff; border-color: var(--primary-dark); }
     .prod-thumb { width: 44px; height: 44px; border-radius: 6px; background: #e2e8f0; object-fit: cover; }
-    .prod-info h4 { margin: 0; font-size: 13px; font-weight: 600; }
-    .prod-info span { font-size: 11px; color: #64748b; }
 
     /* --- SAĞ PANEL (3D SAHNE) --- */
     #stage-wrapper {
@@ -121,60 +96,76 @@
     }
 
     model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
+    
+    /* ⚠️VARSAYILAN AR BUTONUNU GİZLEME (Kritik Düzeltme) */
+    model-viewer::part(default-ar-button) { display: none; }
 
-    /* Kontrol Kapsülü */
+    /* --- KONTROL PANELİ (YENİ) --- */
     #controls-container {
-        position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-        display: flex; align-items: center; gap: 12px;
-        padding: 8px 10px 8px 20px;
-        background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(10px);
-        border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        z-index: 20; transition: all 0.3s;
+        position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.5);
+        border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        z-index: 20; padding: 16px;
+        max-width: 90%; width: auto;
+        display: flex; flex-direction: column; gap: 12px;
+        transition: transform 0.3s, opacity 0.3s;
     }
-    .hidden-controls { opacity: 0; pointer-events: none; transform: translate(-50%, 20px); }
+    .hidden-controls { opacity: 0; pointer-events: none; transform: translate(-50%, 50px) !important; }
 
+    /* Grup Başlıkları */
+    .group-label { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
+    
+    /* Varyasyon Satırı */
+    .variant-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+    .variant-row::-webkit-scrollbar { display: none; }
+
+    /* Butonlar (Büyütüldü) */
     .v-btn {
-        width: 36px; height: 36px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.2);
-        cursor: pointer; background-size: cover; transition: all 0.2s;
+        width: 48px; height: 48px; flex-shrink: 0; /* Küçülmesini engelle */
+        border-radius: 12px; border: 2px solid #e2e8f0;
+        cursor: pointer; background-size: cover; background-position: center;
+        transition: all 0.2s; position: relative;
     }
-    .v-btn.selected { border-color: var(--accent-color); transform: scale(1.1); box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3); }
+    .v-btn.selected { border-color: var(--accent-color); transform: scale(1.05); box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
     
-    .separator { width: 1px; height: 20px; background: rgba(255,255,255,0.2); }
-    
-    #ar-trigger-btn {
-        background: var(--accent-color); color: white; border: none; height: 36px; padding: 0 20px;
-        border-radius: 18px; font-weight: 700; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    /* Seçili Tik İkonu (Opsiyonel Güzellik) */
+    .v-btn.selected::after {
+        content: ''; position: absolute; top: -5px; right: -5px;
+        width: 14px; height: 14px; background: var(--accent-color);
+        border-radius: 50%; border: 2px solid white;
     }
+
+    /* AR Butonu (Özel) */
+    #custom-ar-btn {
+        background: var(--primary-dark); color: white; border: none;
+        padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 13px;
+        cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+        margin-top: 8px; width: 100%;
+    }
+    #custom-ar-btn svg { width: 16px; height: 16px; }
 
     /* Loader */
-    #loader-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.9); z-index: 5; display: flex; align-items: center; justify-content: center; pointer-events: none; transition: opacity 0.3s; }
+    #loader-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.8); z-index: 5; display: flex; align-items: center; justify-content: center; pointer-events: none; transition: opacity 0.3s; }
 
     /* --- MOBİL UYUMLULUK --- */
     @media (max-width: 900px) {
         #main-layout { flex-direction: column; padding: 0; gap: 0; }
-
-        /* 1. ÜST: SAHNE (%55) */
-        #stage-wrapper {
-            order: 1;
-            width: 100%; height: 55vh; flex: none;
-            border-radius: 0 0 24px 24px; border: none; border-bottom: 1px solid #e2e8f0;
-            z-index: 5;
-        }
-
-        /* 2. ALT: PANEL (%45) */
-        #sidebar {
-            order: 2;
-            width: 100%; height: 45vh;
-            border-radius: 0; border: none; box-shadow: none;
-        }
-
-        #controls-container { bottom: 15px; padding: 6px 6px 6px 12px; }
-        .v-btn { width: 32px; height: 32px; }
-        #ar-trigger-btn { height: 32px; padding: 0 16px; font-size: 11px; }
+        #stage-wrapper { order: 1; width: 100%; height: 55vh; flex: none; border-radius: 0 0 24px 24px; border-bottom: 1px solid #e2e8f0; z-index: 5; }
+        #sidebar { order: 2; width: 100%; height: 45vh; border-radius: 0; border: none; box-shadow: none; }
         
-        #product-detail-area { padding: 16px; }
-        #p-title { font-size: 18px; }
-        .list-header { padding-left: 16px; }
+        #controls-container { 
+            bottom: 20px; width: 90%; padding: 12px;
+            border-radius: 16px;
+        }
+        .v-btn { width: 44px; height: 44px; } /* Mobilde hafif küçük ama hala basılabilir */
+        
+        /* Mobilde AR Butonu sadece İkon olsun */
+        #ar-text { display: none; } 
+        #custom-ar-btn { width: auto; position: absolute; bottom: 12px; right: 12px; border-radius: 50%; width: 48px; height: 48px; padding: 0; margin: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        /* AR butonu sağa gidince kontroller sola yaslansın */
+        #controls-container { width: calc(100% - 80px); left: 20px; transform: none; bottom: 20px; }
+        .hidden-controls { transform: translateY(100px) !important; }
     }
     </style>
 </head>
@@ -184,17 +175,12 @@
       
       <aside id="sidebar">
           <div id="brand-header">
-              <button id="back-btn" onclick="goBackToCategories()">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-              </button>
-
+              <button id="back-btn" onclick="goBackToCategories()">←</button>
               <div class="brand-info">
                   <div class="brand-name">PlanSmithCo.</div>
-                  <div class="brand-tag">DIGITAL CATALOG</div>
+                  <div class="brand-tag">CONFIGURATOR</div>
               </div>
-              <div class="logo-box">
-                  <img src="/poster.webp" alt="Logo">
-              </div>
+              <div class="logo-box"><img src="/poster.webp"></div>
           </div>
 
           <div id="content-area">
@@ -202,19 +188,11 @@
 
               <div id="product-view">
                   <div id="product-detail-area">
-                      <h1 id="p-title">Ürün Başlığı</h1>
-                      <div id="p-desc">Ürün açıklaması burada yer alacak.</div>
-                      
-                      <div class="action-row">
-                          <div class="price-tag" id="p-price">$0.00</div>
-                          <span style="display:none;" id="p-sku">SKU: ---</span> <a href="#" target="_blank" id="buy-link" class="buy-btn">
-                              Etsy'de İncele
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                          </a>
-                      </div>
+                      <h1 id="p-title">...</h1>
+                      <div id="p-desc">...</div>
+                      <div id="p-price" style="font-weight:700; font-size:18px;">...</div>
+                      <a href="#" id="buy-link" class="buy-btn" target="_blank">Etsy'de İncele ↗</a>
                   </div>
-
-                  <div class="list-header">BU SERİDEKİ MODELLER</div>
                   <div id="product-list"></div>
               </div>
           </div>
@@ -227,30 +205,24 @@
 
           <model-viewer id="mv"
               src=""
-              ar      
-              ar-modes="webxr scene-viewer quick-look"
-              ar-scale="fixed"
-              ar-placement="floor"
-              camera-controls
-              disable-zoom 
-              interaction-prompt="none"
-              environment-image="/studio.hdr"
-              shadow-intensity="1"
-              exposure="1.5"
-              tone-mapping="neutral"
-              loading="eager"
-              poster="/poster.webp">
-          </model-viewer>
+              ar ar-scale="fixed" ar-placement="floor"
+              camera-controls disable-zoom interaction-prompt="none"
+              environment-image="/studio.hdr" shadow-intensity="1"
+              exposure="1.5" tone-mapping="neutral"
+              loading="eager" poster="/poster.webp">
+              
+              </model-viewer>
 
           <div id="controls-container" class="hidden-controls">
-              <div id="variant-container" style="display:flex; gap:8px;"></div>
-              <div class="separator"></div>
-              <button id="ar-trigger-btn" onclick="activateAR()">
-                 AR VIEW 🧊
-              </button>
+              <div id="groups-wrapper"></div>
           </div>
-      </main>
+          
+          <button id="custom-ar-btn" onclick="activateAR()" style="display:none;">
+              <svg viewBox="0 0 24 24" fill="white"><path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18-.21 0-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44A.996.996 0 0 1 12 2c.21 0 .41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9zM12 4.15L6.04 7.5 12 10.85l5.96-3.35L12 4.15zM5 15.91l6 3.38v-6.71L5 9.21v6.7zM13 12.58v6.71l6-3.38v-6.7l-6 3.37z"></path></svg>
+              <span id="ar-text">AR MODU</span>
+          </button>
 
+      </main>
     </div>
 
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
@@ -260,21 +232,16 @@
       const categoryGrid = document.getElementById('category-grid');
       const productView = document.getElementById('product-view');
       const productList = document.getElementById('product-list');
-      const backBtn = document.getElementById('back-btn');
-      
       const controlsContainer = document.getElementById('controls-container');
-      const variantContainer = document.getElementById('variant-container');
+      const groupsWrapper = document.getElementById('groups-wrapper');
+      const customArBtn = document.getElementById('custom-ar-btn');
       const loader = document.getElementById('loader-overlay');
+      const backBtn = document.getElementById('back-btn');
 
-      const pTitle = document.getElementById('p-title');
-      const pDesc = document.getElementById('p-desc');
-      const pPrice = document.getElementById('p-price');
-      const buyLink = document.getElementById('buy-link');
-      const pSku = document.getElementById('p-sku'); // SKU Elementi
-
+      // Global State
       let allData = [];
       let selectedProduct = null;
-      let currentMasterUrl = ""; // Şu an sahnede hangi master model var?
+      let currentMasterUrl = "";
 
       // 1. Verileri Çek
       fetch('products.json')
@@ -283,20 +250,14 @@
           allData = data;
           renderCategories(allData);
           loader.style.opacity = '0';
-        })
-        .catch(err => console.error("Veri hatası:", err));
+        });
 
-      // 2. Kategorileri Listele
       function renderCategories(categories) {
         categoryGrid.innerHTML = '';
         categories.forEach(cat => {
             const card = document.createElement('div');
             card.className = 'cat-card';
-            card.innerHTML = `
-                <img src="${cat.thumbnail || '/poster.webp'}" class="cat-thumb">
-                <div class="cat-title">${cat.name}</div>
-                <div class="cat-count">${cat.products.length} Model</div>
-            `;
+            card.innerHTML = `<img src="${cat.thumbnail}" class="cat-thumb"><div class="cat-title">${cat.name}</div>`;
             card.onclick = () => openCategory(cat);
             categoryGrid.appendChild(card);
         });
@@ -306,16 +267,23 @@
           categoryGrid.style.display = 'none';
           productView.style.display = 'flex';
           backBtn.style.display = 'flex';
+          
           renderProductList(category.products);
-          if(category.products.length > 0) {
-              selectProduct(category.products[0]);
-          }
+          if(category.products.length > 0) selectProduct(category.products[0]);
       }
 
+      // --- NAVİGASYON TEMİZLİĞİ (Madde 5) ---
       window.goBackToCategories = function() {
           categoryGrid.style.display = 'grid';
           productView.style.display = 'none';
           backBtn.style.display = 'none';
+          
+          // Sahneyi Temizle
+          viewer.src = ""; // Modeli kaldır
+          viewer.poster = "/poster.webp"; // Postere dön
+          currentMasterUrl = ""; // URL sıfırla
+          controlsContainer.classList.add('hidden-controls'); // Paneli gizle
+          customArBtn.style.display = 'none'; // AR butonu gizle
       }
 
       function renderProductList(products) {
@@ -323,169 +291,146 @@
           products.forEach(product => {
               const item = document.createElement('div');
               item.className = 'prod-item';
-              item.innerHTML = `
-                  <img src="${product.thumbnail || '/poster.webp'}" class="prod-thumb">
-                  <div class="prod-info">
-                      <h4>${product.name}</h4>
-                      <span>${product.sku}</span>
-                  </div>
-              `;
-              item.onclick = () => {
-                  document.querySelectorAll('.prod-item').forEach(i => i.classList.remove('active'));
-                  item.classList.add('active');
-                  selectProduct(product);
-              };
+              item.innerHTML = `<img src="${product.thumbnail}" class="prod-thumb"><div><h4>${product.name}</h4><span>${product.sku}</span></div>`;
+              item.onclick = () => selectProduct(product);
               productList.appendChild(item);
           });
-          if(productList.firstChild) productList.firstChild.classList.add('active');
       }
 
-      // 3. Ürün ve Varyasyon Seçimi
       function selectProduct(product) {
-          selectedProduct = product; // Global değişkene ata
+          selectedProduct = product;
           
-          pTitle.textContent = product.name;
-          pDesc.textContent = product.description || "Detaylı bilgi bulunmuyor.";
-          pPrice.textContent = `$${product.price}`;
-          
-          if(product.listingUrl) {
-              buyLink.href = product.listingUrl;
-              buyLink.style.display = 'flex';
-          } else {
-              buyLink.style.display = 'none';
-          }
+          // UI Doldur
+          document.getElementById('p-title').textContent = product.name;
+          document.getElementById('p-desc').textContent = product.description || "";
+          document.getElementById('p-price').textContent = `$${product.price}`;
+          document.getElementById('buy-link').href = product.listingUrl || "#";
 
-          setupVariants(product);
+          // --- GRUP SİSTEMİ KURULUMU (Madde 4) ---
+          setupVariantGroups(product);
+
+          // Ana Modeli Yükle (Varsa master, yoksa SKU)
+          const masterUrl = product.masterModel ? product.masterModel : `/api/engine?sku=${product.sku}`;
+          loadMasterModel(masterUrl);
+      }
+
+      // --- ÇOKLU GRUP OLUŞTURUCU ---
+      function setupVariantGroups(product) {
+          groupsWrapper.innerHTML = ''; // Temizle
           
-          // İlk varyantı (veya ana modeli) yükle
-          if(product.variants && product.variants.length > 0) {
-              loadModel(product.variants[0]);
+          // Eğer yeni "variantGroups" yapısı varsa
+          if (product.variantGroups && product.variantGroups.length > 0) {
+              controlsContainer.classList.remove('hidden-controls');
+
+              product.variantGroups.forEach(group => {
+                  // 1. Grup Başlığı
+                  const label = document.createElement('div');
+                  label.className = 'group-label';
+                  label.innerText = group.groupName;
+                  groupsWrapper.appendChild(label);
+
+                  // 2. Buton Satırı
+                  const row = document.createElement('div');
+                  row.className = 'variant-row';
+
+                  group.items.forEach((item, index) => {
+                      const btn = document.createElement('div');
+                      btn.className = 'v-btn';
+                      
+                      if(item.type === 'color') btn.style.backgroundColor = item.value;
+                      else {
+                          btn.style.backgroundImage = `url('${item.value}')`;
+                          btn.style.backgroundSize = 'cover';
+                      }
+
+                      btn.onclick = () => {
+                          // Bu satırdaki diğer butonların seçimini kaldır
+                          row.querySelectorAll('.v-btn').forEach(b => b.classList.remove('selected'));
+                          btn.classList.add('selected');
+                          
+                          // Texture Değiştir
+                          if(item.textureConfig) applyTextureConfig(item.textureConfig);
+                      };
+
+                      // İlk seçenek (Orijinal) otomatik seçili olsun
+                      if(index === 0) btn.classList.add('selected');
+                      
+                      row.appendChild(btn);
+                  });
+                  groupsWrapper.appendChild(row);
+              });
+          } 
+          // Eski "variants" yapısı varsa (Geri Uyumluluk)
+          else if (product.variants && product.variants.length > 0) {
+              // ... Eski tek satır kodunu buraya ekleyebilirsin ama tavsiyem JSON'ı güncellemen ...
           } else {
-              // Varyant yoksa dummy bir obje gönder ki loadModel çalışsın
-              loadModel({ sku: product.sku }); 
+              controlsContainer.classList.add('hidden-controls');
           }
       }
 
-      function setupVariants(product) {
-        variantContainer.innerHTML = '';
-        if (!product.variants || product.variants.length === 0) {
-            controlsContainer.classList.add('hidden-controls');
-            return;
-        }
-        controlsContainer.classList.remove('hidden-controls');
+      async function loadMasterModel(url) {
+          // Model zaten sahnede mi?
+          if (currentMasterUrl === url) return;
 
-        product.variants.forEach((variant, index) => {
-            const btn = document.createElement('div');
-            btn.className = 'v-btn';
-            
-            // Renk veya Resim
-            if (variant.type === 'color') {
-                btn.style.backgroundColor = variant.value;
-            } else {
-                btn.style.backgroundImage = `url('${variant.value}')`;
-                btn.style.backgroundSize = 'cover';
-                btn.style.backgroundPosition = 'center';
-            }
-            
-            btn.onclick = () => {
-                loadModel(variant); // Tüm variant objesini gönderiyoruz!
-                document.querySelectorAll('.v-btn').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-            };
-            variantContainer.appendChild(btn);
-            if (index === 0) btn.classList.add('selected');
-        });
+          loader.style.opacity = '1';
+          customArBtn.style.display = 'none'; // Yüklenirken AR butonu gizle
+
+          try {
+              let finalUrl = url;
+              // API linki kontrolü
+              if(url.includes('/api/engine')) {
+                  const res = await fetch(url);
+                  const data = await res.json();
+                  if(data.ok) finalUrl = data.url;
+              }
+
+              viewer.src = finalUrl;
+              currentMasterUrl = url;
+
+              viewer.addEventListener('load', () => {
+                  loader.style.opacity = '0';
+                  customArBtn.style.display = 'flex'; // Yüklendiğinde göster
+                  
+                  // İlk açılışta varsayılan texture'ları uygula (Tüm grupların 1. elemanı)
+                  if(selectedProduct.variantGroups) {
+                      selectedProduct.variantGroups.forEach(g => {
+                          if(g.items[0].textureConfig) applyTextureConfig(g.items[0].textureConfig);
+                      });
+                  }
+              }, { once: true });
+
+          } catch (e) {
+              console.error(e);
+              loader.style.opacity = '0';
+          }
       }
 
       function activateAR() {
           if(viewer.canActivateAR) viewer.activateAR();
       }
 
-      // --- 4. AKILLI MODEL YÜKLEYİCİ (Smart Loader) ---
-      async function loadModel(variant) {
-        // Hedeflenen Ana Model URL'ini Belirle
-        const targetMaster = selectedProduct.masterModel 
-                             ? selectedProduct.masterModel 
-                             : `/api/engine?sku=${variant.sku}`;
-
-        // DURUM 1: Sahnedeki model değişmeli mi?
-        if (currentMasterUrl !== targetMaster) {
-            loader.style.opacity = '1';
-            try {
-                let finalUrl = targetMaster;
-
-                // --- DÜZELTİLEN KISIM BURASI ---
-                // Sadece linkin içinde "/api/engine" geçiyorsa JSON fetch yap.
-                // Aksi takdirde (R2 linki veya /assets-r2 linki ise) direkt URL'i kullan.
-                if (targetMaster.includes('/api/engine')) {
-                     const res = await fetch(targetMaster);
-                     const data = await res.json();
-                     if(data.ok) finalUrl = data.url;
-                }
-                // -------------------------------
-
-                // Modeli Yükle
-                viewer.src = finalUrl;
-                currentMasterUrl = targetMaster;
-
-                // Model yüklendikten sonra kaplamayı uygula
-                viewer.addEventListener('load', () => {
-                    if(variant.textureConfig) applyTextureConfig(variant.textureConfig);
-                    loader.style.opacity = '0';
-                }, { once: true });
-
-            } catch (error) {
-                console.error("Model yükleme hatası:", error);
-                loader.style.opacity = '0';
-            }
-        } 
-        // DURUM 2: Model zaten sahnede, sadece kaplama değiştir
-        else {
-            if(variant.textureConfig) {
-                await applyTextureConfig(variant.textureConfig);
-            }
-        }
-      }
-
-      // --- 5. KAPLAMA DEĞİŞTİRME MOTORU (Texture Swapper) ---
+      // --- TEXTURE ENGINE ---
       async function applyTextureConfig(configs) {
-
-        // GÜVENLİK KİLİDİ: Model yoksa işlem yapma, hata verme.
-    if (!viewer.model) {
-        console.warn("Model henüz yüklenmediği için kaplama uygulanamadı.");
-        return;
-    }
-
+          if (!viewer.model) return;
           const configList = Array.isArray(configs) ? configs : [configs];
 
           for (const cfg of configList) {
-              // Malzemeyi bul
               const material = viewer.model.materials.find(m => m.name === cfg.materialName);
-              
-              if (!material) {
-                  console.warn(`⚠️ Malzeme bulunamadı: "${cfg.materialName}". Blender ismini kontrol et!`);
-                  continue;
-              }
+              if (!material) continue;
 
-              // A. Base Color (Renk)
               if (cfg.baseColor) {
                   const texture = await viewer.createTexture(cfg.baseColor);
                   material.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
               }
-
-              // B. Normal Map (Kabartma)
               if (cfg.normal) {
                   const texture = await viewer.createTexture(cfg.normal);
                   material.normalTexture.setTexture(texture);
               }
-
-              // C. ORM Map (Parlaklık/Metalik)
               if (cfg.orm) {
                   const texture = await viewer.createTexture(cfg.orm);
                   material.pbrMetallicRoughness.metallicRoughnessTexture.setTexture(texture);
               }
           }
-          console.log("Kaplamalar güncellendi.");
       }
     </script>
 </body>
