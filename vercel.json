@@ -1,6 +1,8 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/engine.js" },
-    { "source": "/m/(.*)", "destination": "/index.html" }
+    {
+      "source": "/assets-r2/:match*",
+      "destination": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/:match*"
+    }
   ]
 }
