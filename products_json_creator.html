@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlanSmithCo Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-w: 300px;
+            --primary: #0f172a;
+            --accent: #f59e0b;
+            --border: #e2e8f0;
+            --bg: #f8fafc;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--primary); height: 100vh; display: flex; overflow: hidden; }
+        
+        /* Sidebar */
+        aside { width: var(--sidebar-w); background: white; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .brand { padding: 20px; font-weight: 800; font-size: 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .brand span { font-size: 10px; background: #fff7ed; color: var(--accent); padding: 2px 6px; border-radius: 4px; border: 1px solid #ffedd5; }
+        
+        .tree-view { flex: 1; overflow-y: auto; padding: 10px; }
+        .tree-item { padding: 10px; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: 500; margin-bottom: 2px; display: flex; align-items: center; justify-content: space-between; }
+        .tree-item:hover { background: #f1f5f9; }
+        .tree-item.active { background: #eff6ff; color: #2563eb; }
+        .tree-cat { color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; margin: 15px 0 5px 10px; }
+
+        .actions { padding: 15px; border-top: 1px solid var(--border); display: grid; gap: 8px; }
+        button { cursor: pointer; border: none; padding: 10px; border-radius: 6px; font-weight: 600; font-size: 12px; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #1e293b; }
+        .btn-accent { background: var(--accent); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--border); }
+
+        /* Main Editor */
+        main { flex: 1; padding: 30px; overflow-y: auto; display: flex; justify-content: center; }
+        .editor-container { width: 100%; max-width: 800px; background: white; padding: 30px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        
+        h2 { margin: 0 0 20px 0; font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group.full { grid-column: span 2; }
+        
+        label { display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 6px; text-transform: uppercase; }
+        input, textarea, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 13px; }
+        input:focus, textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+        
+        /* Variants Section */
+        .variant-section { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-top: 20px; }
+        .v-group { background: white; padding: 10px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 10px; }
+        .v-header { display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center; font-weight: 600; font-size: 13px; }
+        
+        .v-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+        .v-item { border: 1px solid var(--border); padding: 8px; border-radius: 4px; font-size: 11px; position: relative; }
+        .v-item input { margin-bottom: 4px; font-size: 11px; padding: 4px; }
+        
+        .btn-small { padding: 4px 8px; font-size: 10px; }
+        .btn-danger { background: #fee2e2; color: #ef4444; }
+
+        /* JSON Export Modal */
+        #json-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 99; }
+        .modal-content { background: white; width: 600px; padding: 20px; border-radius: 12px; display: flex; flex-direction: column; height: 80vh; }
+        #json-output { flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 10px; background: #1e293b; color: #a5b4fc; border-radius: 6px; resize: none; border: none; }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div class="brand">PlanSmithCo. <span>ADMIN v1.0</span></div>
+        <div class="tree-view" id="product-tree">
+            </div>
+        <div class="actions">
+            <button class="btn-outline" onclick="addNewProduct()">+ Yeni Ürün Ekle</button>
+            <button class="btn-primary" onclick="exportJSON()">💾 JSON OLUŞTUR & KOPYALA</button>
+        </div>
+    </aside>
+
+    <main>
+        <div class="editor-container" id="editor">
+            <h2>Ürün Düzenle</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Ürün Adı</label>
+                    <input type="text" id="inp-name">
+                </div>
+                <div class="form-group">
+                    <label>SKU (Kod)</label>
+                    <input type="text" id="inp-sku">
+                </div>
+                <div class="form-group">
+                    <label>Fiyat ($)</label>
+                    <input type="number" id="inp-price">
+                </div>
+                <div class="form-group">
+                    <label>Kategori ID (cat_...)</label>
+                    <input type="text" id="inp-catId">
+                </div>
+                <div class="form-group full">
+                    <label>Açıklama</label>
+                    <textarea id="inp-desc" rows="3"></textarea>
+                </div>
+                <div class="form-group full">
+                    <label>Etsy Linki</label>
+                    <input type="text" id="inp-link">
+                </div>
+                <div class="form-group">
+                    <label>Master Model URL (.glb)</label>
+                    <input type="text" id="inp-model">
+                </div>
+                <div class="form-group">
+                    <label>Poster Resim URL</label>
+                    <input type="text" id="inp-thumb">
+                </div>
+            </div>
+
+            <div class="variant-section">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <label>VARYASYON GRUPLARI</label>
+                    <button class="btn-accent btn-small" onclick="addVariantGroup()">+ Grup Ekle</button>
+                </div>
+                <div id="variant-groups-container"></div>
+            </div>
+
+            <div style="margin-top:20px; text-align:right;">
+                <button class="btn-primary" onclick="saveCurrentProduct()">✓ Değişiklikleri Hafızaya Al</button>
+            </div>
+        </div>
+    </main>
+
+    <div id="json-modal">
+        <div class="modal-content">
+            <h3 style="margin-top:0;">products.json Kodu</h3>
+            <p style="font-size:12px; color:#64748b;">Aşağıdaki kodu kopyalayıp projedeki <b>products.json</b> dosyasının içine yapıştır.</p>
+            <textarea id="json-output" readonly></textarea>
+            <div style="margin-top:10px; text-align:right; gap:10px; display:flex; justify-content:end;">
+                <button class="btn-outline" onclick="document.getElementById('json-modal').style.display='none'">Kapat</button>
+                <button class="btn-accent" onclick="copyToClipboard()">Kopyala</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+        let currentProduct = null;
+        let currentCatIndex = 0;
+        let currentProdIndex = 0;
+
+        // 1. Verileri Çek
+        fetch('products.json')
+            .then(res => res.json())
+            .then(data => {
+                allData = data;
+                renderTree();
+                if(allData.length > 0 && allData[0].products.length > 0) {
+                    loadProduct(0, 0);
+                }
+            })
+            .catch(err => {
+                console.log("JSON bulunamadı, boş başlıyoruz.");
+                allData = [{ id: "cat_new", name: "Yeni Kategori", thumbnail: "/poster.webp", products: [] }];
+                renderTree();
+            });
+
+        function renderTree() {
+            const tree = document.getElementById('product-tree');
+            tree.innerHTML = '';
+
+            allData.forEach((cat, cIdx) => {
+                const catTitle = document.createElement('div');
+                catTitle.className = 'tree-cat';
+                catTitle.innerText = cat.name;
+                tree.appendChild(catTitle);
+
+                cat.products.forEach((prod, pIdx) => {
+                    const item = document.createElement('div');
+                    item.className = `tree-item ${currentProduct === prod ? 'active' : ''}`;
+                    item.innerText = prod.name || 'İsimsiz Ürün';
+                    item.onclick = () => loadProduct(cIdx, pIdx);
+                    tree.appendChild(item);
+                });
+            });
+        }
+
+        function loadProduct(cIdx, pIdx) {
+            currentCatIndex = cIdx;
+            currentProdIndex = pIdx;
+            currentProduct = allData[cIdx].products[pIdx];
+            renderTree(); // Highlight güncelle
+
+            // Formu Doldur
+            document.getElementById('inp-name').value = currentProduct.name || '';
+            document.getElementById('inp-sku').value = currentProduct.sku || '';
+            document.getElementById('inp-price').value = currentProduct.price || 0;
+            document.getElementById('inp-catId').value = allData[cIdx].id; // Kategori ID'si
+            document.getElementById('inp-desc').value = currentProduct.description || '';
+            document.getElementById('inp-link').value = currentProduct.listingUrl || '';
+            document.getElementById('inp-model').value = currentProduct.masterModel || '';
+            document.getElementById('inp-thumb').value = currentProduct.thumbnail || '';
+
+            // Varyasyonları Doldur
+            renderVariantGroups(currentProduct.variantGroups || []);
+        }
+
+        function renderVariantGroups(groups) {
+            const container = document.getElementById('variant-groups-container');
+            container.innerHTML = '';
+
+            groups.forEach((group, gIdx) => {
+                const gDiv = document.createElement('div');
+                gDiv.className = 'v-group';
+                gDiv.innerHTML = `
+                    <div class="v-header">
+                        <input type="text" value="${group.groupName}" onchange="updateGroupName(${gIdx}, this.value)" style="width:200px; font-weight:bold;">
+                        <button class="btn-danger btn-small" onclick="removeGroup(${gIdx})">Sil</button>
+                    </div>
+                    <div class="v-items" id="v-items-${gIdx}"></div>
+                    <button class="btn-outline btn-small" style="width:100%; margin-top:5px;" onclick="addVariantItem(${gIdx})">+ Seçenek Ekle</button>
+                `;
+                container.appendChild(gDiv);
+
+                const itemsDiv = document.getElementById(`v-items-${gIdx}`);
+                group.items.forEach((item, iIdx) => {
+                    const iDiv = document.createElement('div');
+                    iDiv.className = 'v-item';
+                    
+                    // Basitlik için sadece temel alanları gösteriyoruz
+                    iDiv.innerHTML = `
+                        <label>Görünen Ad</label>
+                        <input type="text" value="${item.name}" onchange="updateItem(${gIdx}, ${iIdx}, 'name', this.value)">
+                        <label>Resim/Renk</label>
+                        <input type="text" value="${item.value}" onchange="updateItem(${gIdx}, ${iIdx}, 'value', this.value)">
+                        <label>Malzeme ID</label>
+                        <input type="text" value="${item.textureConfig?.materialName || 'texture-1'}" onchange="updateItemConfig(${gIdx}, ${iIdx}, 'materialName', this.value)">
+                        <label>Doku (BaseColor)</label>
+                        <input type="text" value="${item.textureConfig?.baseColor || ''}" onchange="updateItemConfig(${gIdx}, ${iIdx}, 'baseColor', this.value)">
+                        <button class="btn-danger btn-small" style="position:absolute; top:5px; right:5px;" onclick="removeItem(${gIdx}, ${iIdx})">x</button>
+                    `;
+                    itemsDiv.appendChild(iDiv);
+                });
+            });
+        }
+
+        // --- Veri Manipülasyonu ---
+
+        window.updateGroupName = (gIdx, val) => {
+            currentProduct.variantGroups[gIdx].groupName = val;
+        }
+
+        window.updateItem = (gIdx, iIdx, key, val) => {
+            currentProduct.variantGroups[gIdx].items[iIdx][key] = val;
+        }
+
+        window.updateItemConfig = (gIdx, iIdx, key, val) => {
+            if(!currentProduct.variantGroups[gIdx].items[iIdx].textureConfig) {
+                currentProduct.variantGroups[gIdx].items[iIdx].textureConfig = {};
+            }
+            currentProduct.variantGroups[gIdx].items[iIdx].textureConfig[key] = val;
+        }
+
+        window.addVariantGroup = () => {
+            if(!currentProduct.variantGroups) currentProduct.variantGroups = [];
+            currentProduct.variantGroups.push({
+                groupName: "Yeni Grup",
+                items: []
+            });
+            renderVariantGroups(currentProduct.variantGroups);
+        }
+
+        window.addVariantItem = (gIdx) => {
+            currentProduct.variantGroups[gIdx].items.push({
+                name: "Yeni Seçenek",
+                type: "texture",
+                value: "/assets-r2/textures/...",
+                textureConfig: { materialName: "texture-1", baseColor: "" }
+            });
+            renderVariantGroups(currentProduct.variantGroups);
+        }
+
+        window.removeGroup = (gIdx) => {
+            if(confirm('Bu grubu silmek istediğine emin misin?')) {
+                currentProduct.variantGroups.splice(gIdx, 1);
+                renderVariantGroups(currentProduct.variantGroups);
+            }
+        }
+
+        window.removeItem = (gIdx, iIdx) => {
+            currentProduct.variantGroups[gIdx].items.splice(iIdx, 1);
+            renderVariantGroups(currentProduct.variantGroups);
+        }
+
+        window.addNewProduct = () => {
+            const newProd = {
+                sku: "NEW-001",
+                name: "Yeni Ürün",
+                price: 0,
+                masterModel: "",
+                thumbnail: "/poster.webp",
+                variantGroups: []
+            };
+            allData[0].products.push(newProd);
+            loadProduct(0, allData[0].products.length - 1);
+        }
+
+        window.saveCurrentProduct = () => {
+            // Form verilerini objeye yaz
+            currentProduct.name = document.getElementById('inp-name').value;
+            currentProduct.sku = document.getElementById('inp-sku').value;
+            currentProduct.price = parseFloat(document.getElementById('inp-price').value);
+            currentProduct.description = document.getElementById('inp-desc').value;
+            currentProduct.listingUrl = document.getElementById('inp-link').value;
+            currentProduct.masterModel = document.getElementById('inp-model').value;
+            currentProduct.thumbnail = document.getElementById('inp-thumb').value;
+            
+            // UI Güncelle
+            renderTree();
+            alert('Ürün hafızada güncellendi. JSON almayı unutma!');
+        }
+
+        window.exportJSON = () => {
+            const jsonStr = JSON.stringify(allData, null, 2);
+            document.getElementById('json-output').value = jsonStr;
+            document.getElementById('json-modal').style.display = 'flex';
+        }
+
+        window.copyToClipboard = () => {
+            const copyText = document.getElementById("json-output");
+            copyText.select();
+            document.execCommand("copy");
+            alert("Kopyalandı! Şimdi products.json dosyasına yapıştır.");
+        }
+    </script>
+</body>
+</html>
