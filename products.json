@@ -315,57 +315,10 @@
     "name": "Deneme",
     "products": [
       {
-        "name": "Deneme 1",
+        "name": "",
         "sku": "1X2V3",
         "price": 12,
-        "variantGroups": [
-          {
-            "groupName": "Dikmeler",
-            "items": [
-              {
-                "name": "Dikme",
-                "type": "texture",
-                "value": "/assets-r2/textures/1x2V3/dikme_baseColor.png",
-                "textureConfig": {
-                  "materialName": "texture-1.001",
-                  "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
-                }
-              },
-              {
-                "name": "Sarı Plastik",
-                "type": "texture",
-                "value": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png",
-                "textureConfig": {
-                  "materialName": "texture-1.001",
-                  "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
-                }
-              }
-            ]
-          },
-          {
-            "groupName": "Raylar",
-            "items": [
-              {
-                "name": "Koyu Gri",
-                "type": "texture",
-                "value": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png",
-                "textureConfig": {
-                  "materialName": "texture-3.001",
-                  "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png"
-                }
-              },
-              {
-                "name": "Sarı Plastik",
-                "type": "texture",
-                "value": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png",
-                "textureConfig": {
-                  "materialName": "texture-3.001",
-                  "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
-                }
-              }
-            ]
-          }
-        ],
+        "variantGroups": [],
         "description": "Denem Ürün eklendi",
         "listingUrl": "etsy.com",
         "masterModel": "/assets-r2/models/1x2V3.glb",
