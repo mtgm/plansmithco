@@ -36,11 +36,12 @@
         border: 1px solid #e2e8f0; border-radius: var(--radius-xl);
         display: flex; flex-direction: column;
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 10;
+        overflow: hidden; /* Taşmaları gizle, içindeki content scroll edecek */
     }
 
     #brand-header {
         padding: 20px; border-bottom: 1px solid #f1f5f9;
-        display: flex; align-items: center; gap: 10px;
+        display: flex; align-items: center; gap: 10px; flex-shrink: 0;
     }
     
     #back-btn {
@@ -55,7 +56,13 @@
     .logo-box { width: 40px; height: 40px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; background: #fff; margin-left: auto; }
     .logo-box img { width: 60%; }
 
-    #content-area { flex: 1; overflow-y: auto; position: relative; }
+    /* İçerik Alanı: Scroll sorunu burada çözüldü */
+    #content-area { 
+        flex: 1; 
+        overflow-y: auto; /* Dikey scroll açıldı */
+        position: relative; 
+        padding-bottom: 20px; /* Alttan biraz boşluk */
+    }
 
     /* Kategori Grid */
     #category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px; }
@@ -73,7 +80,6 @@
     #p-title { font-size: 22px; font-weight: 700; margin: 0 0 8px 0; line-height: 1.2; }
     #p-desc { font-size: 13px; color: #64748b; margin-bottom: 16px; line-height: 1.5; }
     
-    /* Aksiyon Satırı */
     .action-row {
         display: flex; align-items: center; justify-content: space-between;
         background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0;
@@ -95,7 +101,13 @@
         margin-bottom: 6px; cursor: pointer; transition: all 0.2s;
     }
     .prod-item:hover { background: #f8fafc; border-color: #cbd5e1; }
-    .prod-item.active { background: #f0f9ff; border-color: var(--primary-dark); }
+    
+    /* VURGULAMA (Active State) - İstediğin Turuncu Vurgu */
+    .prod-item.active { 
+        background: #fff7ed; /* Çok açık turuncu */
+        border-color: var(--accent-color); 
+        box-shadow: 0 0 0 1px var(--accent-color); /* Çerçeve kalınlığı */
+    }
     .prod-thumb { width: 44px; height: 44px; border-radius: 6px; background: #e2e8f0; object-fit: cover; }
 
     /* --- SAĞ PANEL (3D SAHNE & KONTROLLER) --- */
@@ -107,6 +119,17 @@
         display: flex; flex-direction: column; 
     }
 
+    /* DEFAULT POSTER (Boş Ekran Çözümü) */
+    #default-poster {
+        position: absolute; inset: 0; 
+        background: white; 
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        z-index: 2; /* Modelin üstünde */
+        pointer-events: none; /* Tıklamaları engelleme */
+    }
+    #default-poster img { width: 120px; margin-bottom: 20px; opacity: 0.8; }
+    #default-poster span { font-family: 'JetBrains Mono'; font-size: 12px; color: #94a3b8; letter-spacing: 1px; }
+
     model-viewer { width: 100%; flex: 1; --poster-color: transparent; }
     model-viewer::part(default-ar-button) { display: none; }
 
@@ -114,14 +137,14 @@
     #controls-dock {
         background: #fff;
         border-top: 1px solid #e2e8f0;
-        padding: 0; /* İç paddingi kaldırdık, elemanlar yönetecek */
+        padding: 0;
         z-index: 20;
         transition: transform 0.3s;
         display: flex; flex-direction: column;
     }
     .hidden-dock { transform: translateY(100%); display: none !important; }
 
-    /* 1. SEKMELER (TABS) */
+    /* Sekmeler */
     #tabs-container {
         display: flex; gap: 4px; padding: 10px 16px 0 16px;
         overflow-x: auto; scrollbar-width: none;
@@ -140,7 +163,7 @@
     .tab-btn:hover { color: #64748b; }
     .tab-btn.active { color: var(--primary-dark); border-bottom-color: var(--accent-color); }
 
-    /* 2. VARYASYONLAR (SEÇENEKLER) */
+    /* Varyasyonlar */
     #active-variants-container {
         padding: 12px 16px;
         display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none;
@@ -148,7 +171,6 @@
     }
     #active-variants-container::-webkit-scrollbar { display: none; }
 
-    /* Butonlar */
     .v-btn {
         width: 48px; height: 48px; flex-shrink: 0;
         border-radius: 10px; border: 2px solid #e2e8f0;
@@ -163,16 +185,18 @@
         border-radius: 50%; border: 2px solid white;
     }
 
-    /* AR Butonu (Mobil) */
+    /* YENİ ŞIK AR BUTONU (Pill Shape) */
     #mobile-ar-btn {
         position: absolute; bottom: 20px; right: 20px;
-        width: 56px; height: 56px; border-radius: 50%;
-        background: var(--primary-dark); color: white; border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        display: flex; align-items: center; justify-content: center;
-        cursor: pointer; z-index: 30;
+        background: var(--primary-dark); color: white;
+        padding: 12px 20px; border-radius: 30px; /* Hap Şekli */
+        border: none; box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        display: flex; align-items: center; gap: 8px;
+        cursor: pointer; z-index: 30; font-weight: 700; font-size: 12px;
+        transition: transform 0.2s;
     }
-    #mobile-ar-btn svg { width: 24px; height: 24px; }
+    #mobile-ar-btn:active { transform: scale(0.95); }
+    #mobile-ar-btn svg { width: 18px; height: 18px; fill: white; }
 
     /* Loader */
     #loader-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.8); z-index: 5; display: flex; align-items: center; justify-content: center; pointer-events: none; transition: opacity 0.3s; }
@@ -183,12 +207,15 @@
     }
     @media (max-width: 900px) {
         #main-layout { flex-direction: column; padding: 0; gap: 0; }
-        #stage-wrapper { order: 1; width: 100%; height: 60vh; flex: none; border-radius: 0 0 24px 24px; border-bottom: 1px solid #e2e8f0; z-index: 5; }
-        #sidebar { order: 2; width: 100%; height: 40vh; border-radius: 0; border: none; }
         
-        /* Panel Mobilde daha kompakt */
+        /* Model Alanı */
+        #stage-wrapper { order: 1; width: 100%; height: 60vh; flex: none; border-radius: 0 0 24px 24px; border-bottom: 1px solid #e2e8f0; z-index: 5; }
+        
+        /* Panel Alanı - Flex 1 ile kalan boşluğu doldurur */
+        #sidebar { order: 2; width: 100%; height: 40vh; flex: 1; border-radius: 0; border: none; }
+        
         .tab-btn { padding: 8px 12px; font-size: 10px; }
-        #controls-dock { padding-bottom: 10px; } /* iPhone alt bar boşluğu */
+        #controls-dock { padding-bottom: 15px; } 
     }
     </style>
 </head>
@@ -231,12 +258,17 @@
              <div style="font-family:'JetBrains Mono'; font-size:12px; color:#666;">YÜKLENİYOR...</div>
           </div>
 
+          <div id="default-poster">
+              <img src="/poster.webp" alt="Logo">
+              <span>BİR ÜRÜN SEÇİN</span>
+          </div>
+
           <model-viewer id="mv"
               src=""
               ar ar-scale="fixed" ar-placement="floor"
               camera-controls disable-zoom interaction-prompt="none"
-              environment-image="/studio.hdr" shadow-intensity="1"
-              exposure="1.5" tone-mapping="neutral"
+              environment-image="/studio.hdr" shadow-intensity="1.5"
+              exposure="1.0" tone-mapping="commerce"
               loading="eager" poster="/poster.webp">
           </model-viewer>
 
@@ -246,7 +278,8 @@
           </div>
           
           <button id="mobile-ar-btn" onclick="activateAR()" style="display:none;">
-              <svg viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+              <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+              AR MODUNDA GÖR
           </button>
 
       </main>
@@ -259,19 +292,17 @@
       const categoryGrid = document.getElementById('category-grid');
       const productView = document.getElementById('product-view');
       const productList = document.getElementById('product-list');
-      
       const controlsDock = document.getElementById('controls-dock');
       const tabsContainer = document.getElementById('tabs-container');
       const variantsContainer = document.getElementById('active-variants-container');
-      
       const mobileArBtn = document.getElementById('mobile-ar-btn');
       const loader = document.getElementById('loader-overlay');
       const backBtn = document.getElementById('back-btn');
+      const defaultPoster = document.getElementById('default-poster'); // Poster Divi
 
-      // Global State
       let allData = [];
       let selectedProduct = null;
-      let currentMasterUrl = null; // Başlangıçta null yapıyoruz
+      let currentMasterUrl = null;
 
       // 1. Verileri Çek
       fetch('products.json')
@@ -301,25 +332,22 @@
           if(category.products.length > 0) selectProduct(category.products[0]);
       }
 
-      // --- DÜZELTME: Geri Dönüş ve Resetleme ---
+      // --- GERİ DÖNÜŞ FONKSİYONU ---
       window.goBackToCategories = function() {
           categoryGrid.style.display = 'grid';
           productView.style.display = 'none';
           backBtn.style.display = 'none';
           
-          // Viewer'ı tamamen sıfırla
-          viewer.src = "null"; // Boş string yerine null stringi bazen daha iyi tetikler
-          setTimeout(() => { viewer.src = ""; }, 50); // Çift dikiş temizlik
-          
-          // Posteri manuel göster (Bazen viewer unutur)
-          viewer.poster = "/poster.webp"; 
-          
-          // State'i sıfırla (Burası "Yükleniyor" sorununu çözen yer!)
+          // Modeli temizle
+          viewer.src = ""; 
           currentMasterUrl = null; 
           
+          // Arayüzü Sıfırla
           controlsDock.classList.add('hidden-dock');
           mobileArBtn.style.display = 'none';
-          loader.style.opacity = '0'; // Loader takılı kaldıysa gizle
+          
+          // POSTERİ GERİ GETİR (Boş ekranı engeller)
+          defaultPoster.style.display = 'flex';
       }
 
       function renderProductList(products) {
@@ -329,6 +357,7 @@
               item.className = 'prod-item';
               item.innerHTML = `<img src="${product.thumbnail}" class="prod-thumb"><div><h4>${product.name}</h4><span>${product.sku}</span></div>`;
               item.onclick = () => {
+                  // Vurgulamayı Güncelle (Highlight)
                   document.querySelectorAll('.prod-item').forEach(i => i.classList.remove('active'));
                   item.classList.add('active');
                   selectProduct(product);
@@ -340,6 +369,7 @@
       function selectProduct(product) {
           selectedProduct = product;
           
+          // UI Doldur
           document.getElementById('p-title').textContent = product.name;
           document.getElementById('p-desc').textContent = product.description || "";
           document.getElementById('p-price').textContent = `$${product.price}`;
@@ -352,14 +382,12 @@
               buyLink.style.display = 'none';
           }
 
-          // Yeni Tab Sistemi Kurulumu
           setupVariantTabs(product);
 
           const masterUrl = product.masterModel ? product.masterModel : `/api/engine?sku=${product.sku}`;
           loadMasterModel(masterUrl);
       }
 
-      // --- YENİ: SEKME (TAB) SİSTEMİ MANTIĞI ---
       function setupVariantTabs(product) {
           tabsContainer.innerHTML = '';
           variantsContainer.innerHTML = '';
@@ -367,26 +395,19 @@
           if (product.variantGroups && product.variantGroups.length > 0) {
               controlsDock.classList.remove('hidden-dock');
 
-              // 1. Sekmeleri (Tabs) Oluştur
               product.variantGroups.forEach((group, index) => {
                   const tabBtn = document.createElement('button');
                   tabBtn.className = 'tab-btn';
                   tabBtn.innerText = group.groupName;
                   
                   tabBtn.onclick = () => {
-                      // Tüm sekmelerin aktifliğini kaldır
                       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                       tabBtn.classList.add('active');
-                      // O grubun varyasyonlarını göster
                       renderVariantsForGroup(group);
                   };
 
                   tabsContainer.appendChild(tabBtn);
-
-                  // İlk sekme varsayılan olarak açılsın
-                  if (index === 0) {
-                      tabBtn.click(); 
-                  }
+                  if (index === 0) tabBtn.click(); 
               });
 
           } else {
@@ -394,18 +415,14 @@
           }
       }
 
-      // Seçili Grubun Kutularını Gösteren Fonksiyon
       function renderVariantsForGroup(group) {
-          variantsContainer.innerHTML = ''; // Temizle
-
+          variantsContainer.innerHTML = '';
           group.items.forEach((item, index) => {
               const btn = document.createElement('div');
               btn.className = 'v-btn';
               
               if(item.type === 'color') btn.style.backgroundColor = item.value;
-              else {
-                  btn.style.backgroundImage = `url('${item.value}')`;
-              }
+              else btn.style.backgroundImage = `url('${item.value}')`;
 
               btn.onclick = () => {
                   variantsContainer.querySelectorAll('.v-btn').forEach(b => b.classList.remove('selected'));
@@ -413,24 +430,22 @@
                   if(item.textureConfig) applyTextureConfig(item.textureConfig);
               };
 
-              // Eğer bu grubun daha önce seçilmiş bir elemanı varsa onu işaretle
-              // (Şimdilik basit olsun diye ilk elemanı seçili yapıyoruz veya boş bırakıyoruz)
-              // İpucu: Burada "seçili olanı hatırla" mantığı da ekleyebiliriz sonra.
               if(index === 0) btn.classList.add('selected');
-
               variantsContainer.appendChild(btn);
           });
       }
 
       async function loadMasterModel(url) {
-          // Eğer aynı model zaten yüklüyse işlem yapma
           if (currentMasterUrl === url) {
-              loader.style.opacity = '0'; // Loader kalmışsa gizle
+              loader.style.opacity = '0';
               return; 
           }
 
           loader.style.opacity = '1';
           mobileArBtn.style.display = 'none';
+          
+          // Model yüklenmeye başlayınca posteri gizle
+          defaultPoster.style.display = 'none';
 
           try {
               let finalUrl = url;
@@ -443,12 +458,11 @@
               viewer.src = finalUrl;
               currentMasterUrl = url;
 
-              // Yükleme tamamlanınca
               viewer.addEventListener('load', () => {
                   loader.style.opacity = '0';
                   if(window.innerWidth <= 900) mobileArBtn.style.display = 'flex';
                   
-                  // Varsayılan texture'ları uygula (Her grubun ilk elemanı)
+                  // Varsayılan kaplamaları uygula
                   if(selectedProduct.variantGroups) {
                       selectedProduct.variantGroups.forEach(g => {
                           if(g.items[0].textureConfig) applyTextureConfig(g.items[0].textureConfig);
@@ -459,6 +473,7 @@
           } catch (e) {
               console.error(e);
               loader.style.opacity = '0';
+              defaultPoster.style.display = 'flex'; // Hata olursa posteri geri getir
           }
       }
 

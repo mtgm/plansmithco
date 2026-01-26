@@ -57,7 +57,7 @@
                 "sku": "1X2V3",
                 "value": "#723957",
                 "textureConfig": {
-                   "materialName": "texture-1001",
+                   "materialName": "texture-1.001",
                    "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
 
                 }
