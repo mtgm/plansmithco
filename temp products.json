@@ -1,0 +1,168 @@
+[
+  {
+    "id": "cat_storage",
+    "name": "Storage Systems",
+    "products": [
+      {
+        "sku": "1X2V3",
+        "name": "1x2 Storage Tote Rack V3",
+        "price": 129.00,
+        "masterModel": "/assets-r2/models/1x2V3.glb", 
+        "thumbnail": "/poster.webp",        
+        
+        "variantGroups": [
+          {
+            "groupName": "Dikmeler",
+            "items": [
+              {
+                "name": "Orijinal (Çam)",
+                "type": "texture",
+                "sku": "1X2V3",
+                "value": "/assets-r2/textures/1x2V3/texture-1_baseColor.png",
+                "textureConfig": {
+                   "materialName": "texture-1",
+                   "baseColor": "/assets-r2/textures/1x2V3/texture-1_baseColor.png",
+                   "normal": "/assets-r2/textures/1x2V3/texture-1_normal.png",
+                   "orm": "/assets-r2/textures/1x2V3/texture-1_occlusionRoughnessMetallic.png"
+                }
+              },
+              {
+                "name": "Antrasit Gri",
+                "type": "color",
+                "sku": "1X2V3",
+                "value": "#374151",
+                "textureConfig": {
+                   "materialName": "texture-1",
+                   "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
+
+                }
+              },
+              {
+                "name": "Koyu Gri",
+                "type": "color",
+                "sku": "1X2V3",
+                "value": "#495151",
+                "textureConfig": {
+                   "materialName": "texture-1",
+                   "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png"
+
+                }
+              },
+              {
+                "name": "Sarı",
+                "type": "color",
+                "sku": "1X2V3",
+                "value": "#723957",
+                "textureConfig": {
+                   "materialName": "texture-1",
+                   "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
+
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "Raylar",
+            "items": [
+              {
+                "name": "Orijinal (Çam)",
+                "type": "texture",
+                "sku": "1X2V3",
+                "value": "/assets-r2/textures/1x2V3/texture-3_baseColor.png",
+                "textureConfig": {
+                   "materialName": "texture-3.001",
+                   "baseColor": "/assets-r2/textures/1x2V3/texture-3_baseColor.png",
+                   "normal": "/assets-r2/textures/1x2V3/texture-3_normal.png",
+                   "orm": "/assets-r2/textures/1x2V3/texture-3_occlusionRoughnessMetallic.png"
+                }
+              },
+              {
+                "name": "Antrasit Gri",
+                "type": "color",
+                "sku": "1X2V3",
+                "value": "#374151",
+                "textureConfig": {
+                   "materialName": "texture-3.001",
+                   "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
+
+                }
+              },
+              {
+                "name": "Koyu Gri",
+                "type": "color",
+                "sku": "1X2V3",
+                "value": "#495151",
+                "textureConfig": {
+                   "materialName": "texture-3.001",
+                   "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png"
+
+                }
+              },
+              {
+                "name": "Sarı",
+                "type": "color",
+                "sku": "1X2V3",
+                "value": "#723957",
+                "textureConfig": {
+                   "materialName": "texture-3.001",
+                   "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
+
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "Üst Tabla",
+            "items": [
+              {
+                "name": "Orijinal (Çam)",
+                "type": "texture",
+                "sku": "1X2V3",
+                "value": "/assets-r2/textures/1x2V3/texture-2_baseColor.png",
+                "textureConfig": {
+                   "materialName": "texture-2.001",
+                   "baseColor": "/assets-r2/textures/1x2V3/texture-2_baseColor.png",
+                   "normal": "/assets-r2/textures/1x2V3/texture-2_normal.png",
+                   "orm": "/assets-r2/textures/1x2V3/texture-2_occlusionRoughnessMetallic.png"
+                }
+              },
+              {
+                "name": "Antrasit Gri",
+                "type": "color",
+                "sku": "1X2V3",
+                "value": "#374151",
+                "textureConfig": {
+                   "materialName": "texture-2.001",
+                   "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
+
+                }
+              },
+              {
+                "name": "Koyu Gri",
+                "type": "color",
+                "sku": "1X2V3",
+                "value": "#495151",
+                "textureConfig": {
+                   "materialName": "texture-2.001",
+                   "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png"
+
+                }
+              },
+              {
+                "name": "Sarı",
+                "type": "color",
+                "sku": "1X2V3",
+                "value": "#723957",
+                "textureConfig": {
+                   "materialName": "texture-2.001",
+                   "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
+
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
