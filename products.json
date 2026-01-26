@@ -2,11 +2,14 @@
   {
     "id": "cat_storage",
     "name": "Storage Systems",
+    "thumbnail": "/poster.webp",
     "products": [
       {
         "sku": "1X2V3",
         "name": "1x2 Storage Tote Rack V3",
         "price": 129.00,
+        "description": "Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.",
+        "listingUrl": "https://www.etsy.com/shop/PlanSmithCo", 
         "masterModel": "/assets-r2/models/1x2V3.glb", 
         "thumbnail": "/poster.webp",        
         
@@ -20,7 +23,7 @@
                 "sku": "1X2V3",
                 "value": "/assets-r2/textures/1x2V3/texture-1_baseColor.png",
                 "textureConfig": {
-                   "materialName": "texture-1",
+                   "materialName": "texture-1.001",
                    "baseColor": "/assets-r2/textures/1x2V3/texture-1_baseColor.png",
                    "normal": "/assets-r2/textures/1x2V3/texture-1_normal.png",
                    "orm": "/assets-r2/textures/1x2V3/texture-1_occlusionRoughnessMetallic.png"
