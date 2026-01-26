@@ -25,7 +25,7 @@
                         
             "textureConfig": [
               {
-                "materialName": "texture-1", 
+                "materialName": "texture-1.001", 
                 "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png",
                 "normal": "/assets-r2/textures/1x2V3/dikme_normal.png",
                 "orm": "/assets-r2/textures/1x2V3/dikme_occlusionRoughnessMetallic.png"
@@ -40,8 +40,8 @@
             
             "textureConfig": [
                             {
-                "materialName": "texture-1", 
-                "baseColor": "/assets-r2/textures/1x2V3/texture-1_baseColor.png",
+                "materialName": "texture-1.001", 
+                "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png",
                 "normal": "/assets-r2/textures/1x2V3/texture-1_normal.png",
                 "orm": "/assets-r2/textures/1x2V3/texture-1_occlusionRoughnessMetallic.png"
               }
@@ -56,8 +56,8 @@
             
             "textureConfig": [
                             {
-                "materialName": "texture-1", 
-                "baseColor": "/assets-r2/textures/1x2V3/texture-1_baseColor.png",
+                "materialName": "texture-1.001", 
+                "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png",
                 "normal": "/assets-r2/textures/1x2V3/texture-1_normal.png",
                 "orm": "/assets-r2/textures/1x2V3/texture-1_occlusionRoughnessMetallic.png"
               }
