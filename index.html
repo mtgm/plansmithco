@@ -312,13 +312,17 @@
 
       let allData = [];
       let selectedProduct = null;
-      let currentMasterUrl = null;
+      // currentMasterUrl değişkenini sildik, artık her seferinde taze yükleme deneyeceğiz.
 
-      fetch('products.json').then(res => res.json()).then(data => {
+      // 1. Verileri Çek
+      fetch('products.json')
+        .then(res => res.json())
+        .then(data => {
           allData = data;
           renderCategories(allData);
+          // Başlangıçta loader'ı gizle
           loader.style.opacity = '0';
-      });
+        });
 
       function renderCategories(categories) {
         categoryGrid.innerHTML = '';
@@ -339,22 +343,23 @@
           if(category.products.length > 0) selectProduct(category.products[0]);
       }
 
-      // --- GERİ DÖNÜŞ (KARARLI SÜRÜM) ---
+      // --- GERİ DÖNÜŞ (RESETLEME) ---
       window.goBackToCategories = function() {
           categoryGrid.style.display = 'grid';
           productView.style.display = 'none';
           backBtn.style.display = 'none';
           
-          // DİKKAT: "null" stringi yerine boş string kullanıyoruz. 
-          // Bu en güvenli temizleme yöntemidir.
+          // Modeli temizle
           viewer.src = ""; 
-          currentMasterUrl = null; 
           
+          // Arayüzü gizle
           controlsDock.classList.add('hidden-dock');
           defaultPoster.style.display = 'flex';
-          loader.style.opacity = '0'; // Loader'ı zorla kapat
           
-          // Açıklamayı sıfırla
+          // Loader açıksa kapat
+          loader.style.opacity = '0';
+          
+          // Açıklamayı kapat
           pDesc.classList.add('desc-collapsed');
           descBtn.classList.remove('rotate-180');
       }
@@ -382,10 +387,12 @@
       function selectProduct(product) {
           selectedProduct = product;
           
+          // UI Doldur
           document.getElementById('p-title').textContent = product.name;
           pDesc.textContent = product.description || "";
           document.getElementById('p-price').textContent = `$${product.price}`;
           
+          // Yeni ürün seçince açıklamayı kapat
           pDesc.classList.add('desc-collapsed');
           descBtn.classList.remove('rotate-180');
           
@@ -393,8 +400,10 @@
           if(product.listingUrl) { buyLink.href = product.listingUrl; buyLink.style.display = 'flex'; } 
           else { buyLink.style.display = 'none'; }
 
+          // Varyasyon Sekmelerini Kur
           setupVariantTabs(product);
 
+          // Modeli Yükle
           const masterUrl = product.masterModel ? product.masterModel : `/api/engine?sku=${product.sku}`;
           loadMasterModel(masterUrl);
       }
@@ -454,54 +463,57 @@
           });
       }
 
-      // --- KARARLI YÜKLEME MOTORU ---
+      // --- GÜVENLİ YÜKLEME MOTORU ---
       async function loadMasterModel(url) {
-          // 1. Eğer zaten aynı URL yüklüyse HİÇBİR ŞEY YAPMA (Hata riskini sıfırla)
-          if (currentMasterUrl === url) {
-              loader.style.opacity = '0';
-              defaultPoster.style.display = 'none';
-              return; 
-          }
-
-          // 2. Yeni yükleme başlıyor
           loader.style.opacity = '1';
           
+          // Posteri gizle ki loader görünsün
+          defaultPoster.style.display = 'none';
+
           try {
               let finalUrl = url;
-              // API veya R2 Link Çözümleme
+              // API linki kontrolü
               if(url.includes('/api/engine')) {
                   const res = await fetch(url);
                   const data = await res.json();
                   if(data.ok) finalUrl = data.url;
               }
 
-              // 3. Kaynağı Ata
+              // Önce src'yi ata
               viewer.src = finalUrl;
-              currentMasterUrl = url;
 
-              // 4. Yükleme bitince
-              viewer.addEventListener('load', () => {
+              // Yükleme tamamlanınca yapılacaklar
+              const onLoad = () => {
                   loader.style.opacity = '0';
+                  // Eğer model yüklendiyse posteri tamamen gizle
                   defaultPoster.style.display = 'none';
                   
-                  // Texture uygula
+                  // Texture'ları uygula
                   if(selectedProduct.variantGroups) {
                       selectedProduct.variantGroups.forEach(g => {
                           if(g.items[0].textureConfig) applyTextureConfig(g.items[0].textureConfig);
                       });
                   }
-              }, { once: true });
+              };
 
-              // 5. Hata Olursa (Fallback)
-              viewer.addEventListener('error', (e) => {
-                  console.error("Model yükleme hatası:", e);
-                  loader.style.opacity = '0'; 
-                  // Model yüklenemese bile arayüz kilitlenmesin
-              }, { once: true });
+              // 'load' olayını dinle (once: true ile sadece bir kere çalışır)
+              viewer.addEventListener('load', onLoad, { once: true });
+
+              // SİGORTA: Eğer 3 saniye içinde 'load' tetiklenmezse loader'ı zorla kapat
+              // (Bazen tarayıcı cache'den çok hızlı çeker ve event'i kaçırırız)
+              setTimeout(() => {
+                  if(loader.style.opacity === '1') {
+                      console.log("Zaman aşımı: Loader zorla kapatıldı.");
+                      loader.style.opacity = '0';
+                      // Model görünür değilse posteri aç (Hata durumu)
+                      if (!viewer.loaded) defaultPoster.style.display = 'flex';
+                  }
+              }, 3000);
 
           } catch (e) {
               console.error(e);
               loader.style.opacity = '0';
+              defaultPoster.style.display = 'flex'; // Hata olursa posteri göster
           }
       }
 
