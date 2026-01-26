@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PlanSmithCo Configurator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     
     <style>
     /* --- TASARIM SİSTEMİ --- */
@@ -52,10 +52,17 @@
     #back-btn:hover { background: #f1f5f9; }
 
     .brand-name { font-size: 18px; font-weight: 800; color: var(--primary-dark); }
+    .brand-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent-color); font-weight: 600; background: rgba(245, 158, 11, 0.1); padding: 2px 6px; border-radius: 4px; }
     .logo-box { width: 40px; height: 40px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; background: #fff; margin-left: auto; }
     .logo-box img { width: 60%; }
 
-    #content-area { flex: 1; overflow-y: auto; position: relative; padding-bottom: 20px; }
+    /* İçerik Alanı */
+    #content-area { 
+        flex: 1; 
+        overflow-y: auto; 
+        position: relative; 
+        padding-bottom: 20px; 
+    }
 
     /* Kategori Grid */
     #category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px; }
@@ -73,16 +80,30 @@
     #p-title { font-size: 22px; font-weight: 700; margin: 0 0 8px 0; line-height: 1.2; }
     
     /* AÇIKLAMA ALANI (Accordion) */
-    #desc-wrapper { position: relative; margin-bottom: 16px; }
-    #p-desc { font-size: 13px; color: #64748b; line-height: 1.5; transition: all 0.3s ease; }
-    .desc-collapsed {
-        display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
-        overflow: hidden; padding-right: 20px;
+    #desc-wrapper {
+        position: relative; margin-bottom: 16px;
     }
+    #p-desc { 
+        font-size: 13px; color: #64748b; line-height: 1.5; 
+        transition: all 0.3s ease;
+    }
+    /* Kapalı Durum (CSS Class ile kontrol edilecek) */
+    .desc-collapsed {
+        display: -webkit-box;
+        -webkit-line-clamp: 1; /* Sadece 1 satır göster */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        padding-right: 20px; /* Ok için yer aç */
+    }
+    
+    /* Açma/Kapama Oku */
     #desc-toggle-btn {
-        position: absolute; top: 0; right: 0; width: 20px; height: 20px;
-        background: none; border: none; cursor: pointer; display: none;
-        align-items: center; justify-content: center; color: var(--accent-color);
+        position: absolute; top: 0; right: 0;
+        width: 20px; height: 20px;
+        background: none; border: none; cursor: pointer;
+        display: none; /* JS ile görünür yapılacak */
+        align-items: center; justify-content: center;
+        color: var(--accent-color);
         transition: transform 0.3s;
     }
     .rotate-180 { transform: rotate(180deg); }
@@ -93,11 +114,13 @@
         background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0;
     }
     #p-price { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--primary-dark); }
+    
     .buy-btn {
         background: var(--primary-dark); color: white; text-decoration: none;
         font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 6px;
         display: flex; align-items: center; gap: 6px; transition: background 0.2s;
     }
+    .buy-btn:hover { background: #334155; }
 
     /* Alt Liste */
     #product-list { padding: 10px 16px 20px; }
@@ -106,7 +129,13 @@
         background: #fff; border: 1px solid transparent; border-radius: 8px;
         margin-bottom: 6px; cursor: pointer; transition: all 0.2s;
     }
-    .prod-item.active { background: #fff7ed; border-color: var(--accent-color); box-shadow: 0 0 0 1px var(--accent-color); }
+    .prod-item:hover { background: #f8fafc; border-color: #cbd5e1; }
+    
+    /* VURGULAMA */
+    .prod-item.active { 
+        background: #fff7ed; border-color: var(--accent-color); 
+        box-shadow: 0 0 0 1px var(--accent-color); 
+    }
     .prod-thumb { width: 44px; height: 44px; border-radius: 6px; background: #e2e8f0; object-fit: cover; }
 
     /* --- SAĞ PANEL (3D SAHNE) --- */
@@ -114,7 +143,8 @@
         flex: 1; position: relative;
         background: radial-gradient(circle at 50% 50%, #fff 0%, #f1f5f9 100%);
         border-radius: var(--radius-xl); border: 1px solid #e2e8f0;
-        overflow: hidden; display: flex; flex-direction: column; 
+        overflow: hidden; 
+        display: flex; flex-direction: column; 
     }
 
     #default-poster {
@@ -128,126 +158,106 @@
     model-viewer { width: 100%; flex: 1; --poster-color: transparent; }
     model-viewer::part(default-ar-button) { display: none; }
 
-    /* --- KONTROL PANELİ (YENİ DÜZEN) --- */
+    /* --- KONTROL PANELİ --- */
     #controls-dock {
         background: #fff; border-top: 1px solid #e2e8f0; padding: 0;
         z-index: 20; transition: transform 0.3s; display: flex; flex-direction: column;
     }
     .hidden-dock { transform: translateY(100%); display: none !important; }
 
-    /* 1. SEKMELER (Üstte İnce Şerit) */
+    /* Sekmeler */
     #tabs-container {
-        display: flex; gap: 12px; padding: 8px 16px 0 16px;
+        display: flex; gap: 12px; padding: 10px 16px 0 16px;
         overflow-x: auto; scrollbar-width: none;
         border-bottom: 1px solid #f1f5f9;
     }
+    #tabs-container::-webkit-scrollbar { display: none; }
+
     .tab-btn {
-        padding: 6px 4px; font-size: 10px; font-weight: 700; color: #94a3b8;
+        padding: 8px 4px; /* Mobilde daha kompakt */
+        font-size: 11px; font-weight: 700; color: #94a3b8;
         background: transparent; border: none; cursor: pointer;
-        text-transform: uppercase; white-space: nowrap; border-bottom: 3px solid transparent;
+        text-transform: uppercase; letter-spacing: 0.5px;
+        white-space: nowrap; border-bottom: 3px solid transparent; /* Kalın çizgi */
+        transition: all 0.2s;
     }
     .tab-btn.active { color: var(--primary-dark); border-bottom-color: var(--accent-color); }
 
-    /* 2. İÇERİK ALANI (Split Layout: Sol Varyasyonlar | Sağ AR) */
-    #dock-content {
-        display: flex; align-items: center;
-        height: 90px; /* Sabit yükseklik */
-        padding: 0 16px;
-    }
-
-    /* Sol Taraf: Kayar Liste */
+    /* Varyasyonlar */
     #active-variants-container {
-        flex: 1; /* Kalan alanı kapla */
-        display: flex; gap: 12px; 
-        overflow-x: auto; scrollbar-width: none;
-        align-items: flex-start; /* Yukarı hizala */
-        height: 100%; padding-top: 10px;
-        padding-right: 12px; /* AR butonuna yapışmasın */
+        padding: 12px 16px; display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none;
+        min-height: 76px; align-items: center;
     }
     #active-variants-container::-webkit-scrollbar { display: none; }
 
-    /* Varyasyon Kutusu (Item) */
-    .variant-item {
-        display: flex; flex-direction: column; align-items: center; gap: 4px;
-        cursor: pointer;
-    }
-    
-    /* Buton */
     .v-btn {
-        width: 44px; height: 44px; flex-shrink: 0;
+        width: 48px; height: 48px; flex-shrink: 0;
         border-radius: 10px; border: 2px solid #e2e8f0;
-        background-size: cover; background-position: center;
+        cursor: pointer; background-size: cover; background-position: center;
         transition: all 0.2s; position: relative;
     }
-    .variant-item:hover .v-btn { border-color: #cbd5e1; }
-    
-    /* Seçili Durum */
-    .variant-item.selected .v-btn {
-        border-color: var(--accent-color); transform: translateY(-2px);
-        box-shadow: 0 2px 5px rgba(245, 158, 11, 0.2);
-    }
-    /* İsim Etiketi */
-    .v-label {
-        font-size: 9px; font-weight: 600; color: #64748b;
-        text-align: center; max-width: 50px;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .variant-item.selected .v-label { color: var(--accent-color); }
-
-    /* Sağ Taraf: AR Buton Alanı (Sabit) */
-    #ar-area {
-        width: 60px; height: 70px; /* Sabit alan */
-        border-left: 1px solid #f1f5f9;
-        padding-left: 12px;
-        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-        flex-shrink: 0; /* Küçülmesin */
+    .v-btn.selected { border-color: var(--accent-color); transform: translateY(-2px); box-shadow: 0 2px 5px rgba(245, 158, 11, 0.2); }
+    .v-btn.selected::after {
+        content: ''; position: absolute; top: -4px; right: -4px;
+        width: 12px; height: 12px; background: var(--accent-color);
+        border-radius: 50%; border: 2px solid white;
     }
 
-    /* Entegre AR Butonu */
-    #dock-ar-btn {
-        width: 44px; height: 44px; border-radius: 12px;
-        background: var(--primary-dark); color: white; border: none;
-        display: flex; align-items: center; justify-content: center;
-        cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    /* AR Butonu */
+    #mobile-ar-btn {
+        position: absolute; bottom: 20px; right: 20px;
+        background: var(--primary-dark); color: white;
+        padding: 12px 20px; border-radius: 30px; border: none; 
+        box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        display: flex; align-items: center; gap: 8px;
+        cursor: pointer; z-index: 30; font-weight: 700; font-size: 12px;
         transition: transform 0.2s;
     }
-    #dock-ar-btn:active { transform: scale(0.95); }
-    #dock-ar-btn svg { width: 20px; height: 20px; fill: white; }
-    
-    .ar-label { font-size: 9px; font-weight: 800; color: var(--primary-dark); }
+    #mobile-ar-btn:active { transform: scale(0.95); }
+    #mobile-ar-btn svg { width: 18px; height: 18px; fill: white; }
 
     #loader-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.8); z-index: 5; display: flex; align-items: center; justify-content: center; pointer-events: none; transition: opacity 0.3s; }
 
-    /* --- RESPONSIVE --- */
+    /* --- RESPONSIVE KURALLAR --- */
     @media (min-width: 901px) {
-        #ar-area { display: none; } /* Masaüstünde AR yok */
+        #mobile-ar-btn { display: none !important; }
+        /* Masaüstünde açıklama açık kalsın */
         #desc-toggle-btn { display: none !important; }
         .desc-collapsed { -webkit-line-clamp: unset !important; }
     }
     
     @media (max-width: 900px) {
         #main-layout { flex-direction: column; padding: 0; gap: 0; }
+        
         #stage-wrapper { order: 1; width: 100%; height: 55vh; flex: none; border-radius: 0 0 24px 24px; border-bottom: 1px solid #e2e8f0; z-index: 5; }
+        
         #sidebar { order: 2; width: 100%; height: 45vh; flex: 1; border-radius: 0; border: none; }
         
-        .prod-thumb { width: 36px; height: 36px; }
-        .prod-item { padding: 8px; margin-bottom: 4px; }
+        /* KOMPAKT LİSTE AYARLARI */
+        .prod-thumb { width: 36px; height: 36px; } /* Küçüldü */
+        .prod-item { padding: 8px; margin-bottom: 4px; } /* Sıkılaştı */
+        .prod-info h4 { font-size: 12px; }
+        .prod-info span { font-size: 10px; }
         #product-detail-area { padding: 16px; }
-        #desc-toggle-btn { display: flex; }
-        .desc-collapsed { -webkit-line-clamp: 1; }
         
-        #controls-dock { padding-bottom: 10px; } 
+        /* AÇIKLAMA MOBİL AYARI */
+        #desc-toggle-btn { display: flex; } /* Oku göster */
+        .desc-collapsed { -webkit-line-clamp: 1; } /* 1 satır */
+        
+        #controls-dock { padding-bottom: 15px; } 
     }
     </style>
 </head>
 <body>
 
     <div id="main-layout">
+      
       <aside id="sidebar">
           <div id="brand-header">
               <button id="back-btn" onclick="goBackToCategories()">←</button>
               <div class="brand-info">
                   <div class="brand-name">PlanSmithCo.</div>
+                  <div class="brand-tag">CONFIGURATOR</div>
               </div>
               <div class="logo-box"><img src="/poster.webp"></div>
           </div>
@@ -258,12 +268,14 @@
               <div id="product-view">
                   <div id="product-detail-area">
                       <h1 id="p-title">...</h1>
+                      
                       <div id="desc-wrapper">
                           <div id="p-desc" class="desc-collapsed">...</div>
                           <button id="desc-toggle-btn" onclick="toggleDesc()">
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 9l6 6 6-6"/></svg>
                           </button>
                       </div>
+
                       <div class="action-row">
                           <div id="p-price">$0.00</div>
                           <a href="#" id="buy-link" class="buy-btn" target="_blank">
@@ -278,29 +290,33 @@
       </aside>
 
       <main id="stage-wrapper">
-          <div id="loader-overlay"><div style="font-family:'JetBrains Mono'; font-size:12px; color:#666;">YÜKLENİYOR...</div></div>
+          <div id="loader-overlay">
+             <div style="font-family:'JetBrains Mono'; font-size:12px; color:#666;">YÜKLENİYOR...</div>
+          </div>
 
           <div id="default-poster">
               <img src="/poster.webp" alt="Logo">
               <span>BİR ÜRÜN SEÇİN</span>
           </div>
 
-          <model-viewer id="mv" src="" ar ar-scale="fixed" ar-placement="floor" camera-controls disable-zoom interaction-prompt="none" environment-image="/studio.hdr" shadow-intensity="1" exposure="1.5" tone-mapping="neutral" loading="eager" poster="/poster.webp"></model-viewer>
+          <model-viewer id="mv"
+              src=""
+              ar ar-scale="fixed" ar-placement="floor"
+              camera-controls disable-zoom interaction-prompt="none"
+              environment-image="/studio.hdr" shadow-intensity="1"
+              exposure="1.5" tone-mapping="neutral"
+              loading="eager" poster="/poster.webp">
+          </model-viewer>
 
           <div id="controls-dock" class="hidden-dock">
               <div id="tabs-container"></div>
-              
-              <div id="dock-content">
-                  <div id="active-variants-container"></div>
-                  
-                  <div id="ar-area">
-                      <button id="dock-ar-btn" onclick="activateAR()">
-                          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-                      </button>
-                      <span class="ar-label">AR GÖR</span>
-                  </div>
-              </div>
+              <div id="active-variants-container"></div>
           </div>
+          
+          <button id="mobile-ar-btn" onclick="activateAR()" style="display:none;">
+              <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+              AR MODUNDA GÖR
+          </button>
 
       </main>
     </div>
@@ -315,9 +331,12 @@
       const controlsDock = document.getElementById('controls-dock');
       const tabsContainer = document.getElementById('tabs-container');
       const variantsContainer = document.getElementById('active-variants-container');
+      const mobileArBtn = document.getElementById('mobile-ar-btn');
       const loader = document.getElementById('loader-overlay');
       const backBtn = document.getElementById('back-btn');
       const defaultPoster = document.getElementById('default-poster');
+      
+      // Açıklama Toggle Elemanları
       const pDesc = document.getElementById('p-desc');
       const descBtn = document.getElementById('desc-toggle-btn');
 
@@ -325,11 +344,14 @@
       let selectedProduct = null;
       let currentMasterUrl = null;
 
-      fetch('products.json').then(res => res.json()).then(data => {
+      // 1. Verileri Çek
+      fetch('products.json')
+        .then(res => res.json())
+        .then(data => {
           allData = data;
           renderCategories(allData);
           loader.style.opacity = '0';
-      });
+        });
 
       function renderCategories(categories) {
         categoryGrid.innerHTML = '';
@@ -350,22 +372,26 @@
           if(category.products.length > 0) selectProduct(category.products[0]);
       }
 
-      // --- SIKI RESETLEME (Hata Çözümü) ---
+      // --- SIKI RESETLEME (Bug Fix) ---
       window.goBackToCategories = function() {
           categoryGrid.style.display = 'grid';
           productView.style.display = 'none';
           backBtn.style.display = 'none';
           
-          viewer.src = "null"; // Viewer'ı boşalt
-          currentMasterUrl = null; // Hafızayı sil (Önemli!)
+          // Modeli ve State'i Zorla Temizle
+          viewer.src = "null"; // Trick: String 'null' vererek viewer'ı resetle
+          currentMasterUrl = null; 
           
           controlsDock.classList.add('hidden-dock');
+          mobileArBtn.style.display = 'none';
           defaultPoster.style.display = 'flex';
           
+          // Açıklamayı kapat (Sıfırla)
           pDesc.classList.add('desc-collapsed');
           descBtn.classList.remove('rotate-180');
       }
 
+      // --- AÇIKLAMA AÇ/KAPA ---
       window.toggleDesc = function() {
           pDesc.classList.toggle('desc-collapsed');
           descBtn.classList.toggle('rotate-180');
@@ -393,18 +419,22 @@
           pDesc.textContent = product.description || "";
           document.getElementById('p-price').textContent = `$${product.price}`;
           
+          // Yeni üründe açıklama hep kapalı başlasın
           pDesc.classList.add('desc-collapsed');
           descBtn.classList.remove('rotate-180');
           
           const buyLink = document.getElementById('buy-link');
-          if(product.listingUrl) { buyLink.href = product.listingUrl; buyLink.style.display = 'flex'; } 
-          else { buyLink.style.display = 'none'; }
+          if(product.listingUrl) {
+              buyLink.href = product.listingUrl;
+              buyLink.style.display = 'flex';
+          } else {
+              buyLink.style.display = 'none';
+          }
 
           setupVariantTabs(product);
 
           const masterUrl = product.masterModel ? product.masterModel : `/api/engine?sku=${product.sku}`;
-          // Her seçimde zorla yükle komutu gönderiyoruz (3. argüman true)
-          loadMasterModel(masterUrl, true);
+          loadMasterModel(masterUrl);
       }
 
       function setupVariantTabs(product) {
@@ -428,6 +458,7 @@
                   tabsContainer.appendChild(tabBtn);
                   if (index === 0) tabBtn.click(); 
               });
+
           } else {
               controlsDock.classList.add('hidden-dock');
           }
@@ -436,46 +467,33 @@
       function renderVariantsForGroup(group) {
           variantsContainer.innerHTML = '';
           group.items.forEach((item, index) => {
-              // Kapsayıcı (Item)
-              const wrapper = document.createElement('div');
-              wrapper.className = 'variant-item';
-
-              // Buton
               const btn = document.createElement('div');
               btn.className = 'v-btn';
+              
               if(item.type === 'color') btn.style.backgroundColor = item.value;
               else btn.style.backgroundImage = `url('${item.value}')`;
 
-              // İsim Etiketi
-              const label = document.createElement('span');
-              label.className = 'v-label';
-              // İsmi parantezden temizle (Örn: "Orijinal (Çam)" -> "Orijinal")
-              // Veya direkt item.name kullanabilirsin
-              label.innerText = item.name.split('(')[0];
-
-              wrapper.onclick = () => {
-                  variantsContainer.querySelectorAll('.variant-item').forEach(b => b.classList.remove('selected'));
-                  wrapper.classList.add('selected');
+              btn.onclick = () => {
+                  variantsContainer.querySelectorAll('.v-btn').forEach(b => b.classList.remove('selected'));
+                  btn.classList.add('selected');
                   if(item.textureConfig) applyTextureConfig(item.textureConfig);
               };
 
-              if(index === 0) wrapper.classList.add('selected');
-
-              wrapper.appendChild(btn);
-              wrapper.appendChild(label);
-              variantsContainer.appendChild(wrapper);
+              if(index === 0) btn.classList.add('selected');
+              variantsContainer.appendChild(btn);
           });
       }
 
-      async function loadMasterModel(url, forceReload = false) {
-          // Eğer zorla yükle denmediyse ve url aynıysa çık
-          if (!forceReload && currentMasterUrl === url && viewer.src !== "null") {
+      async function loadMasterModel(url) {
+          // BUG FIX: Eğer aynı url olsa bile viewer boşsa (geri dönüp gelince) tekrar yükle
+          if (currentMasterUrl === url && viewer.src !== "null" && viewer.src !== "") {
               loader.style.opacity = '0';
               defaultPoster.style.display = 'none';
               return; 
           }
 
           loader.style.opacity = '1';
+          mobileArBtn.style.display = 'none';
           
           try {
               let finalUrl = url;
@@ -490,7 +508,9 @@
 
               viewer.addEventListener('load', () => {
                   loader.style.opacity = '0';
-                  defaultPoster.style.display = 'none';
+                  defaultPoster.style.display = 'none'; // Poster gizle
+                  
+                  if(window.innerWidth <= 900) mobileArBtn.style.display = 'flex';
                   
                   if(selectedProduct.variantGroups) {
                       selectedProduct.variantGroups.forEach(g => {
@@ -506,7 +526,9 @@
           }
       }
 
-      function activateAR() { if(viewer.canActivateAR) viewer.activateAR(); }
+      function activateAR() {
+          if(viewer.canActivateAR) viewer.activateAR();
+      }
 
       async function applyTextureConfig(configs) {
           if (!viewer.model) return;
