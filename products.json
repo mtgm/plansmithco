@@ -36,7 +36,7 @@
             "name": "dikme r2",
             "type": "texture",
             "sku": "1X2V2",
-            "value": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/koyu gri_baseColor.png", 
+            "value": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/koyu_gri_baseColor.png", 
             
             "textureConfig": [
                             {
@@ -52,7 +52,7 @@
             "name": "dikme r2",
             "type": "texture",
             "sku": "1X2V2",
-            "value": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/sarı plastik_baseColor.png", 
+            "value": "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev/textures/1x2V3/sari_plastik_baseColor.png", 
             
             "textureConfig": [
                             {
