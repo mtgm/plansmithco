@@ -324,13 +324,92 @@
         "price": "50",
         "variantGroups": [
           {
+            "groupName": "Vidalar",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "",
+                "textureConfig": {
+                  "materialName": "polished brass",
+                  "baseColor": ""
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "Kutu Kapak",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "",
+                "textureConfig": {
+                  "materialName": "yellow low gloss plastic",
+                  "baseColor": ""
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "Kutu",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "",
+                "textureConfig": {
+                  "materialName": "dark grey low gloss plastic",
+                  "baseColor": ""
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "Yataylar",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "",
+                "textureConfig": {
+                  "materialName": "texture",
+                  "baseColor": ""
+                }
+              }
+            ]
+          },
+          {
             "groupName": "Dikmeler",
             "items": [
               {
                 "name": "Orijinal",
-                "value": "/textures/1x2V3/texture-1_baseColor.png",
+                "value": "",
                 "textureConfig": {
-                  "baseColor": "/textures/1x2V3/texture-1_baseColor.png"
+                  "materialName": "texture-1",
+                  "baseColor": ""
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "Raylar",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "",
+                "textureConfig": {
+                  "materialName": "texture-3",
+                  "baseColor": ""
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "Üst Tabla",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "",
+                "textureConfig": {
+                  "materialName": "texture-2",
+                  "baseColor": ""
                 }
               }
             ]
