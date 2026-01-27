@@ -7,12 +7,11 @@
       {
         "sku": "1X2V3",
         "name": "1x2 Storage Tote Rack V3",
-        "price": 129.00,
+        "price": 129,
         "description": "Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.",
-        "listingUrl": "https://www.etsy.com/shop/PlanSmithCo", 
-        "masterModel": "/assets-r2/models/1x2V3.glb", 
-        "thumbnail": "/poster.webp",        
-        
+        "listingUrl": "https://www.etsy.com/shop/PlanSmithCo",
+        "masterModel": "/assets-r2/models/1x2V3.glb",
+        "thumbnail": "/poster.webp",
         "variantGroups": [
           {
             "groupName": "Dikmeler",
@@ -23,10 +22,10 @@
                 "sku": "1X2V3",
                 "value": "/assets-r2/textures/1x2V3/texture-1_baseColor.png",
                 "textureConfig": {
-                   "materialName": "texture-1.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/texture-1_baseColor.png",
-                   "normal": "/assets-r2/textures/1x2V3/texture-1_normal.png",
-                   "orm": "/assets-r2/textures/1x2V3/texture-1_occlusionRoughnessMetallic.png"
+                  "materialName": "texture-1.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/texture-1_baseColor.png",
+                  "normal": "/assets-r2/textures/1x2V3/texture-1_normal.png",
+                  "orm": "/assets-r2/textures/1x2V3/texture-1_occlusionRoughnessMetallic.png"
                 }
               },
               {
@@ -35,9 +34,8 @@
                 "sku": "1X2V3",
                 "value": "#374151",
                 "textureConfig": {
-                   "materialName": "texture-1.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
-
+                  "materialName": "texture-1.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
                 }
               },
               {
@@ -46,9 +44,8 @@
                 "sku": "1X2V3",
                 "value": "#495151",
                 "textureConfig": {
-                   "materialName": "texture-1.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png"
-
+                  "materialName": "texture-1.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png"
                 }
               },
               {
@@ -57,9 +54,8 @@
                 "sku": "1X2V3",
                 "value": "#723957",
                 "textureConfig": {
-                   "materialName": "texture-1.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
-
+                  "materialName": "texture-1.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
                 }
               }
             ]
@@ -73,10 +69,10 @@
                 "sku": "1X2V3",
                 "value": "/assets-r2/textures/1x2V3/texture-3_baseColor.png",
                 "textureConfig": {
-                   "materialName": "texture-3.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/texture-3_baseColor.png",
-                   "normal": "/assets-r2/textures/1x2V3/texture-3_normal.png",
-                   "orm": "/assets-r2/textures/1x2V3/texture-3_occlusionRoughnessMetallic.png"
+                  "materialName": "texture-3.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/texture-3_baseColor.png",
+                  "normal": "/assets-r2/textures/1x2V3/texture-3_normal.png",
+                  "orm": "/assets-r2/textures/1x2V3/texture-3_occlusionRoughnessMetallic.png"
                 }
               },
               {
@@ -85,9 +81,8 @@
                 "sku": "1X2V3",
                 "value": "#374151",
                 "textureConfig": {
-                   "materialName": "texture-3.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
-
+                  "materialName": "texture-3.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
                 }
               },
               {
@@ -96,9 +91,8 @@
                 "sku": "1X2V3",
                 "value": "#495151",
                 "textureConfig": {
-                   "materialName": "texture-3.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png"
-
+                  "materialName": "texture-3.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png"
                 }
               },
               {
@@ -107,9 +101,8 @@
                 "sku": "1X2V3",
                 "value": "#723957",
                 "textureConfig": {
-                   "materialName": "texture-3.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
-
+                  "materialName": "texture-3.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
                 }
               }
             ]
@@ -123,10 +116,10 @@
                 "sku": "1X2V3",
                 "value": "/assets-r2/textures/1x2V3/texture-2_baseColor.png",
                 "textureConfig": {
-                   "materialName": "texture-2.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/texture-2_baseColor.png",
-                   "normal": "/assets-r2/textures/1x2V3/texture-2_normal.png",
-                   "orm": "/assets-r2/textures/1x2V3/texture-2_occlusionRoughnessMetallic.png"
+                  "materialName": "texture-2.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/texture-2_baseColor.png",
+                  "normal": "/assets-r2/textures/1x2V3/texture-2_normal.png",
+                  "orm": "/assets-r2/textures/1x2V3/texture-2_occlusionRoughnessMetallic.png"
                 }
               },
               {
@@ -135,9 +128,8 @@
                 "sku": "1X2V3",
                 "value": "#374151",
                 "textureConfig": {
-                   "materialName": "texture-2.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
-
+                  "materialName": "texture-2.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
                 }
               },
               {
@@ -146,9 +138,8 @@
                 "sku": "1X2V3",
                 "value": "#495151",
                 "textureConfig": {
-                   "materialName": "texture-2.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png"
-
+                  "materialName": "texture-2.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png"
                 }
               },
               {
@@ -157,9 +148,8 @@
                 "sku": "1X2V3",
                 "value": "#723957",
                 "textureConfig": {
-                   "materialName": "texture-2.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
-
+                  "materialName": "texture-2.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
                 }
               }
             ]
@@ -169,12 +159,11 @@
       {
         "sku": "1X2V3",
         "name": "1x2 Storage Tote Rack V3",
-        "price": 129.00,
+        "price": 129,
         "description": "Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.",
-        "listingUrl": "https://www.etsy.com/shop/PlanSmithCo", 
-        "masterModel": "/assets-r2/models/1x2V3.glb", 
-        "thumbnail": "/poster.webp",        
-        
+        "listingUrl": "https://www.etsy.com/shop/PlanSmithCo",
+        "masterModel": "/assets-r2/models/1x2V3.glb",
+        "thumbnail": "/poster.webp",
         "variantGroups": [
           {
             "groupName": "Dikmeler",
@@ -185,10 +174,10 @@
                 "sku": "1X2V3",
                 "value": "/assets-r2/textures/1x2V3/texture-1_baseColor.png",
                 "textureConfig": {
-                   "materialName": "texture-1.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/texture-1_baseColor.png",
-                   "normal": "/assets-r2/textures/1x2V3/texture-1_normal.png",
-                   "orm": "/assets-r2/textures/1x2V3/texture-1_occlusionRoughnessMetallic.png"
+                  "materialName": "texture-1.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/texture-1_baseColor.png",
+                  "normal": "/assets-r2/textures/1x2V3/texture-1_normal.png",
+                  "orm": "/assets-r2/textures/1x2V3/texture-1_occlusionRoughnessMetallic.png"
                 }
               },
               {
@@ -197,9 +186,8 @@
                 "sku": "1X2V3",
                 "value": "#374151",
                 "textureConfig": {
-                   "materialName": "texture-1.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
-
+                  "materialName": "texture-1.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
                 }
               },
               {
@@ -208,9 +196,8 @@
                 "sku": "1X2V3",
                 "value": "#495151",
                 "textureConfig": {
-                   "materialName": "texture-1.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png"
-
+                  "materialName": "texture-1.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png"
                 }
               },
               {
@@ -219,9 +206,8 @@
                 "sku": "1X2V3",
                 "value": "#723957",
                 "textureConfig": {
-                   "materialName": "texture-1001",
-                   "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
-
+                  "materialName": "texture-1001",
+                  "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
                 }
               }
             ]
@@ -235,10 +221,10 @@
                 "sku": "1X2V3",
                 "value": "/assets-r2/textures/1x2V3/texture-3_baseColor.png",
                 "textureConfig": {
-                   "materialName": "texture-3.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/texture-3_baseColor.png",
-                   "normal": "/assets-r2/textures/1x2V3/texture-3_normal.png",
-                   "orm": "/assets-r2/textures/1x2V3/texture-3_occlusionRoughnessMetallic.png"
+                  "materialName": "texture-3.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/texture-3_baseColor.png",
+                  "normal": "/assets-r2/textures/1x2V3/texture-3_normal.png",
+                  "orm": "/assets-r2/textures/1x2V3/texture-3_occlusionRoughnessMetallic.png"
                 }
               },
               {
@@ -247,9 +233,8 @@
                 "sku": "1X2V3",
                 "value": "#374151",
                 "textureConfig": {
-                   "materialName": "texture-3.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
-
+                  "materialName": "texture-3.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
                 }
               },
               {
@@ -258,9 +243,8 @@
                 "sku": "1X2V3",
                 "value": "#495151",
                 "textureConfig": {
-                   "materialName": "texture-3.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png"
-
+                  "materialName": "texture-3.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png"
                 }
               },
               {
@@ -269,9 +253,8 @@
                 "sku": "1X2V3",
                 "value": "#723957",
                 "textureConfig": {
-                   "materialName": "texture-3.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
-
+                  "materialName": "texture-3.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
                 }
               }
             ]
@@ -285,10 +268,10 @@
                 "sku": "1X2V3",
                 "value": "/assets-r2/textures/1x2V3/texture-2_baseColor.png",
                 "textureConfig": {
-                   "materialName": "texture-2.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/texture-2_baseColor.png",
-                   "normal": "/assets-r2/textures/1x2V3/texture-2_normal.png",
-                   "orm": "/assets-r2/textures/1x2V3/texture-2_occlusionRoughnessMetallic.png"
+                  "materialName": "texture-2.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/texture-2_baseColor.png",
+                  "normal": "/assets-r2/textures/1x2V3/texture-2_normal.png",
+                  "orm": "/assets-r2/textures/1x2V3/texture-2_occlusionRoughnessMetallic.png"
                 }
               },
               {
@@ -297,9 +280,8 @@
                 "sku": "1X2V3",
                 "value": "#374151",
                 "textureConfig": {
-                   "materialName": "texture-2.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
-
+                  "materialName": "texture-2.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
                 }
               },
               {
@@ -308,9 +290,8 @@
                 "sku": "1X2V3",
                 "value": "#495151",
                 "textureConfig": {
-                   "materialName": "texture-2.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png"
-
+                  "materialName": "texture-2.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/koyu_gri_baseColor.png"
                 }
               },
               {
@@ -319,9 +300,8 @@
                 "sku": "1X2V3",
                 "value": "#723957",
                 "textureConfig": {
-                   "materialName": "texture-2.001",
-                   "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
-
+                  "materialName": "texture-2.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/sari_plastik_baseColor.png"
                 }
               }
             ]
@@ -329,5 +309,84 @@
         ]
       }
     ]
+  },
+  {
+    "id": "cat_1769469838259",
+    "name": "Gardeoplar",
+    "products": [
+      {
+        "name": "Ürün 1",
+        "sku": "1X2V3",
+        "price": 50,
+        "variantGroups": [
+          {
+            "groupName": "Orijinal Parçalar",
+            "items": [
+              {
+                "name": "polished brass.001",
+                "value": "/assets-r2/textures/thumb_wood.jpg",
+                "textureConfig": {
+                  "materialName": "polished brass.001",
+                  "baseColor": ""
+                }
+              },
+              {
+                "name": "yellow low gloss plastic.001",
+                "value": "/assets-r2/textures/thumb_wood.jpg",
+                "textureConfig": {
+                  "materialName": "yellow low gloss plastic.001",
+                  "baseColor": ""
+                }
+              },
+              {
+                "name": "dark grey low gloss plastic.001",
+                "value": "/assets-r2/textures/thumb_wood.jpg",
+                "textureConfig": {
+                  "materialName": "dark grey low gloss plastic.001",
+                  "baseColor": ""
+                }
+              },
+              {
+                "name": "texture.001",
+                "value": "/assets-r2/textures/thumb_wood.jpg",
+                "textureConfig": {
+                  "materialName": "texture.001",
+                  "baseColor": ""
+                }
+              },
+              {
+                "name": "texture-1.001",
+                "value": "/assets-r2/textures/thumb_wood.jpg",
+                "textureConfig": {
+                  "materialName": "texture-1.001",
+                  "baseColor": ""
+                }
+              },
+              {
+                "name": "texture-3.001",
+                "value": "/assets-r2/textures/thumb_wood.jpg",
+                "textureConfig": {
+                  "materialName": "texture-3.001",
+                  "baseColor": ""
+                }
+              },
+              {
+                "name": "texture-2.001",
+                "value": "/assets-r2/textures/thumb_wood.jpg",
+                "textureConfig": {
+                  "materialName": "texture-2.001",
+                  "baseColor": ""
+                }
+              }
+            ]
+          }
+        ],
+        "description": "Denem Ürün eklendi. güncelleme yapıldı",
+        "listingUrl": "etsy.com",
+        "masterModel": "/assets-r2/models/1x2V3.glb",
+        "thumbnail": "/poster.webp"
+      }
+    ],
+    "thumbnail": ""
   }
 ]
