@@ -312,12 +312,12 @@
   },
   {
     "id": "cat_1769469838259",
-    "name": "Deneme",
+    "name": "Gardeoplar",
     "products": [
       {
-        "name": "adsız",
+        "name": "Ürün 1",
         "sku": "1X2V3",
-        "price": 12,
+        "price": 50,
         "variantGroups": [
           {
             "groupName": "Orijinal Parçalar",
@@ -381,11 +381,12 @@
             ]
           }
         ],
-        "description": "Denem Ürün eklendi",
+        "description": "Denem Ürün eklendi. güncelleme yapıldı",
         "listingUrl": "etsy.com",
         "masterModel": "/assets-r2/models/1x2V3.glb",
         "thumbnail": "/poster.webp"
       }
-    ]
+    ],
+    "thumbnail": ""
   }
 ]
