@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlanSmithCo CMS v2</title>
+    <title>PlanSmithCo Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --sidebar-w: 280px;
-            --primary: #0f172a;
-            --accent: #f59e0b;
-            --border: #e2e8f0;
-            --bg: #f8fafc;
-            --surface: #ffffff;
-        }
+        :root { --sidebar-w: 280px; --primary: #0f172a; --accent: #f59e0b; --border: #e2e8f0; --bg: #f8fafc; --surface: #ffffff; }
         * { box-sizing: border-box; }
         body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--primary); height: 100vh; display: flex; overflow: hidden; }
         
-        /* LOGIN & LOADER */
-        #login-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.98); z-index: 100; display: flex; align-items: center; justify-content: center; }
-        .login-box { background: white; padding: 30px; border-radius: 12px; width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 50; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        /* GİRİŞ EKRANI */
+        #login-overlay { position: fixed; inset: 0; background: #0f172a; z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: white; padding: 40px; border-radius: 16px; width: 450px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .login-box h2 { margin-top: 0; color: var(--primary); font-size: 24px; text-align: center; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 5px; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; transition: 0.2s; }
+        .input-group input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1); }
+        
+        /* YÜKLENİYOR */
+        .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 50; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         
@@ -30,15 +30,15 @@
         .tree-view { flex: 1; overflow-y: auto; padding: 10px; }
         .tree-item { padding: 10px; cursor: pointer; border-radius: 6px; font-size: 13px; font-weight: 500; margin-bottom: 2px; display: flex; align-items: center; justify-content: space-between; transition: 0.1s; }
         .tree-item:hover { background: #f1f5f9; }
-        .tree-item.active { background: #eff6ff; color: #2563eb; font-weight: 700; }
-        .tree-cat { color: #94a3b8; font-size: 10px; font-weight: 800; text-transform: uppercase; margin: 20px 0 5px 10px; letter-spacing: 0.5px; }
-        .actions { padding: 15px; border-top: 1px solid var(--border); display: grid; gap: 8px; }
+        .tree-item.active { background: #eff6ff; color: #2563eb; font-weight: 700; border-left: 3px solid #2563eb; }
+        .tree-cat { color: #94a3b8; font-size: 11px; font-weight: 800; text-transform: uppercase; margin: 25px 0 5px 15px; letter-spacing: 0.5px; }
+        .actions { padding: 15px; border-top: 1px solid var(--border); display: grid; gap: 10px; }
 
         /* MAIN EDITOR */
-        main { flex: 1; padding: 30px; overflow-y: auto; display: flex; justify-content: center; }
+        main { flex: 1; padding: 30px; overflow-y: auto; display: flex; justify-content: center; background: #f8fafc; }
         .editor-container { width: 100%; max-width: 900px; background: var(--surface); padding: 30px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 50px; }
         
-        h2 { margin: 0 0 20px 0; font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        h2 { margin: 0 0 25px 0; font-size: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
         
         /* FORMS */
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
@@ -46,21 +46,24 @@
         .form-group.full { grid-column: span 2; }
         
         label { display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 6px; text-transform: uppercase; }
-        input, textarea, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 13px; transition: 0.2s; }
+        input, textarea, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 13px; transition: 0.2s; background: #fff; }
         input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); border-color: transparent; }
         
         /* BUTTONS */
         button { cursor: pointer; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; font-size: 12px; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-accent { background: var(--accent); color: white; }
-        .btn-success { background: #10b981; color: white; width: 100%; font-size: 14px; padding: 14px; }
+        .btn-primary:hover { background: #1e293b; }
+        .btn-accent { background: var(--accent); color: white; width: 100%; padding: 15px; font-size: 14px; }
+        .btn-accent:hover { background: #d97706; }
+        .btn-success { background: #10b981; color: white; width: 100%; font-size: 14px; padding: 16px; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2); }
+        .btn-success:hover { background: #059669; transform: translateY(-1px); }
         .btn-outline { background: white; border: 1px solid var(--border); color: #475569; }
+        .btn-outline:hover { border-color: #94a3b8; background: #f8fafc; }
         .btn-danger { background: #fee2e2; color: #ef4444; padding: 4px 8px; font-size: 10px; }
         
         /* VARYASYONLAR */
         .variant-section { background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-top: 30px; }
         .v-group { background: white; padding: 15px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 15px; }
-        .v-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
         .v-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
         .v-item { border: 1px solid var(--border); padding: 10px; border-radius: 6px; font-size: 11px; background: #fafafa; }
         .v-item input, .v-item select { margin-bottom: 6px; font-size: 11px; padding: 6px; background: white; }
@@ -72,35 +75,63 @@
 
     <div id="login-overlay">
         <div class="login-box">
-            <h2>🔐 CMS Giriş</h2>
-            <div class="form-group"><label>GitHub Token</label><input type="password" id="gh-token"></div>
-            <div class="form-group"><label>Kullanıcı (Owner)</label><input type="text" id="gh-owner" placeholder="PlanSmithCo"></div>
-            <div class="form-group"><label>Repo</label><input type="text" id="gh-repo" placeholder="showroom"></div>
-            <div class="form-group"><label>Branch</label><input type="text" id="gh-branch" value="main"></div>
-            <div class="form-group"><label>Dosya Yolu</label><input type="text" id="gh-path" value="products.json"></div>
-            <button class="btn-accent" style="width:100%" onclick="login()">BAĞLAN</button>
+            <h2>PlanSmithCo CMS</h2>
+            
+            <div class="input-group">
+                <label>GitHub Token (ghp_...)</label>
+                <input type="password" id="gh-token" placeholder="Token yapıştır...">
+            </div>
+            
+            <div class="form-grid" style="margin-bottom:0;">
+                <div class="input-group">
+                    <label>Kullanıcı (Owner)</label>
+                    <input type="text" id="gh-owner" value="mtgm">
+                </div>
+                <div class="input-group">
+                    <label>Repo</label>
+                    <input type="text" id="gh-repo" value="plansmithco">
+                </div>
+            </div>
+
+            <div class="form-grid" style="margin-bottom:15px;">
+                <div class="input-group">
+                    <label>Branch (Dal)</label>
+                    <input type="text" id="gh-branch" value="v2-showroom">
+                </div>
+                <div class="input-group">
+                    <label>Dosya Yolu</label>
+                    <input type="text" id="gh-path" value="products.json">
+                </div>
+            </div>
+
+            <button class="btn-accent" onclick="login()">BAĞLAN VE DÜZENLE</button>
         </div>
     </div>
 
-    <div id="loader" class="loading-overlay"><div class="spinner"></div></div>
+    <div id="loader" class="loading-overlay">
+        <div style="text-align:center;">
+            <div class="spinner" style="margin:0 auto 20px auto;"></div>
+            <div style="font-weight:600; color:#475569;">Veriler GitHub'dan çekiliyor...</div>
+        </div>
+    </div>
 
     <aside>
-        <div class="brand">PlanSmithCo. <span>v2.0</span></div>
+        <div class="brand">PlanSmithCo. <span>ADMIN</span></div>
         <div class="tree-view" id="product-tree"></div>
         <div class="actions">
-            <button class="btn-outline" onclick="addNewProduct()">+ Yeni Ürün</button>
-            <button class="btn-outline" onclick="addNewCategory()">+ Yeni Kategori</button>
-            <button class="btn-primary" onclick="logout()">Çıkış Yap</button>
+            <button class="btn-outline" onclick="addNewProduct()">+ Yeni Ürün Ekle</button>
+            <button class="btn-outline" onclick="addNewCategory()">+ Yeni Kategori Ekle</button>
+            <button class="btn-primary" onclick="logout()">Güvenli Çıkış</button>
         </div>
     </aside>
 
     <main>
         <div class="editor-container hidden" id="editor">
-            <h2>Ürün Düzenle</h2>
+            <h2>Ürün Düzenle <span style="font-size:12px; font-weight:400; color:#94a3b8;">Otomatik kaydedilmez, butona basmalısın.</span></h2>
             
             <div class="form-grid">
                 <div class="form-group full" style="background:#fff7ed; padding:15px; border:1px solid #ffedd5; border-radius:8px;">
-                    <label style="color:#d97706;">📂 KATEGORİ</label>
+                    <label style="color:#d97706;">📂 KATEGORİSİ</label>
                     <select id="inp-category" onchange="moveProductCategory()"></select>
                 </div>
 
@@ -109,7 +140,7 @@
                     <input type="text" id="inp-name">
                 </div>
                 <div class="form-group">
-                    <label>SKU</label>
+                    <label>SKU (Stok Kodu)</label>
                     <input type="text" id="inp-sku">
                 </div>
                 <div class="form-group">
@@ -117,38 +148,38 @@
                     <input type="number" id="inp-price">
                 </div>
                 <div class="form-group">
-                    <label>Poster Resmi</label>
-                    <input type="text" id="inp-thumb" list="image-history" placeholder="/poster.webp">
+                    <label>Poster Resmi URL</label>
+                    <input type="text" id="inp-thumb" list="image-history">
                 </div>
                 <div class="form-group full">
                     <label>Açıklama</label>
                     <textarea id="inp-desc" rows="3"></textarea>
                 </div>
                 <div class="form-group full">
-                    <label>Etsy Linki</label>
+                    <label>Etsy Satış Linki</label>
                     <input type="text" id="inp-link">
                 </div>
                 <div class="form-group full">
-                    <label>Master Model (.glb)</label>
+                    <label>Master Model Dosyası (.glb)</label>
                     <input type="text" id="inp-model" list="model-history" placeholder="/assets-r2/models/...">
                 </div>
             </div>
 
             <div class="variant-section">
                 <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center;">
-                    <label style="margin:0;">VARYASYON GRUPLARI</label>
+                    <label style="margin:0; font-size:13px;">RENK / DOKU GRUPLARI</label>
                     <button class="btn-outline btn-small" onclick="addVariantGroup()">+ Grup Ekle</button>
                 </div>
                 <div id="variant-groups-container"></div>
             </div>
 
             <div style="margin-top:30px; padding-top:20px; border-top:1px solid #e2e8f0;">
-                <button class="btn-success" onclick="saveToGithub()">💾 DEĞİŞİKLİKLERİ KAYDET</button>
+                <button class="btn-success" onclick="saveToGithub()">💾 TÜM DEĞİŞİKLİKLERİ GITHUB'A YAZ (YAYINLA)</button>
             </div>
         </div>
         
-        <div id="empty-state" style="display:flex; justify-content:center; align-items:center; height:100%; color:#cbd5e1; font-size:20px;">
-            👈 Soldan bir ürün seçin
+        <div id="empty-state" style="display:flex; justify-content:center; align-items:center; height:100%; color:#cbd5e1; font-size:18px; font-weight:600;">
+            👈 Sol menüden düzenlemek istediğin ürünü seç.
         </div>
     </main>
 
@@ -157,67 +188,94 @@
     <datalist id="texture-history"></datalist>
 
     <script>
-        // --- SIK KULLANILAN TEXTURE PRESETLERİ (Burası manuel tanımlanır) ---
+        // --- TEXTURE PRESETS ---
         const TEXTURE_PRESETS = [
             { name: "Çam (Pine)", url: "/assets-r2/textures/1x2V3/dikme_baseColor.png" },
             { name: "Antrasit", url: "/assets-r2/textures/1x2V3/dark_grey_base.png" },
             { name: "Sarı Plastik", url: "/assets-r2/textures/1x2V3/yellow_plastic_base.png" },
             { name: "Siyah Plastik", url: "/assets-r2/textures/1x2V3/black_plastic_base.png" },
-            // Buraya kendi R2 linklerini ekleyebilirsin
         ];
 
         let allData = [];
         let currentCatIndex = -1;
         let currentProdIndex = -1;
         
-        // GH Config
         let GH_TOKEN="", GH_OWNER="", GH_REPO="", GH_BRANCH="", GH_PATH="", FILE_SHA="";
 
-        // 1. GİRİŞ
+        // 1. BAŞLANGIÇ
         window.onload = () => {
+            // Token varsa doldur, yoksa senin varsayılanların zaten HTML'de value="" içinde yazılı
             if(localStorage.getItem('gh_token')) {
-                ['token','owner','repo','branch','path'].forEach(k => 
-                    document.getElementById('gh-'+k).value = localStorage.getItem('gh_'+k) || '');
+                document.getElementById('gh-token').value = localStorage.getItem('gh_token');
+                // Kullanıcı daha önce girdiyse onları getir, yoksa defaultlar kalır
+                if(localStorage.getItem('gh_owner')) document.getElementById('gh-owner').value = localStorage.getItem('gh_owner');
+                if(localStorage.getItem('gh_repo')) document.getElementById('gh-repo').value = localStorage.getItem('gh_repo');
+                if(localStorage.getItem('gh_branch')) document.getElementById('gh-branch').value = localStorage.getItem('gh_branch');
             }
         };
 
         async function login() {
-            ['token','owner','repo','branch','path'].forEach(k => {
-                const val = document.getElementById('gh-'+k).value;
-                window['GH_'+k.toUpperCase()] = val;
-                localStorage.setItem('gh_'+k, val);
-            });
+            // Verileri Al
+            GH_TOKEN = document.getElementById('gh-token').value.trim();
+            GH_OWNER = document.getElementById('gh-owner').value.trim();
+            GH_REPO = document.getElementById('gh-repo').value.trim();
+            GH_BRANCH = document.getElementById('gh-branch').value.trim();
+            GH_PATH = document.getElementById('gh-path').value.trim();
+
+            if(!GH_TOKEN) { alert("Token girmelisin!"); return; }
+
+            // Kaydet
+            localStorage.setItem('gh_token', GH_TOKEN);
+            localStorage.setItem('gh_owner', GH_OWNER);
+            localStorage.setItem('gh_repo', GH_REPO);
+            localStorage.setItem('gh_branch', GH_BRANCH);
 
             document.getElementById('loader').style.display = 'flex';
+            
             try {
                 await fetchFromGithub();
                 document.getElementById('login-overlay').style.display = 'none';
                 renderTree();
-                populateHistory(); // Akıllı listeleri doldur
-            } catch (e) { alert(e.message); } 
-            finally { document.getElementById('loader').style.display = 'none'; }
+                populateHistory(); 
+            } catch (e) { 
+                alert("BAĞLANTI BAŞARISIZ!\n\n" + e.message); 
+            } finally { 
+                document.getElementById('loader').style.display = 'none'; 
+            }
         }
 
         function logout() { localStorage.clear(); location.reload(); }
 
-        // 2. GITHUB IO
+        // 2. GITHUB BAĞLANTISI (Test Kodundaki Aynısı)
         async function fetchFromGithub() {
             const url = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}?ref=${GH_BRANCH}`;
             const res = await fetch(url, { headers: { 'Authorization': `token ${GH_TOKEN}` } });
-            if(!res.ok) throw new Error("GitHub Bağlantı Hatası! Bilgileri kontrol et.");
+            
+            if(!res.ok) {
+                if(res.status === 404) throw new Error("Dosya bulunamadı! Branch ismini kontrol et (v2-showroom mu?).");
+                if(res.status === 401) throw new Error("Token geçersiz.");
+                throw new Error("Hata Kodu: " + res.status);
+            }
+            
             const data = await res.json();
             FILE_SHA = data.sha;
-            allData = JSON.parse(decodeURIComponent(escape(window.atob(data.content))));
+            
+            // Türkçe karakter korumalı decode
+            try {
+                allData = JSON.parse(decodeURIComponent(escape(window.atob(data.content))));
+            } catch(e) {
+                throw new Error("JSON formatı bozuk: " + e.message);
+            }
         }
 
         async function saveToGithub() {
-            if(!confirm("Site güncellenecek. Onaylıyor musun?")) return;
-            if(currentProdIndex > -1) saveFormToMemory(); // Son hali kaydet
+            if(!confirm(`Değişiklikler '${GH_BRANCH}' dalına kaydedilecek. Emin misin?`)) return;
+            if(currentProdIndex > -1) saveFormToMemory(); 
 
             document.getElementById('loader').style.display = 'flex';
             try {
                 const content = window.btoa(unescape(encodeURIComponent(JSON.stringify(allData, null, 2))));
-                const body = { message: "CMS Update", content, sha: FILE_SHA, branch: GH_BRANCH };
+                const body = { message: "CMS Update via Admin Panel", content, sha: FILE_SHA, branch: GH_BRANCH };
                 
                 const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`, {
                     method: 'PUT',
@@ -225,34 +283,31 @@
                     body: JSON.stringify(body)
                 });
                 
-                if(!res.ok) throw new Error("Kaydetme Başarısız");
+                if(!res.ok) throw new Error("Kaydetme Başarısız: " + res.statusText);
                 const data = await res.json();
-                FILE_SHA = data.content.sha;
-                alert("✅ Başarılı! Site 1-2 dk içinde güncellenir.");
+                FILE_SHA = data.content.sha; // Yeni SHA'yı al (üst üste kayıt için)
+                alert("✅ BAŞARILI! Web siten 1-2 dakika içinde güncellenecek.");
             } catch (e) { alert(e.message); }
             finally { document.getElementById('loader').style.display = 'none'; }
         }
 
-        // 3. UI & LOGIC
+        // 3. ARAYÜZ İŞLEMLERİ
         function renderTree() {
             const tree = document.getElementById('product-tree');
             tree.innerHTML = '';
             
-            // Kategori Dropdown'ını da doldur (Formdaki)
             const catSelect = document.getElementById('inp-category');
             catSelect.innerHTML = '';
 
             allData.forEach((cat, cIdx) => {
-                // Dropdown için seçenek
                 const option = document.createElement('option');
                 option.value = cIdx;
                 option.text = cat.name;
                 catSelect.appendChild(option);
 
-                // Sidebar Ağacı
                 const catTitle = document.createElement('div');
                 catTitle.className = 'tree-cat';
-                catTitle.innerHTML = `${cat.name} <button class="btn-danger" style="float:right" onclick="removeCategory(${cIdx})">x</button>`;
+                catTitle.innerHTML = `${cat.name} <button class="btn-danger" style="float:right; opacity:0.5;" onclick="removeCategory(${cIdx})">SİL</button>`;
                 tree.appendChild(catTitle);
 
                 cat.products.forEach((prod, pIdx) => {
@@ -266,8 +321,7 @@
         }
 
         function loadProduct(cIdx, pIdx) {
-            if(currentProdIndex > -1) saveFormToMemory(); // Eskiyi kaydet
-            
+            if(currentProdIndex > -1) saveFormToMemory();
             currentCatIndex = cIdx;
             currentProdIndex = pIdx;
             const prod = allData[cIdx].products[pIdx];
@@ -276,8 +330,7 @@
             document.getElementById('editor').classList.remove('hidden');
             renderTree();
 
-            // Form Doldur
-            document.getElementById('inp-category').value = cIdx; // Kategori Seçimi
+            document.getElementById('inp-category').value = cIdx;
             document.getElementById('inp-name').value = prod.name || '';
             document.getElementById('inp-sku').value = prod.sku || '';
             document.getElementById('inp-price').value = prod.price || 0;
@@ -302,30 +355,19 @@
             prod.thumbnail = document.getElementById('inp-thumb').value;
         }
 
-        // --- KATEGORİ DEĞİŞTİRME MANTIĞI ---
         window.moveProductCategory = function() {
             const newCatIdx = parseInt(document.getElementById('inp-category').value);
-            if(newCatIdx === currentCatIndex) return; // Değişiklik yok
+            if(newCatIdx === currentCatIndex) return;
 
-            // Mevcut veriyi al
             saveFormToMemory();
             const productData = allData[currentCatIndex].products[currentProdIndex];
-
-            // Eskiden sil
             allData[currentCatIndex].products.splice(currentProdIndex, 1);
-
-            // Yeniye ekle
             allData[newCatIdx].products.push(productData);
-
-            // Yeni indeksi ayarla ve yeniden yükle
             currentCatIndex = newCatIdx;
             currentProdIndex = allData[newCatIdx].products.length - 1;
-            
             renderTree();
-            // loadProduct çağırmıyoruz çünkü zaten formdaki veri hafızada
         }
 
-        // --- VARYASYONLAR ---
         function renderVariantGroups(groups) {
             const container = document.getElementById('variant-groups-container');
             container.innerHTML = '';
@@ -335,11 +377,11 @@
                 gDiv.className = 'v-group';
                 gDiv.innerHTML = `
                     <div class="v-header">
-                        <input type="text" value="${group.groupName}" oninput="updateGroupName(${gIdx}, this.value)" style="width:200px; font-weight:bold;">
+                        <input type="text" value="${group.groupName}" oninput="updateGroupName(${gIdx}, this.value)" style="width:200px; font-weight:bold; border:none; border-bottom:1px solid #ccc; border-radius:0; padding:0;">
                         <button class="btn-danger" onclick="removeGroup(${gIdx})">Grubu Sil</button>
                     </div>
                     <div class="v-items" id="v-items-${gIdx}"></div>
-                    <button class="btn-outline btn-small" style="width:100%; margin-top:8px;" onclick="addVariantItem(${gIdx})">+ Seçenek Ekle</button>
+                    <button class="btn-outline btn-small" style="width:100%; margin-top:8px;" onclick="addVariantItem(${gIdx})">+ Yeni Seçenek Ekle</button>
                 `;
                 container.appendChild(gDiv);
 
@@ -348,58 +390,58 @@
                     const iDiv = document.createElement('div');
                     iDiv.className = 'v-item';
                     
-                    // PRESET SEÇİMİ (Texture)
-                    let presetOptions = `<option value="">Hazır Listeden Seç...</option>`;
+                    let presetOptions = `<option value="">Hızlı Doku Seç...</option>`;
                     TEXTURE_PRESETS.forEach(p => {
                         presetOptions += `<option value="${p.url}">${p.name}</option>`;
                     });
 
+                    // Safe Access
+                    const matName = (item.textureConfig && item.textureConfig.materialName) ? item.textureConfig.materialName : '';
+                    const baseCol = (item.textureConfig && item.textureConfig.baseColor) ? item.textureConfig.baseColor : '';
+
                     iDiv.innerHTML = `
                         <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                            <span style="font-weight:700; color:#cbd5e1;">#${iIdx+1}</span>
-                            <button class="btn-danger" style="padding:0 4px;" onclick="removeItem(${gIdx}, ${iIdx})">x</button>
+                            <span style="font-weight:700; color:#94a3b8;">#${iIdx+1}</span>
+                            <button class="btn-danger" style="padding:0 4px;" onclick="removeItem(${gIdx}, ${iIdx})">Sil</button>
                         </div>
-                        <label>Ad</label>
+                        <label>Görünen İsim</label>
                         <input type="text" value="${item.name}" oninput="updateItem(${gIdx}, ${iIdx}, 'name', this.value)">
                         
-                        <label>Buton Görseli/Renk</label>
+                        <label>Buton Resmi/Rengi</label>
                         <input type="text" value="${item.value}" list="texture-history" oninput="updateItem(${gIdx}, ${iIdx}, 'value', this.value)">
                         
-                        <label>3D Malzeme Adı</label>
-                        <input type="text" value="${item.textureConfig?.materialName || ''}" oninput="updateItemConfig(${gIdx}, ${iIdx}, 'materialName', this.value)">
+                        <label>3D Malzeme ID</label>
+                        <input type="text" value="${matName}" oninput="updateItemConfig(${gIdx}, ${iIdx}, 'materialName', this.value)">
                         
                         <label>Doku (BaseColor)</label>
-                        <select onchange="updateItemConfig(${gIdx}, ${iIdx}, 'baseColor', this.value); this.previousElementSibling.value=this.value;" style="margin-bottom:5px;">
+                        <select onchange="updateItemConfig(${gIdx}, ${iIdx}, 'baseColor', this.value); this.nextElementSibling.value=this.value;" style="margin-bottom:5px;">
                             ${presetOptions}
                         </select>
-                        <input type="text" placeholder="Veya manuel link..." value="${item.textureConfig?.baseColor || ''}" list="texture-history" oninput="updateItemConfig(${gIdx}, ${iIdx}, 'baseColor', this.value)">
+                        <input type="text" placeholder="Manuel link..." value="${baseCol}" list="texture-history" oninput="updateItemConfig(${gIdx}, ${iIdx}, 'baseColor', this.value)">
                     `;
                     itemsDiv.appendChild(iDiv);
                 });
             });
         }
 
-        // --- AKILLI GEÇMİŞ (SMART HISTORY) ---
         function populateHistory() {
             const images = new Set();
             const models = new Set();
             const textures = new Set();
-
-            // JSON'daki tüm linkleri tara
             allData.forEach(cat => {
                 cat.products.forEach(p => {
                     if(p.thumbnail) images.add(p.thumbnail);
                     if(p.masterModel) models.add(p.masterModel);
-                    p.variantGroups?.forEach(g => {
-                        g.items.forEach(i => {
-                            if(i.value && i.value.includes('/')) textures.add(i.value);
-                            if(i.textureConfig?.baseColor) textures.add(i.textureConfig.baseColor);
+                    if(p.variantGroups) {
+                        p.variantGroups.forEach(g => {
+                            g.items.forEach(i => {
+                                if(i.value && i.value.includes('/')) textures.add(i.value);
+                                if(i.textureConfig && i.textureConfig.baseColor) textures.add(i.textureConfig.baseColor);
+                            });
                         });
-                    });
+                    }
                 });
             });
-
-            // Datalistleri doldur
             fillDatalist('image-history', images);
             fillDatalist('model-history', models);
             fillDatalist('texture-history', textures);
@@ -407,15 +449,17 @@
 
         function fillDatalist(id, set) {
             const dl = document.getElementById(id);
-            dl.innerHTML = '';
-            set.forEach(val => {
-                const opt = document.createElement('option');
-                opt.value = val;
-                dl.appendChild(opt);
-            });
+            if(dl) {
+                dl.innerHTML = '';
+                set.forEach(val => {
+                    const opt = document.createElement('option');
+                    opt.value = val;
+                    dl.appendChild(opt);
+                });
+            }
         }
 
-        // --- CRUD HELPERS ---
+        // --- VERİ GÜNCELLEME YARDIMCILARI ---
         window.updateGroupName = (gIdx, val) => { allData[currentCatIndex].products[currentProdIndex].variantGroups[gIdx].groupName = val; }
         window.updateItem = (gIdx, iIdx, key, val) => { allData[currentCatIndex].products[currentProdIndex].variantGroups[gIdx].items[iIdx][key] = val; }
         window.updateItemConfig = (gIdx, iIdx, key, val) => {
@@ -434,13 +478,12 @@
             prod.variantGroups[gIdx].items.push({ name: "Yeni", type: "texture", value: "", textureConfig: {} });
             renderVariantGroups(prod.variantGroups);
         }
-        window.removeGroup = (gIdx) => { if(confirm("Sil?")) { allData[currentCatIndex].products[currentProdIndex].variantGroups.splice(gIdx, 1); renderVariantGroups(allData[currentCatIndex].products[currentProdIndex].variantGroups); }}
+        window.removeGroup = (gIdx) => { if(confirm("Bu grubu silmek istediğine emin misin?")) { allData[currentCatIndex].products[currentProdIndex].variantGroups.splice(gIdx, 1); renderVariantGroups(allData[currentCatIndex].products[currentProdIndex].variantGroups); }}
         window.removeItem = (gIdx, iIdx) => { allData[currentCatIndex].products[currentProdIndex].variantGroups[gIdx].items.splice(iIdx, 1); renderVariantGroups(allData[currentCatIndex].products[currentProdIndex].variantGroups); }
         
         window.addNewProduct = () => {
-            if(currentCatIndex === -1) currentCatIndex = 0; // Kategori seçili değilse ilkine ekle
+            if(currentCatIndex === -1) currentCatIndex = 0; 
             if(allData.length === 0) { alert("Önce kategori oluştur!"); return; }
-            
             const newProd = { name: "Yeni Ürün", sku: "NEW", price: 0, variantGroups: [] };
             allData[currentCatIndex].products.push(newProd);
             renderTree();
@@ -450,7 +493,7 @@
             const name = prompt("Kategori Adı:");
             if(name) { allData.push({ id: "cat_"+Date.now(), name: name, products: [] }); renderTree(); }
         }
-        window.removeCategory = (idx) => { if(confirm("Emin misin?")) { allData.splice(idx, 1); renderTree(); document.getElementById('editor').classList.add('hidden'); }}
+        window.removeCategory = (idx) => { if(confirm("Kategoriyi ve içindeki ürünleri silmek istediğine emin misin?")) { allData.splice(idx, 1); renderTree(); document.getElementById('editor').classList.add('hidden'); }}
     </script>
 </body>
 </html>

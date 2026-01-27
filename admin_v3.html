@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>PlanSmithCo Panel v5.1 (Stable & Fixed)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+    <style>
+        :root { --sidebar-w: 280px; --primary: #0f172a; --accent: #f59e0b; --border: #e2e8f0; --bg: #f8fafc; --surface: #ffffff; }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--primary); height: 100vh; display: flex; overflow: hidden; }
+        
+        /* GİRİŞ EKRANI */
+        #login-overlay { position: fixed; inset: 0; background: #0f172a; z-index: 999; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; width: 450px; }
+        .input-group { margin-bottom: 15px; } 
+        .input-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #64748b; }
+        .input-group input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
+        
+        /* LOADER */
+        #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 50; display: none; align-items: center; justify-content: center; flex-direction: column; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* LAYOUT */
+        aside { width: var(--sidebar-w); background: white; border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+        .brand { padding: 20px; font-weight: 800; font-size: 18px; border-bottom: 1px solid var(--border); }
+        .tree-view { flex: 1; overflow-y: auto; padding: 10px; }
+        .actions { padding: 15px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+
+        main { flex: 1; display: flex; overflow: hidden; }
+        .editor-area { flex: 1; padding: 30px; overflow-y: auto; }
+        .tools-area { width: 340px; background: #fff; border-left: 1px solid var(--border); padding: 20px; overflow-y: auto; flex-shrink: 0; }
+
+        /* TREE ITEMS */
+        .tree-cat { font-size: 11px; font-weight: 800; color: #94a3b8; margin: 15px 0 5px 10px; text-transform: uppercase; cursor: pointer; }
+        .tree-item { padding: 8px 10px; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 6px; margin-left: 10px; }
+        .tree-item:hover { background: #f1f5f9; }
+        .tree-item.active { background: #eff6ff; color: #2563eb; font-weight: 700; }
+
+        /* FORMS */
+        .card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .full { grid-column: span 2; }
+        label { display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 5px; text-transform: uppercase; }
+        input, textarea, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: inherit; }
+        input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+        input.listening { background: #dcfce7; border-color: #10b981; transition: 0.3s; }
+
+        /* BUTTONS */
+        .btn { padding: 10px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-accent { background: var(--accent); color: white; width: 100%; padding: 14px; font-size: 14px; }
+        .btn-success { background: #10b981; color: white; width: 100%; padding: 15px; font-size: 14px; margin-top: 10px; }
+        .btn-danger { background: #fee2e2; color: #ef4444; }
+        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #475569; }
+
+        /* VARYASYONLAR */
+        .v-group { background: #f8fafc; border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+        .v-item { background: white; border: 1px solid var(--border); padding: 10px; border-radius: 6px; margin-bottom: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .v-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+
+        /* TOOLS */
+        .drop-zone { border: 2px dashed #cbd5e1; padding: 20px; text-align: center; border-radius: 8px; color: #64748b; font-size: 12px; cursor: pointer; background: #f8fafc; margin-bottom: 10px; }
+        .drop-zone:hover { border-color: var(--accent); background: #fff7ed; }
+        #inspector-viewer { width: 100%; height: 250px; background: #eee; border-radius: 8px; }
+        .mat-item { padding: 10px; border-bottom: 1px solid #eee; font-size: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background:white; }
+        .mat-item:hover { background: #eff6ff; color: #2563eb; font-weight:bold; }
+        .mat-item span { font-size:10px; color:#94a3b8; background:#f1f5f9; padding:2px 6px; border-radius:4px; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="margin-top:0; text-align:center;">PlanSmithCo Panel v5.1</h2>
+            <div class="input-group">
+                <label>GitHub Token</label>
+                <input type="password" id="gh-token" placeholder="ghp_...">
+            </div>
+            <div class="form-grid" style="margin-bottom:0;">
+                <div class="input-group"><label>User</label><input type="text" id="gh-owner" value="mtgm"></div>
+                <div class="input-group"><label>Repo</label><input type="text" id="gh-repo" value="plansmithco"></div>
+            </div>
+            <div class="form-grid">
+                <div class="input-group"><label>Branch</label><input type="text" id="gh-branch" value="v2-showroom"></div>
+                <div class="input-group"><label>Dosya</label><input type="text" id="gh-path" value="products.json"></div>
+            </div>
+            <button class="btn btn-accent" onclick="startLogin()">BAĞLAN</button>
+        </div>
+    </div>
+
+    <div id="loader"><div class="spinner"></div><p style="margin-top:10px; font-weight:600; color:#64748b;">GitHub ile konuşuluyor...</p></div>
+
+    <aside>
+        <div class="brand">PlanSmithCo.</div>
+        <div class="tree-view" id="tree-root"></div>
+        <div class="actions">
+            <button class="btn btn-primary" onclick="createNewProduct()">+ YENİ ÜRÜN</button>
+            <button class="btn btn-outline" onclick="createNewCategory()">+ YENİ KATEGORİ</button>
+            <button class="btn btn-danger" onclick="doLogout()">ÇIKIŞ</button>
+        </div>
+    </aside>
+
+    <main>
+        <div class="editor-area">
+            <div id="empty-state" style="text-align:center; color:#cbd5e1; margin-top:100px;">
+                <h1>👈</h1>
+                <p>Soldan bir ürün veya kategori seç.</p>
+            </div>
+
+            <div id="product-form" class="hidden">
+                <div class="card">
+                    <h2 style="margin-top:0;">Ürün Düzenle</h2>
+                    <div class="form-grid">
+                        <div class="full">
+                            <label>Kategori</label>
+                            <select id="p-cat" onchange="moveCategory()"></select>
+                        </div>
+                        <div><label>Ürün Adı</label><input id="p-name"></div>
+                        <div><label>SKU</label><input id="p-sku"></div>
+                        <div><label>Fiyat ($)</label><input type="number" id="p-price"></div>
+                        <div><label>Poster URL</label><input id="p-thumb" list="dl-img"></div>
+                        <div class="full"><label>Açıklama</label><textarea id="p-desc" rows="3"></textarea></div>
+                        <div class="full"><label>Etsy Linki</label><input id="p-link"></div>
+                        <div class="full"><label>Model URL (.glb)</label><input id="p-model" list="dl-glb"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3 style="margin:0; font-size:14px;">Varyasyonlar (Parçalar)</h3>
+                        <button class="btn btn-outline" onclick="addVariantGroup()">+ Grup Ekle</button>
+                    </div>
+                    <div id="variant-container"></div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between;">
+                    <button class="btn btn-danger" onclick="deleteProduct()">BU ÜRÜNÜ SİL</button>
+                    <button class="btn btn-success" onclick="saveToGithub()">💾 KAYDET VE YAYINLA</button>
+                </div>
+            </div>
+
+            <div id="category-form" class="hidden">
+                <div class="card">
+                    <h2 style="margin-top:0;">Kategori Düzenle</h2>
+                    <label>Kategori Adı</label>
+                    <input id="c-name" style="margin-bottom:15px;">
+                    <label>Kategori Resmi</label>
+                    <input id="c-thumb" list="dl-img">
+                    
+                    <div style="margin-top:20px; display:flex; justify-content:space-between;">
+                        <button class="btn btn-danger" onclick="deleteCategory()">KATEGORİYİ SİL</button>
+                        <button class="btn btn-primary" onclick="saveCategoryLocal()">Değişiklikleri Uygula</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tools-area">
+            <h3 style="font-size:14px; margin-top:0;">🛠️ Araçlar</h3>
+            
+            <div style="background:#f0f9ff; border:1px solid #bae6fd; padding:10px; border-radius:8px; margin-bottom:20px;">
+                <label style="color:#0284c7;">GLB Dedektifi (Malzeme Bulucu)</label>
+                <div class="drop-zone" id="drop-zone">.glb Dosyasını Buraya Sürükle</div>
+                <input type="file" id="file-input" hidden accept=".glb">
+                
+                <button id="btn-auto-capture" class="btn btn-primary hidden" style="width:100%; margin-top:5px; font-size:11px;" onclick="autoFillOriginal()">
+                    ✨ TÜMÜNÜ "ORİJİNAL" OLARAK EKLE
+                </button>
+                <p style="font-size:10px; color:#64748b;">Not: Listeye tıklayınca modelde parlar.</p>
+                
+                <div id="mat-list" style="margin-top:10px; max-height:200px; overflow-y:auto; border-top:1px solid #e2e8f0;"></div>
+                <model-viewer id="inspector-viewer" camera-controls auto-rotate></model-viewer>
+            </div>
+
+            <div style="background:#fff; border:1px solid #e2e8f0; padding:10px; border-radius:8px;">
+                <label>Varlık Havuzu</label>
+                <textarea id="asset-pool" style="width:100%; height:150px; font-size:10px;" placeholder="R2 dosya listesini buraya yapıştır..." oninput="parseAssets()"></textarea>
+            </div>
+        </div>
+    </main>
+
+    <datalist id="dl-img"></datalist>
+    <datalist id="dl-glb"></datalist>
+
+    <script>
+        // GLOBAL STATE
+        let APP_DATA = [];
+        let CUR_CAT = -1;
+        let CUR_PROD = -1;
+        let CREDENTIALS = {};
+        let SHA = "";
+        let LAST_INPUT = null;
+        let DETECTED_MATS = [];
+
+        // --- 1. BAŞLANGIÇ ---
+        window.onload = () => {
+            if(localStorage.getItem('gh_token')) {
+                document.getElementById('gh-token').value = localStorage.getItem('gh_token');
+                if(localStorage.getItem('asset_pool')) document.getElementById('asset-pool').value = localStorage.getItem('asset_pool');
+            }
+        };
+
+        // --- 2. BAĞLANTI (SADE VE NET) ---
+        async function startLogin() {
+            CREDENTIALS.token = document.getElementById('gh-token').value.trim();
+            CREDENTIALS.owner = document.getElementById('gh-owner').value.trim();
+            CREDENTIALS.repo = document.getElementById('gh-repo').value.trim();
+            CREDENTIALS.branch = document.getElementById('gh-branch').value.trim();
+            CREDENTIALS.path = document.getElementById('gh-path').value.trim();
+
+            if(!CREDENTIALS.token) { alert("Token yazmadın!"); return; }
+
+            localStorage.setItem('gh_token', CREDENTIALS.token);
+            
+            document.getElementById('loader').style.display = 'flex';
+            const url = `https://api.github.com/repos/${CREDENTIALS.owner}/${CREDENTIALS.repo}/contents/${CREDENTIALS.path}?ref=${CREDENTIALS.branch}`;
+            
+            try {
+                const res = await fetch(url, { headers: { 'Authorization': `token ${CREDENTIALS.token}` } });
+                if(!res.ok) throw new Error(`Hata: ${res.status} (${res.statusText})`);
+                
+                const data = await res.json();
+                SHA = data.sha;
+                const content = decodeURIComponent(escape(window.atob(data.content)));
+                APP_DATA = JSON.parse(content);
+
+                document.getElementById('login-overlay').style.display = 'none';
+                renderTree();
+                parseAssets();
+
+            } catch(e) { alert(e.message); } finally { document.getElementById('loader').style.display = 'none'; }
+        }
+
+        async function saveToGithub() {
+            if(!confirm("Emin misin?")) return;
+            if(CUR_PROD > -1) saveToMemory(); 
+
+            document.getElementById('loader').style.display = 'flex';
+            try {
+                const url = `https://api.github.com/repos/${CREDENTIALS.owner}/${CREDENTIALS.repo}/contents/${CREDENTIALS.path}`;
+                const newContent = window.btoa(unescape(encodeURIComponent(JSON.stringify(APP_DATA, null, 2))));
+                const body = { message: "Panel Update", content: newContent, sha: SHA, branch: CREDENTIALS.branch };
+
+                const res = await fetch(url, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${CREDENTIALS.token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if(!res.ok) throw new Error("Kaydetme başarısız!");
+                const data = await res.json();
+                SHA = data.content.sha;
+                alert("✅ Başarılı!");
+            } catch(e) { alert(e.message); } finally { document.getElementById('loader').style.display = 'none'; }
+        }
+
+        // --- 3. UI RENDER ---
+        function renderTree() {
+            const root = document.getElementById('tree-root');
+            root.innerHTML = '';
+            const catSelect = document.getElementById('p-cat');
+            catSelect.innerHTML = '';
+
+            APP_DATA.forEach((cat, cIdx) => {
+                const opt = document.createElement('option');
+                opt.value = cIdx; opt.text = cat.name;
+                catSelect.appendChild(opt);
+
+                const title = document.createElement('div');
+                title.className = 'tree-cat';
+                title.innerHTML = `📁 ${cat.name}`;
+                title.onclick = () => loadCategory(cIdx);
+                root.appendChild(title);
+
+                cat.products.forEach((prod, pIdx) => {
+                    const item = document.createElement('div');
+                    item.className = 'tree-item';
+                    if(cIdx === CUR_CAT && pIdx === CUR_PROD) item.classList.add('active');
+                    item.innerText = prod.name || 'Adsız';
+                    item.onclick = () => loadProduct(cIdx, pIdx);
+                    root.appendChild(item);
+                });
+            });
+        }
+
+        // --- 4. FORM YÖNETİMİ ---
+        function loadProduct(cIdx, pIdx) {
+            if(CUR_PROD > -1) saveToMemory();
+            CUR_CAT = cIdx; CUR_PROD = pIdx;
+            
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('category-form').classList.add('hidden');
+            document.getElementById('product-form').classList.remove('hidden');
+            renderTree();
+
+            const p = APP_DATA[cIdx].products[pIdx];
+            document.getElementById('p-cat').value = cIdx;
+            document.getElementById('p-name').value = p.name || '';
+            document.getElementById('p-sku').value = p.sku || '';
+            document.getElementById('p-price').value = p.price || 0;
+            document.getElementById('p-thumb').value = p.thumbnail || '';
+            document.getElementById('p-desc').value = p.description || '';
+            document.getElementById('p-link').value = p.listingUrl || '';
+            document.getElementById('p-model').value = p.masterModel || '';
+
+            renderVariants(p.variantGroups || []);
+        }
+
+        function loadCategory(cIdx) {
+            CUR_CAT = cIdx; CUR_PROD = -1;
+            document.getElementById('product-form').classList.add('hidden');
+            document.getElementById('category-form').classList.remove('hidden');
+            document.getElementById('empty-state').classList.add('hidden');
+            
+            document.getElementById('c-name').value = APP_DATA[cIdx].name;
+            document.getElementById('c-thumb').value = APP_DATA[cIdx].thumbnail || '';
+        }
+
+        function saveToMemory() {
+            if(CUR_PROD === -1) return;
+            const p = APP_DATA[CUR_CAT].products[CUR_PROD];
+            p.name = document.getElementById('p-name').value;
+            p.sku = document.getElementById('p-sku').value;
+            p.price = parseFloat(document.getElementById('p-price').value);
+            p.thumbnail = document.getElementById('p-thumb').value;
+            p.description = document.getElementById('p-desc').value;
+            p.listingUrl = document.getElementById('p-link').value;
+            p.masterModel = document.getElementById('p-model').value;
+        }
+
+        // --- 5. VARYASYONLAR ---
+        function renderVariants(groups) {
+            const con = document.getElementById('variant-container');
+            con.innerHTML = '';
+            
+            groups.forEach((g, gIdx) => {
+                const box = document.createElement('div'); box.className = 'v-group';
+                
+                let itemsHtml = '';
+                g.items.forEach((i, iIdx) => {
+                    const matName = i.textureConfig?.materialName || '';
+                    const baseCol = i.textureConfig?.baseColor || '';
+                    
+                    itemsHtml += `
+                    <div class="v-item">
+                        <div class="full"><label>Görünen İsim</label><input value="${i.name}" oninput="updateVar(${gIdx},${iIdx},'name',this.value)"></div>
+                        <div><label>Buton Resmi</label><input value="${i.value}" list="dl-img" oninput="updateVar(${gIdx},${iIdx},'value',this.value)"></div>
+                        <div>
+                            <label>3D Malzeme ID</label>
+                            <input value="${matName}" placeholder="Tıkla..." onfocus="registerFocus(this)" oninput="updateConf(${gIdx},${iIdx},'materialName',this.value)">
+                        </div>
+                        <div class="full"><label>Doku (BaseColor)</label><input value="${baseCol}" list="dl-img" oninput="updateConf(${gIdx},${iIdx},'baseColor',this.value)"></div>
+                        <button class="btn-danger full" onclick="delVarItem(${gIdx},${iIdx})">SEÇENEĞİ SİL</button>
+                    </div>`;
+                });
+
+                box.innerHTML = `
+                    <div class="v-header">
+                        <input value="${g.groupName}" style="width:60%; font-weight:bold; border:none; background:transparent;" oninput="APP_DATA[CUR_CAT].products[CUR_PROD].variantGroups[${gIdx}].groupName=this.value">
+                        <button class="btn-danger" onclick="delGroup(${gIdx})">GRUBU SİL</button>
+                    </div>
+                    ${itemsHtml}
+                    <button class="btn-outline full" style="width:100%" onclick="addVarItem(${gIdx})">+ SEÇENEK EKLE</button>
+                `;
+                con.appendChild(box);
+            });
+        }
+
+        window.updateVar = (g,i,k,v) => APP_DATA[CUR_CAT].products[CUR_PROD].variantGroups[g].items[i][k] = v;
+        window.updateConf = (g,i,k,v) => {
+            let item = APP_DATA[CUR_CAT].products[CUR_PROD].variantGroups[g].items[i];
+            if(!item.textureConfig) item.textureConfig = {};
+            item.textureConfig[k] = v;
+        }
+        window.addVariantGroup = () => { APP_DATA[CUR_CAT].products[CUR_PROD].variantGroups.push({groupName:"Yeni Grup", items:[]}); refreshProd(); }
+        window.addVarItem = (g) => { APP_DATA[CUR_CAT].products[CUR_PROD].variantGroups[g].items.push({name:"Yeni", value:"", textureConfig:{}}); refreshProd(); }
+        window.delGroup = (g) => { if(confirm("Sil?")) { APP_DATA[CUR_CAT].products[CUR_PROD].variantGroups.splice(g,1); refreshProd(); }}
+        window.delVarItem = (g,i) => { APP_DATA[CUR_CAT].products[CUR_PROD].variantGroups[g].items.splice(i,1); refreshProd(); }
+        function refreshProd() { renderVariants(APP_DATA[CUR_CAT].products[CUR_PROD].variantGroups); }
+
+        // --- 6. EKSTRA ÖZELLİKLER ---
+        window.createNewProduct = () => {
+            if(APP_DATA.length === 0) return alert("Önce kategori!");
+            if(CUR_CAT === -1) CUR_CAT = 0;
+            const newP = { name: "Yeni Ürün", sku: "YENI", price: 0, variantGroups: [] }; // BOŞ BAŞLIYOR
+            APP_DATA[CUR_CAT].products.push(newP);
+            renderTree();
+            loadProduct(CUR_CAT, APP_DATA[CUR_CAT].products.length - 1);
+        }
+        window.deleteProduct = () => {
+            if(confirm("Silinsin mi?")) {
+                APP_DATA[CUR_CAT].products.splice(CUR_PROD, 1);
+                CUR_PROD = -1;
+                document.getElementById('product-form').classList.add('hidden');
+                renderTree();
+            }
+        }
+        window.createNewCategory = () => { const n = prompt("Adı:"); if(n) { APP_DATA.push({id: "c"+Date.now(), name: n, products:[]}); renderTree(); } }
+        window.saveCategoryLocal = () => {
+            APP_DATA[CUR_CAT].name = document.getElementById('c-name').value;
+            APP_DATA[CUR_CAT].thumbnail = document.getElementById('c-thumb').value;
+            renderTree(); alert("Güncellendi (Kaydet'e basmayı unutma)");
+        }
+        window.deleteCategory = () => { if(confirm("Silinsin mi?")) { APP_DATA.splice(CUR_CAT, 1); location.reload(); } }
+        window.doLogout = () => { localStorage.clear(); location.reload(); }
+
+        // --- 7. GLB & MAGIC & HIGHLIGHT ---
+        const dropZone = document.getElementById('drop-zone');
+        const fileIn = document.getElementById('file-input');
+        dropZone.onclick = () => fileIn.click();
+        dropZone.ondragover = e => { e.preventDefault(); dropZone.style.background = '#e0f2fe'; }
+        dropZone.ondrop = e => { e.preventDefault(); handleFile(e.dataTransfer.files[0]); }
+        fileIn.onchange = e => handleFile(e.target.files[0]);
+
+        function registerFocus(el) {
+            if(LAST_INPUT) LAST_INPUT.classList.remove('listening');
+            LAST_INPUT = el;
+            el.classList.add('listening');
+        }
+
+        function handleFile(f) {
+            if(!f) return;
+            const url = URL.createObjectURL(f);
+            const v = document.getElementById('inspector-viewer');
+            v.src = url;
+            DETECTED_MATS = [];
+            
+            v.addEventListener('load', () => {
+                const list = document.getElementById('mat-list');
+                list.innerHTML = '';
+                if(v.model && v.model.materials) {
+                    v.model.materials.forEach(m => {
+                        DETECTED_MATS.push(m.name);
+                        const div = document.createElement('div');
+                        div.className = 'mat-item';
+                        div.innerHTML = `<strong>${m.name}</strong> <span>SEÇ</span>`;
+                        
+                        // TIKLAMA OLAYI: VURGULA + DOLDUR
+                        div.onclick = () => {
+                            // 1. Flash Highlight (Vurgu)
+                            const orig = m.pbrMetallicRoughness.baseColorFactor.slice();
+                            m.pbrMetallicRoughness.setBaseColorFactor([1, 0, 0, 1]); // KIRMIZI
+                            setTimeout(() => m.pbrMetallicRoughness.setBaseColorFactor(orig), 500);
+
+                            // 2. Input Doldur
+                            if(LAST_INPUT) {
+                                LAST_INPUT.value = m.name;
+                                LAST_INPUT.classList.remove('listening');
+                                LAST_INPUT.style.background = '#dcfce7'; // Yeşil onayla
+                                LAST_INPUT.dispatchEvent(new Event('input'));
+                                setTimeout(()=>LAST_INPUT.style.background = 'white', 500);
+                                LAST_INPUT = null;
+                            }
+                        };
+                        list.appendChild(div);
+                    });
+                    document.getElementById('btn-auto-capture').classList.remove('hidden');
+                }
+            }, {once:true});
+        }
+
+        window.autoFillOriginal = () => {
+            if(CUR_PROD === -1) return alert("Ürün seç!");
+            if(DETECTED_MATS.length === 0) return alert("Model yükle!");
+            
+            // YENİ GRUP EKLE (ESKİLERİ SİLMEZ)
+            const newGroup = { groupName: "Otomatik Orijinaller", items: [] };
+            
+            DETECTED_MATS.forEach(m => {
+                newGroup.items.push({
+                    name: m, // Adı malzeme ile aynı olsun
+                    value: "/assets-r2/textures/thumb_wood.jpg", 
+                    textureConfig: { materialName: m, baseColor: "" }
+                });
+            });
+            
+            APP_DATA[CUR_CAT].products[CUR_PROD].variantGroups.push(newGroup);
+            refreshProd();
+            alert("Eklendi! İsimleri değiştirebilirsin.");
+        }
+
+        window.parseAssets = () => {
+            const txt = document.getElementById('asset-pool').value;
+            localStorage.setItem('asset_pool', txt);
+            const urls = txt.match(/(https?:\/\/[^\s]+)/g) || [];
+            const imgs = document.getElementById('dl-img');
+            const glbs = document.getElementById('dl-glb');
+            imgs.innerHTML = ''; glbs.innerHTML = '';
+            urls.forEach(u => {
+                const op = document.createElement('option'); op.value = u;
+                if(u.match(/\.glb/)) glbs.appendChild(op); else imgs.appendChild(op);
+            });
+        }
+    </script>
+</body>
+</html>

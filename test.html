@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlanSmithCo CMS - Debugger Mode</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: white; padding: 30px; border-radius: 12px; width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+        label { font-size: 12px; font-weight: bold; color: #64748b; display: block; margin-bottom: 5px; }
+        button { width: 100%; padding: 12px; background: #0f172a; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #1e293b; }
+        #log { margin-top: 20px; font-size: 11px; background: #1e293b; color: #4ade80; padding: 10px; border-radius: 6px; min-height: 100px; white-space: pre-wrap; display: none; }
+        .error { color: #f87171 !important; }
+    </style>
+</head>
+<body>
+
+    <div class="box" id="login-box">
+        <h2 style="margin-top:0">Bağlantı Testi</h2>
+        
+        <label>GitHub Token (ghp_...)</label>
+        <input type="password" id="token">
+        
+        <label>Kullanıcı Adı (Owner)</label>
+        <input type="text" id="owner" placeholder="PlanSmithCo">
+        
+        <label>Repo Adı (Sadece isim!)</label>
+        <input type="text" id="repo" placeholder="showroom">
+        
+        <label>Branch</label>
+        <input type="text" id="branch" value="main">
+
+        <label>Dosya Yolu</label>
+        <input type="text" id="path" value="products.json">
+
+        <button onclick="startDiagnostic()">BAĞLANTIYI TEST ET VE GİR</button>
+        
+        <div id="log"></div>
+    </div>
+
+    <script>
+        // Sayfa açılınca eski verileri getir
+        window.onload = () => {
+            if(localStorage.getItem('gh_token')) {
+                document.getElementById('token').value = localStorage.getItem('gh_token');
+                document.getElementById('owner').value = localStorage.getItem('gh_owner');
+                document.getElementById('repo').value = localStorage.getItem('gh_repo');
+            }
+        }
+
+        function log(msg, isError = false) {
+            const logBox = document.getElementById('log');
+            logBox.style.display = 'block';
+            const line = document.createElement('div');
+            line.textContent = "> " + msg;
+            if(isError) line.className = 'error';
+            logBox.appendChild(line);
+            console.log(msg);
+        }
+
+        async function startDiagnostic() {
+            document.getElementById('log').innerHTML = ''; // Temizle
+            log("Başlıyor...");
+
+            // 1. VERİLERİ AL VE TEMİZLE
+            let token = document.getElementById('token').value.trim();
+            let owner = document.getElementById('owner').value.trim();
+            let repo = document.getElementById('repo').value.trim();
+            let branch = document.getElementById('branch').value.trim();
+            let path = document.getElementById('path').value.trim();
+
+            // Link temizliği (Kullanıcı yanlışlıkla link yapıştırırsa düzelt)
+            if(repo.includes('/')) {
+                repo = repo.split('/').pop();
+                log("UYARI: Repo isminde '/' tespit edildi, temizlendi: " + repo);
+            }
+            if(repo.includes('.git')) {
+                repo = repo.replace('.git', '');
+                log("UYARI: .git uzantısı silindi.");
+            }
+
+            // Kaydet
+            localStorage.setItem('gh_token', token);
+            localStorage.setItem('gh_owner', owner);
+            localStorage.setItem('gh_repo', repo);
+
+            // 2. TOKEN TESTİ (Kimlik Kontrolü)
+            log("Adım 1: Token kontrol ediliyor...");
+            try {
+                const userReq = await fetch('https://api.github.com/user', {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+
+                if(userReq.status === 401) {
+                    throw new Error("TOKEN GEÇERSİZ! Lütfen GitHub'dan yeni bir token oluşturun.");
+                }
+                
+                const userData = await userReq.json();
+                log(`Token Doğrulandı! Merhaba ${userData.login} ✅`);
+
+            } catch(e) {
+                log("HATA: " + e.message, true);
+                return; // Dur
+            }
+
+            // 3. REPO VE DOSYA TESTİ
+            log("Adım 2: Dosya aranıyor...");
+            const fileUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
+            log("İstek Adresi: " + fileUrl);
+
+            try {
+                const fileReq = await fetch(fileUrl, {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+
+                if(!fileReq.ok) {
+                    if(fileReq.status === 404) throw new Error("DOSYA BULUNAMADI (404).\nOlası sebepler:\n1. Repo adı yanlış.\n2. Branch adı yanlış (main yerine master olabilir mi?).\n3. Dosya yolu yanlış (products.json nerede?).");
+                    throw new Error("GitHub Hatası: " + fileReq.statusText);
+                }
+
+                const fileData = await fileReq.json();
+                log("DOSYA BULUNDU! ✅");
+                log("SHA: " + fileData.sha);
+                
+                // 4. BAŞARILIYSA ANA PANELE YÖNLENDİR
+                log("Yönlendiriliyor...");
+                setTimeout(() => {
+                    // Buraya senin çalışan admin panel kodlarını geri yükleyeceğiz
+                    // Ama şimdilik sadece başarılı olduğunu görelim.
+                    alert("BAĞLANTI SÜPER! Şimdi gerçek paneli kullanabilirsin.");
+                    // Eğer bu mesajı görürsen, verilerin doğrudur.
+                    // Şimdi bir önceki verdiğim KODU kullanarak bu verileri gir.
+                }, 1000);
+
+            } catch(e) {
+                log("KRİTİK HATA: " + e.message, true);
+                if(e.message.includes("Failed to fetch")) {
+                    log("İPUCU: 'Failed to fetch' genelde Repo isminin yanlış yazılmasından kaynaklanır.", true);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
