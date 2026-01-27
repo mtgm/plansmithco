@@ -328,8 +328,10 @@
             "items": [
               {
                 "name": "Orijinal",
-                "value": "",
-                "textureConfig": {}
+                "value": "/textures/1x2V3/texture-1_baseColor.png",
+                "textureConfig": {
+                  "baseColor": "/textures/1x2V3/texture-1_baseColor.png"
+                }
               }
             ]
           }
