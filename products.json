@@ -5,10 +5,10 @@
       {
         "name": "1x2 Storage Tote Rack",
         "sku": "1X2V3",
-        "thumb": "/logov2.webp",
+        "thumb": "/assets-r2/logov2.webp",
         "desc": "1x2 Storage Tote Rack Description",
         "link": "",
-        "model": "/models/1x2V3.glb",
+        "model": "/assets-r2/models/1x2V3.glb",
         "price": "80",
         "variantGroups": []
       }
