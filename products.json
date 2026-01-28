@@ -161,13 +161,9 @@
         "model": ""
       },
       {
+        "sku": "",
         "name": "Yeni",
-        "variantGroups": []
-      },
-      {
-        "sku": "1X2V3",
-        "name": "1x2 Storage Tote Rack V3",
-        "price": "129",
+        "price": "0",
         "description": "Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.",
         "listingUrl": "https://www.etsy.com/shop/PlanSmithCo",
         "masterModel": "/assets-r2/models/1x2V3.glb",
@@ -327,12 +323,104 @@
     "products": [
       {
         "name": "Yeni",
-        "variantGroups": [],
+        "variantGroups": [
+          {
+            "groupName": "polished brass.001",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "polished brass.001_baseColor.png",
+                "textureConfig": {
+                  "materialName": "polished brass.001",
+                  "baseColor": "polished brass.001_baseColor.png"
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "yellow low gloss plastic.001",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "yellow low gloss plastic.001_baseColor.png",
+                "textureConfig": {
+                  "materialName": "yellow low gloss plastic.001",
+                  "baseColor": "yellow low gloss plastic.001_baseColor.png"
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "dark grey low gloss plastic.001",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "dark grey low gloss plastic.001_baseColor.png",
+                "textureConfig": {
+                  "materialName": "dark grey low gloss plastic.001",
+                  "baseColor": "dark grey low gloss plastic.001_baseColor.png"
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "texture.001",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "texture.001_baseColor.png",
+                "textureConfig": {
+                  "materialName": "texture.001",
+                  "baseColor": "texture.001_baseColor.png"
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "texture-1.001",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "texture-1.001_baseColor.png",
+                "textureConfig": {
+                  "materialName": "texture-1.001",
+                  "baseColor": "texture-1.001_baseColor.png"
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "texture-3.001",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "texture-3.001_baseColor.png",
+                "textureConfig": {
+                  "materialName": "texture-3.001",
+                  "baseColor": "texture-3.001_baseColor.png"
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "texture-2.001",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "texture-2.001_baseColor.png",
+                "textureConfig": {
+                  "materialName": "texture-2.001",
+                  "baseColor": "texture-2.001_baseColor.png"
+                }
+              }
+            ]
+          }
+        ],
         "sku": "",
         "thumb": "",
         "desc": "",
         "link": "",
-        "model": "",
+        "model": "/1x2V3.glb",
         "price": "0"
       }
     ]
