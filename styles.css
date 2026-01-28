@@ -57,7 +57,7 @@ body {
     cursor: pointer; text-align: center; transition: all 0.2s;
 }
 .cat-card:hover { border-color: var(--accent-color); background: #fff; transform: translateY(-2px); }
-.cat-thumb { width: 40px; height: 40px; margin-bottom: 10px; opacity: 0.6; }
+.cat-thumb { width: 80px; height: 80px; margin-bottom: 10px; opacity: 0.6; }
 
 /* Ürün Detay */
 #product-view { display: none; flex-direction: column; height: 100%; }
