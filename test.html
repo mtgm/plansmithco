@@ -92,15 +92,7 @@
             background: linear-gradient(to right, var(--primary), #FCD34D);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             text-shadow: 0 2px 15px rgba(234, 179, 8, 0.2);
-            display: flex; align-items: center; justify-content: space-between; gap: 10px;
         }
-        .brand span { background: linear-gradient(to right, var(--primary), #FCD34D); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .logo-btn { 
-            background: rgba(255,255,255,0.1); border: 1px dashed rgba(255,255,255,0.3);
-            padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 14px;
-            transition: all 0.2s; opacity: 0.6;
-        }
-        .logo-btn:hover { opacity: 1; background: rgba(255,255,255,0.2); }
         
         .tree-view { flex: 1; padding: 15px; overflow-y: auto; }
         
@@ -112,50 +104,13 @@
             transition: color 0.2s;
         }
         .tree-cat-header:hover { color: #fff; }
-        
-        /* Kategori header düzeni */
-        .tree-cat-header { 
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 12px; font-weight: 700; font-size: 11px; 
-            text-transform: uppercase; color: #94a3b8; cursor:pointer; 
-            transition: color 0.2s;
-        }
-        .cat-name { cursor: pointer; flex: 1; }
-        .cat-name:hover { color: var(--primary); }
-        .cat-actions { display: flex; gap: 8px; align-items: center; }
-        .cat-btn { cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: all 0.2s; font-size: 12px; }
-        .cat-add { color: var(--success); font-weight: bold; font-size: 16px; }
-        .cat-add:hover { background: rgba(16, 185, 129, 0.2); }
-        .cat-del { color: var(--danger); font-size: 12px; }
-        .cat-del:hover { background: rgba(239, 68, 68, 0.2); }
-        
-        /* Ürün item düzeni */
+
         .tree-item { 
             padding: 10px 14px; cursor: pointer; font-size: 13px; 
             border-radius: 8px; margin-top: 4px; font-weight: 500; 
-            display: flex; align-items: center; justify-content: space-between; color: #cbd5e1;
+            display: flex; align-items: center; gap: 10px; color: #cbd5e1;
             transition: all 0.2s ease; border: 1px solid transparent;
         }
-        .prod-name { flex: 1; cursor: pointer; }
-        .prod-del { opacity: 0; color: var(--danger); cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: all 0.2s; font-size: 12px; }
-        .tree-item:hover .prod-del { opacity: 1; }
-        .prod-del:hover { background: rgba(239, 68, 68, 0.2); }
-        
-        /* Inline düzenleme input */
-        .inline-edit {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid var(--primary);
-            border-radius: 4px;
-            padding: 4px 8px;
-            color: #fff;
-            font-size: 12px;
-            width: 120px;
-            outline: none;
-        }
-        .inline-edit:focus {
-            box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.3);
-        }
-
         .tree-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
         .tree-item.active { 
             background: rgba(234, 179, 8, 0.15); color: var(--primary); 
@@ -240,7 +195,7 @@
         .v-group.collapsed .arrow { transform: rotate(-90deg); }
         .v-group.collapsed .v-body { display: none; }
 
-        .v-item { display: grid; grid-template-columns: 25px 1.5fr 1.5fr 1fr 1.5fr 40px; gap: 12px; align-items: end; background: #fff; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; }
+        .v-item { display: grid; grid-template-columns: 1.5fr 1.5fr 1fr 1.5fr 40px; gap: 15px; align-items: end; background: #fff; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; }
         .v-item-label { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
 
         /* --- 7. PRO SAĞ PANEL --- */
@@ -260,53 +215,6 @@
         .spinner { width: 40px; height: 40px; border: 4px solid #cbd5e1; border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-        
-        /* Custom Modal */
-        .custom-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px); z-index: 2000; display: none;
-            align-items: center; justify-content: center;
-        }
-        .custom-modal.active { display: flex; }
-        .custom-modal-content {
-            background: #fff; border-radius: 16px; width: 400px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3); overflow: hidden;
-            animation: modalSlide 0.2s ease;
-        }
-        @keyframes modalSlide { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .custom-modal-header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 24px; border-bottom: 1px solid #e2e8f0;
-            background: linear-gradient(135deg, var(--primary) 0%, #FCD34D 100%);
-        }
-        .custom-modal-header h3 { margin: 0; color: var(--secondary); font-size: 16px; }
-        .modal-close { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--secondary); opacity: 0.7; }
-        .modal-close:hover { opacity: 1; }
-        .custom-modal-body { padding: 24px; }
-        .custom-modal-body label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--secondary); }
-        .custom-modal-body input { 
-            width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; 
-            border-radius: 8px; font-size: 14px; transition: all 0.2s;
-        }
-        .custom-modal-body input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.15); outline: none; }
-        .custom-modal-footer { padding: 16px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 12px; background: #f8fafc; }
-        
-        /* Varyasyon Checkbox Stilleri */
-        .v-group-check, .v-item-check { 
-            width: 18px; height: 18px; cursor: pointer; 
-            accent-color: var(--primary); flex-shrink: 0;
-        }
-        .v-batch-actions {
-            display: flex; gap: 10px; align-items: center; margin-bottom: 15px;
-            padding: 10px 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;
-        }
-        .v-batch-actions.hidden { display: none; }
-        .v-batch-count { font-size: 13px; color: var(--text-muted); }
-        .v-item-batch-actions {
-            display: flex; gap: 8px; align-items: center; margin-top: 10px;
-            padding: 8px 12px; background: #fef3c7; border-radius: 6px;
-        }
-        .v-item-batch-actions.hidden { display: none; }
         
         #login-overlay { position: fixed; inset: 0; background: var(--bg-gradient); z-index: 3000; display: flex; align-items: center; justify-content: center; }
         .login-box { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); padding: 50px; border-radius: 24px; width: 420px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
@@ -347,57 +255,6 @@
         </div>
     </div>
 
-    <!-- Yeni Kategori Modal -->
-    <div id="cat-modal" class="custom-modal">
-        <div class="custom-modal-content">
-            <div class="custom-modal-header">
-                <h3>➕ Yeni Kategori Oluştur</h3>
-                <button class="modal-close" onclick="closeCatModal()">✕</button>
-            </div>
-            <div class="custom-modal-body">
-                <label>Kategori Adı</label>
-                <input type="text" id="new-cat-name" placeholder="Kategori adını girin..." autofocus>
-            </div>
-            <div class="custom-modal-footer">
-                <button class="btn btn-ghost" onclick="closeCatModal()">İptal</button>
-                <button class="btn btn-success" onclick="confirmNewCat()">Oluştur</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Genel Onay Modal -->
-    <div id="confirm-modal" class="custom-modal">
-        <div class="custom-modal-content" style="width:380px;">
-            <div class="custom-modal-header" id="confirm-header">
-                <h3 id="confirm-title">⚠️ Onay</h3>
-                <button class="modal-close" onclick="closeConfirmModal(false)">✕</button>
-            </div>
-            <div class="custom-modal-body">
-                <p id="confirm-message" style="margin:0; color:var(--secondary); line-height:1.6;"></p>
-            </div>
-            <div class="custom-modal-footer">
-                <button class="btn btn-ghost" onclick="closeConfirmModal(false)">İptal</button>
-                <button class="btn btn-danger" id="confirm-btn" onclick="closeConfirmModal(true)">Onayla</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Genel Bilgi Modal (Alert yerine) -->
-    <div id="alert-modal" class="custom-modal">
-        <div class="custom-modal-content" style="width:360px;">
-            <div class="custom-modal-header" id="alert-header">
-                <h3 id="alert-title">ℹ️ Bilgi</h3>
-                <button class="modal-close" onclick="closeAlertModal()">✕</button>
-            </div>
-            <div class="custom-modal-body">
-                <p id="alert-message" style="margin:0; color:var(--secondary); line-height:1.6;"></p>
-            </div>
-            <div class="custom-modal-footer">
-                <button class="btn btn-primary" onclick="closeAlertModal()">Tamam</button>
-            </div>
-        </div>
-    </div>
-
     <div id="loader"><div class="spinner"></div></div>
     <div id="login-overlay">
         <div class="login-box">
@@ -413,14 +270,11 @@
     </div>
 
     <aside>
-        <div class="brand">
-            <span>🚀 PlanSmithCo.</span>
-            <img id="brand-logo" src="" alt="" style="display:none; height:28px; border-radius:4px;" onclick="changeLogo()">
-            <button class="logo-btn" onclick="changeLogo()" title="Logo Ekle/Değiştir">🖼️</button>
-        </div>
+        <div class="brand">🚀 PlanSmithCo.</div>
         <div class="tree-view" id="tree-root"></div>
         <div class="sidebar-footer">
             <button class="btn btn-ghost" style="width:100%; color:#e2e8f0; border-color:rgba(255,255,255,0.2);" onclick="openFileManager()">📂 R2 Dosya Yöneticisi</button>
+            <button class="btn btn-primary" style="width:100%" onclick="newProd()">+ Yeni Ürün</button>
             <button class="btn btn-warning" style="width:100%" onclick="newCat()">+ Yeni Kategori</button>
             <button class="btn btn-success" style="width:100%" onclick="saveGithub()">💾 GitHub'a Kaydet</button>
         </div>
@@ -439,7 +293,7 @@
                         <div class="card">
                             <div class="form-grid">
                                 <div class="full"><label>Kategori</label><select id="p-cat" onchange="moveCat()"></select></div>
-                                <div><label>Ürün Adı</label><input id="p-name" oninput="updateProdNameInTree()"></div>
+                                <div><label>Ürün Adı</label><input id="p-name"></div>
                                 <div><label>SKU</label><input id="p-sku"></div>
                                 <div><label>Fiyat</label><input type="number" id="p-price"></div>
                                 <div>
@@ -453,12 +307,14 @@
                                 <div class="full">
                                     <label>Model Dosyası (.glb)</label>
                                     <div class="input-group-btn">
-                                        <input id="p-model" onchange="localGlbUrl=null; updateGlbPreview()">
-                                        <button class="btn btn-primary" onclick="openMedia('p-model','model')" title="R2'den Seç">📂</button>
-                                        <button class="btn btn-success" onclick="selectLocalGlb()" title="Bilgisayardan Yükle">💻</button>
+                                        <input id="p-model" onchange="updateGlbPreview()"><button class="btn btn-primary" onclick="openMedia('p-model','model')">Seç</button>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top: 30px; padding-top: 20px; border-top:1px solid #e2e8f0;">
+                            <button class="btn btn-danger" onclick="delProd()">Ürünü Sil</button>
+                            <button class="btn btn-success" onclick="saveGithub()">Değişiklikleri Kaydet</button>
                         </div>
                     </div>
 
@@ -476,7 +332,7 @@
         </div>
 
         <div class="right-panel">
-            <div class="rp-header" style="justify-content:center;">✨ 3D Dedektifi</div>
+            <div class="rp-header">✨ 3D Dedektifi</div>
             <div class="rp-content">
                 <model-viewer id="viewer" camera-controls shadow-intensity="1" background-color="#1e293b" crossorigin="anonymous"></model-viewer>
                 <div class="mat-list-title">MODEL MATERYALLERİ</div>
@@ -494,101 +350,6 @@
         let CHECKED_FILES = new Set(), CLIPBOARD = [], CLIPBOARD_ACTION = 'copy'; 
         let MATS = []; // Global MATS Dizisi (HATA DÜZELTİLDİ)
         let hasUnsavedChanges = false; // Kaydedilmemiş değişiklik var mı?
-        let confirmCallback = null; // Confirm modal callback
-        let alertCallback = null; // Alert modal callback
-
-        // Custom Confirm Modal (pop-up yerine)
-        function showConfirm(title, message, onConfirm, btnText = 'Onayla', type = 'danger') {
-            document.getElementById('confirm-title').innerHTML = title;
-            document.getElementById('confirm-message').innerHTML = message;
-            document.getElementById('confirm-btn').textContent = btnText;
-            document.getElementById('confirm-btn').className = `btn btn-${type}`;
-            
-            // Header rengini tipe göre ayarla
-            const header = document.getElementById('confirm-header');
-            if(type === 'danger') {
-                header.style.background = 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)';
-                header.querySelector('h3').style.color = '#fff';
-            } else if(type === 'success') {
-                header.style.background = 'linear-gradient(135deg, #10b981 0%, #34d399 100%)';
-                header.querySelector('h3').style.color = '#fff';
-            } else {
-                header.style.background = 'linear-gradient(135deg, var(--primary) 0%, #FCD34D 100%)';
-                header.querySelector('h3').style.color = 'var(--secondary)';
-            }
-            
-            confirmCallback = onConfirm;
-            document.getElementById('confirm-modal').classList.add('active');
-        }
-        
-        function closeConfirmModal(confirmed) {
-            document.getElementById('confirm-modal').classList.remove('active');
-            if(confirmed && confirmCallback) {
-                confirmCallback();
-            }
-            confirmCallback = null;
-        }
-        
-        // Custom Alert Modal (alert yerine)
-        function showAlert(title, message, type = 'info', onClose = null) {
-            document.getElementById('alert-title').innerHTML = title;
-            document.getElementById('alert-message').innerHTML = message;
-            
-            const header = document.getElementById('alert-header');
-            if(type === 'success') {
-                header.style.background = 'linear-gradient(135deg, #10b981 0%, #34d399 100%)';
-                header.querySelector('h3').style.color = '#fff';
-            } else if(type === 'error') {
-                header.style.background = 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)';
-                header.querySelector('h3').style.color = '#fff';
-            } else if(type === 'warning') {
-                header.style.background = 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)';
-                header.querySelector('h3').style.color = '#fff';
-            } else {
-                header.style.background = 'linear-gradient(135deg, var(--primary) 0%, #FCD34D 100%)';
-                header.querySelector('h3').style.color = 'var(--secondary)';
-            }
-            
-            alertCallback = onClose;
-            document.getElementById('alert-modal').classList.add('active');
-        }
-        
-        function closeAlertModal() {
-            document.getElementById('alert-modal').classList.remove('active');
-            if(alertCallback) alertCallback();
-            alertCallback = null;
-        }
-        
-        // Logo değiştirme
-        function changeLogo() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if(file) {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => {
-                        const logo = document.getElementById('brand-logo');
-                        logo.src = ev.target.result;
-                        logo.style.display = 'block';
-                        localStorage.setItem('brand_logo', ev.target.result);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            };
-            input.click();
-        }
-        
-        // Sayfa yüklendiğinde kayıtlı logoyu yükle
-        function loadSavedLogo() {
-            const savedLogo = localStorage.getItem('brand_logo');
-            if(savedLogo) {
-                const logo = document.getElementById('brand-logo');
-                logo.src = savedLogo;
-                logo.style.display = 'block';
-            }
-        }
 
         // Kaydedilmemiş değişiklik göstergesi
         function showUnsaved() {
@@ -611,10 +372,7 @@
             }
         }
 
-        window.onload = () => { 
-            if(localStorage.getItem('gh_token')) document.getElementById('gh-token').value = localStorage.getItem('gh_token'); 
-            loadSavedLogo();
-        }
+        window.onload = () => { if(localStorage.getItem('gh_token')) document.getElementById('gh-token').value = localStorage.getItem('gh_token'); }
 
         async function startLogin() {
             if(WORKER_URL.endsWith('/list')) WORKER_URL = WORKER_URL.replace('/list', '');
@@ -767,128 +525,23 @@
                 const div = document.createElement('div'); div.className='tree-cat-group';
                 
                 // Kategori Başlığı
-                const header = document.createElement('div');
-                header.className = 'tree-cat-header';
-                header.innerHTML = `
-                    <span class="cat-name" data-cat="${i}">${c.name}</span>
-                    <div class="cat-actions">
-                        <span class="cat-btn cat-add" onclick="event.stopPropagation(); addProdToCat(${i})" title="Ürün Ekle">+</span>
-                        <span class="cat-btn cat-del" onclick="delCat(event, ${i})" title="Kategori Sil">🗑️</span>
-                    </div>
-                `;
-                // Kategori ismine çift tıklayınca inline düzenleme
-                header.querySelector('.cat-name').ondblclick = (e) => { e.stopPropagation(); inlineEditCat(i, e.target); };
-                div.appendChild(header);
+                div.innerHTML = `<div class="tree-cat-header"><span onclick="editCat(${i})">${c.name} ✎</span><span onclick="delCat(event, ${i})" style="color:var(--danger); cursor:pointer;">🗑️</span></div>`;
                 
                 c.products.forEach((p,j) => { 
                     const item = document.createElement('div'); 
                     item.className = 'tree-item'; 
-                    if(i === CAT && j === PROD) item.classList.add('active'); 
                     
-                    item.innerHTML = `
-                        <span class="prod-name" data-cat="${i}" data-prod="${j}">📦 ${p.name||'Adsız'}</span>
-                        <span class="prod-del" onclick="event.stopPropagation(); delProdDirect(${i}, ${j})" title="Ürünü Sil">🗑️</span>
-                    `;
-                    // Ürün ismine çift tıklayınca inline düzenleme
-                    item.querySelector('.prod-name').ondblclick = (e) => { e.stopPropagation(); inlineEditProd(i, j, e.target); };
-                    item.querySelector('.prod-name').onclick = (e) => { e.stopPropagation(); loadProd(i,j,item); };
+                    // --- VURGULAMA KODU ---
+                    // Eğer şu anki ürün seçiliyse 'active' sınıfı ekle
+                    if(i === CAT && j === PROD) item.classList.add('active'); 
+                    // ---------------------
+
+                    item.innerHTML = `📦 ${p.name||'Adsız'}`; 
+                    item.onclick = () => loadProd(i,j,item); 
                     div.appendChild(item); 
                 });
                 root.appendChild(div);
             });
-        }
-        
-        // Inline kategori ismi düzenleme
-        function inlineEditCat(catIndex, el) {
-            const oldName = DATA[catIndex].name;
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = oldName;
-            input.className = 'inline-edit';
-            input.onclick = (e) => e.stopPropagation();
-            
-            const finishEdit = () => {
-                const newName = input.value.trim();
-                if(newName && newName !== oldName) {
-                    DATA[catIndex].name = newName;
-                    showUnsaved();
-                }
-                renderTree();
-            };
-            
-            input.onblur = finishEdit;
-            input.onkeydown = (e) => { 
-                if(e.key === 'Enter') { e.preventDefault(); finishEdit(); }
-                if(e.key === 'Escape') { renderTree(); }
-            };
-            
-            el.replaceWith(input);
-            input.focus();
-            input.select();
-        }
-        
-        // Inline ürün ismi düzenleme
-        function inlineEditProd(catIndex, prodIndex, el) {
-            const oldName = DATA[catIndex].products[prodIndex].name;
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = oldName;
-            input.className = 'inline-edit';
-            input.onclick = (e) => e.stopPropagation();
-            
-            const finishEdit = () => {
-                const newName = input.value.trim();
-                if(newName && newName !== oldName) {
-                    DATA[catIndex].products[prodIndex].name = newName;
-                    // Eğer bu ürün şu an düzenleme panelinde açıksa formu da güncelle
-                    if(CAT === catIndex && PROD === prodIndex) {
-                        document.getElementById('p-name').value = newName;
-                    }
-                    showUnsaved();
-                }
-                renderTree();
-            };
-            
-            input.onblur = finishEdit;
-            input.onkeydown = (e) => { 
-                if(e.key === 'Enter') { e.preventDefault(); finishEdit(); }
-                if(e.key === 'Escape') { renderTree(); }
-            };
-            
-            el.innerHTML = '';
-            el.appendChild(input);
-            input.focus();
-            input.select();
-        }
-        
-        // Belirli kategoriye ürün ekle
-        function addProdToCat(catIndex) {
-            DATA[catIndex].products.push({name:"Yeni Ürün", sku:"", thumb:"", desc:"", link:"", model:"", price:0, variantGroups:[]});
-            renderTree();
-            showUnsaved();
-        }
-        
-        // Direkt ürün silme (tree'den)
-        function delProdDirect(catIndex, prodIndex) {
-            const prodName = DATA[catIndex].products[prodIndex].name || 'Adsız';
-            
-            showConfirm(
-                '🗑️ Ürün Sil',
-                `<strong>"${prodName}"</strong> ürünü silinecek.<br><br>Bu işlem geri alınamaz!`,
-                () => {
-                    DATA[catIndex].products.splice(prodIndex, 1);
-                    if(CAT === catIndex && PROD === prodIndex) {
-                        document.getElementById('editor-area').classList.add('hidden');
-                        PROD = -1;
-                    } else if(CAT === catIndex && PROD > prodIndex) {
-                        PROD--;
-                    }
-                    renderTree();
-                    showUnsaved();
-                },
-                'Sil',
-                'danger'
-            );
         }
         function loadProd(i,j,el) {
             // Önceki ürünü hafızaya al
@@ -911,34 +564,10 @@
             renderVars(p.variantGroups||[]); 
             updateGlbPreview();
         }
-        
-        // Local GLB dosyası için geçici URL
-        let localGlbUrl = null;
-        
         function updateGlbPreview() {
-            const path = document.getElementById('p-model').value; 
-            const viewer = document.getElementById('viewer'); 
-            const list = document.getElementById('mat-list');
-            
-            if(!path) { 
-                viewer.src=""; 
-                list.innerHTML="<div style='padding:15px; text-align:center; color:#94a3b8; font-size:12px;'>Model Seçilmedi</div>"; 
-                window.MATS = [];
-                return; 
-            }
-            
-            // Eğer local blob URL ise direkt kullan, değilse R2'den çek
-            let srcUrl;
-            if(path.startsWith('blob:') || localGlbUrl) {
-                srcUrl = localGlbUrl || path;
-            } else {
-                const cleanPath = path.startsWith('/') ? path.slice(1) : path; 
-                srcUrl = WORKER_URL + "/get/" + cleanPath + "?t=" + new Date().getTime();
-            }
-            
-            viewer.src = srcUrl;
-            list.innerHTML = "<div style='padding:15px; text-align:center; color:#94a3b8; font-size:12px;'>Model yükleniyor...</div>";
-            
+            const path = document.getElementById('p-model').value; const viewer = document.getElementById('viewer'); const list = document.getElementById('mat-list');
+            if(!path) { viewer.src=""; list.innerHTML=""; return; }
+            const cleanPath = path.startsWith('/') ? path.slice(1) : path; viewer.src = WORKER_URL + "/get/" + cleanPath + "?t=" + new Date().getTime();
             viewer.addEventListener('load', () => {
                 list.innerHTML = ''; window.MATS = [];
                 if(viewer.model && viewer.model.materials) {
@@ -948,48 +577,8 @@
                         el.onclick = () => { highlightMaterial(m.name); if(LAST_INPUT){ LAST_INPUT.value = m.name; LAST_INPUT.dispatchEvent(new Event('input')); } };
                         list.appendChild(el);
                     });
-                    // Materyal bulundu bildirimi
-                    if(window.MATS.length > 0) {
-                        console.log(`✅ ${window.MATS.length} materyal bulundu:`, window.MATS);
-                    }
-                } else {
-                    list.innerHTML = "<div style='padding:15px; text-align:center; color:#f59e0b; font-size:12px;'>Materyal bulunamadı</div>";
                 }
             }, {once:true});
-            
-            viewer.addEventListener('error', () => {
-                list.innerHTML = "<div style='padding:15px; text-align:center; color:#ef4444; font-size:12px;'>Model yüklenemedi</div>";
-            }, {once:true});
-        }
-        
-        // GLB dosyasını bilgisayardan seçip local olarak yükle
-        function selectLocalGlb() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.glb,.gltf';
-            input.onchange = async (e) => {
-                const file = e.target.files[0];
-                if(!file) return;
-                
-                // Local blob URL oluştur
-                if(localGlbUrl) URL.revokeObjectURL(localGlbUrl);
-                localGlbUrl = URL.createObjectURL(file);
-                
-                // Input'a dosya adını yaz (daha sonra R2'ye yüklenecek path)
-                document.getElementById('p-model').value = `/models/${file.name}`;
-                document.getElementById('p-model').dataset.localFile = file.name;
-                document.getElementById('p-model').dataset.pendingUpload = 'true';
-                
-                // Dosyayı hafızada tut
-                window.pendingGlbFile = file;
-                
-                // Preview'ı güncelle
-                updateGlbPreview();
-                showUnsaved();
-                
-                showAlert('📦 GLB Yüklendi', `<strong>${file.name}</strong> dosyası yüklendi.<br><br>Artık "GLB'den Grupları Oluştur" butonunu kullanabilirsiniz.<br><br><small style="color:#64748b;">Not: Dosya GitHub'a kaydederken otomatik olarak R2'ye yüklenecektir.</small>`, 'success');
-            };
-            input.click();
         }
         function highlightMaterial(matName) {
             const viewer = document.getElementById('viewer'); if (!viewer.model) return;
@@ -998,232 +587,52 @@
             mat.pbrMetallicRoughness.setBaseColorFactor([1, 0, 0, 1]); setTimeout(() => { mat.pbrMetallicRoughness.setBaseColorFactor(originalColor); }, 500);
         }
         function autoFill() {
-            if(!window.MATS || window.MATS.length===0) {
-                return showAlert('⚠️ Uyarı', 'Önce bir GLB model yükleyin!', 'warning');
-            }
-            showConfirm(
-                '⚡ Otomatik Varyasyon',
-                `<strong>${window.MATS.length}</strong> materyal bulundu.<br><br>Her materyal için otomatik varyasyon grubu oluşturulsun mu?`,
-                () => {
-                    const newGrps = []; 
-                    window.MATS.forEach(m => { 
-                        const autoName = m + "_baseColor.png"; 
-                        newGrps.push({ groupName: m, items: [{ name: "Orijinal", value: autoName, textureConfig: { materialName: m, baseColor: autoName } }] }); 
-                    });
-                    if (!DATA[CAT].products[PROD].variantGroups) DATA[CAT].products[PROD].variantGroups = [];
-                    DATA[CAT].products[PROD].variantGroups = [...DATA[CAT].products[PROD].variantGroups, ...newGrps]; 
-                    renderVars(DATA[CAT].products[PROD].variantGroups);
-                    showUnsaved();
-                    showAlert('✅ Başarılı', `${window.MATS.length} varyasyon grubu oluşturuldu!`, 'success');
-                },
-                'Oluştur',
-                'success'
-            );
+            if(!window.MATS || window.MATS.length===0) return alert("Önce Model Yükle!"); if(!confirm("Otomatik oluşturulsun mu?")) return;
+            const newGrps = []; window.MATS.forEach(m => { const autoName = m + "_baseColor.png"; newGrps.push({ groupName: m, items: [{ name: "Orijinal", value: autoName, textureConfig: { materialName: m, baseColor: autoName } }] }); });
+            if (!DATA[CAT].products[PROD].variantGroups) DATA[CAT].products[PROD].variantGroups = [];
+            DATA[CAT].products[PROD].variantGroups = [...DATA[CAT].products[PROD].variantGroups, ...newGrps]; renderVars(DATA[CAT].products[PROD].variantGroups);
         }
         function renderVars(grps) {
             const div = document.getElementById('v-container'); div.innerHTML='';
-            
-            // Toplu grup silme butonu
-            div.insertAdjacentHTML('beforebegin', '');
-            let batchActionsHtml = document.getElementById('v-batch-actions');
-            if(!batchActionsHtml) {
-                const batchDiv = document.createElement('div');
-                batchDiv.id = 'v-batch-actions';
-                batchDiv.className = 'v-batch-actions hidden';
-                batchDiv.innerHTML = `
-                    <input type="checkbox" id="select-all-groups" class="v-group-check" onchange="toggleAllGroups(this.checked)">
-                    <span class="v-batch-count"><span id="selected-group-count">0</span> grup seçildi</span>
-                    <button class="btn btn-danger" onclick="deleteSelectedGroups()">🗑️ Seçili Grupları Sil</button>
-                `;
-                div.parentElement.insertBefore(batchDiv, div);
-            }
-            
-            // Grup varsa batch actions göster
-            document.getElementById('v-batch-actions').classList.toggle('hidden', grps.length === 0);
-            
             grps.forEach((g,gi) => {
                 const gDiv = document.createElement('div'); gDiv.className='v-group';
                 let itemsHtml = '';
-                
-                // Item batch actions
-                itemsHtml += `<div class="v-item-batch-actions hidden" id="item-batch-${gi}">
-                    <input type="checkbox" class="v-item-check" onchange="toggleAllItems(${gi}, this.checked)">
-                    <span class="v-batch-count"><span id="selected-item-count-${gi}">0</span> öğe seçildi</span>
-                    <button class="btn btn-danger" style="padding:4px 10px; font-size:11px;" onclick="deleteSelectedItems(${gi})">🗑️ Seçili Öğeleri Sil</button>
-                </div>`;
-                
                 g.items.forEach((it,ii) => {
-                    itemsHtml += `<div class="v-item" data-group="${gi}" data-item="${ii}">
-                        <input type="checkbox" class="v-item-check item-check-${gi}" onchange="updateItemSelection(${gi})">
-                        <div><div class="v-item-label">Varyasyon Adı</div><input value="${it.name}" oninput="updVar(${gi},${ii},'name',this.value)"></div>
-                        <div><div class="v-item-label">Resim</div><div class="input-group-btn"><input value="${it.value}" id="vi-${gi}-${ii}" oninput="updVar(${gi},${ii},'value',this.value)"><button class="btn btn-primary" onclick="openMedia('vi-${gi}-${ii}','image')">..</button></div></div>
-                        <div><div class="v-item-label">GLB Mat ID</div><input value="${it.textureConfig?.materialName||''}" onfocus="registerFocus(this)" oninput="updConf(${gi},${ii},'materialName',this.value)"></div>
-                        <div><div class="v-item-label">Doku Dosyası</div><div class="input-group-btn"><input value="${it.textureConfig?.baseColor||''}" id="vt-${gi}-${ii}" oninput="updConf(${gi},${ii},'baseColor',this.value)"><button class="btn btn-primary" onclick="openMedia('vt-${gi}-${ii}','image')">..</button></div></div>
-                        <button class="btn btn-danger" style="height:35px;" onclick="delItem(${gi},${ii})">X</button>
-                    </div>`;
+                    itemsHtml += `<div class="v-item"><div><div class="v-item-label">Varyasyon Adı</div><input value="${it.name}" oninput="updVar(${gi},${ii},'name',this.value)"></div><div><div class="v-item-label">Resim</div><div class="input-group-btn"><input value="${it.value}" id="vi-${gi}-${ii}" oninput="updVar(${gi},${ii},'value',this.value)"><button class="btn btn-primary" onclick="openMedia('vi-${gi}-${ii}','image')">..</button></div></div><div><div class="v-item-label">GLB Mat ID</div><input value="${it.textureConfig?.materialName||''}" onfocus="registerFocus(this)" oninput="updConf(${gi},${ii},'materialName',this.value)"></div><div><div class="v-item-label">Doku Dosyası</div><div class="input-group-btn"><input value="${it.textureConfig?.baseColor||''}" id="vt-${gi}-${ii}" oninput="updConf(${gi},${ii},'baseColor',this.value)"><button class="btn btn-primary" onclick="openMedia('vt-${gi}-${ii}','image')">..</button></div></div><button class="btn btn-danger" style="height:35px;" onclick="delItem(${gi},${ii})">X</button></div>`;
                 });
-                
-                gDiv.innerHTML = `
-                    <div class="v-header" onclick="this.parentElement.classList.toggle('collapsed')">
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <input type="checkbox" class="v-group-check group-check" data-group="${gi}" onclick="event.stopPropagation()" onchange="updateGroupSelection()">
-                            <span class="arrow">▼</span>
-                            <input value="${g.groupName}" onclick="event.stopPropagation()" oninput="DATA[CAT].products[PROD].variantGroups[${gi}].groupName=this.value">
-                        </div>
-                        <button class="btn btn-danger" onclick="delGrp(event, ${gi})">Sil</button>
-                    </div>
-                    <div class="v-body">${itemsHtml}<button class="btn btn-ghost" style="width:100%" onclick="addItem(${gi})">+ Ekle</button></div>`;
+                gDiv.innerHTML = `<div class="v-header" onclick="this.parentElement.classList.toggle('collapsed')"><div style="display:flex; align-items:center;"><span class="arrow">▼</span><input value="${g.groupName}" onclick="event.stopPropagation()" oninput="DATA[CAT].products[PROD].variantGroups[${gi}].groupName=this.value"></div><button class="btn btn-danger" onclick="delGrp(event, ${gi})">Sil</button></div><div class="v-body">${itemsHtml}<button class="btn btn-ghost" style="width:100%" onclick="addItem(${gi})">+ Ekle</button></div>`;
                 div.appendChild(gDiv);
             });
-        }
-        
-        // Grup seçimi güncelle
-        function updateGroupSelection() {
-            const checked = document.querySelectorAll('.group-check:checked').length;
-            document.getElementById('selected-group-count').textContent = checked;
-        }
-        
-        // Tüm grupları seç/kaldır
-        function toggleAllGroups(checked) {
-            document.querySelectorAll('.group-check').forEach(cb => cb.checked = checked);
-            updateGroupSelection();
-        }
-        
-        // Seçili grupları sil
-        function deleteSelectedGroups() {
-            const checkedGroups = [...document.querySelectorAll('.group-check:checked')];
-            if(checkedGroups.length === 0) {
-                return showAlert('⚠️ Uyarı', 'Hiç grup seçilmedi!', 'warning');
-            }
-            
-            showConfirm(
-                '🗑️ Grupları Sil',
-                `<strong>${checkedGroups.length}</strong> varyasyon grubu silinecek.<br><br>Bu işlem geri alınamaz. Devam etmek istiyor musunuz?`,
-                () => {
-                    const indices = checkedGroups.map(cb => parseInt(cb.dataset.group)).sort((a,b) => b-a);
-                    indices.forEach(i => DATA[CAT].products[PROD].variantGroups.splice(i, 1));
-                    renderVars(DATA[CAT].products[PROD].variantGroups);
-                    showUnsaved();
-                },
-                'Sil',
-                'danger'
-            );
-        }
-        
-        // Item seçimi güncelle
-        function updateItemSelection(gi) {
-            const checked = document.querySelectorAll(`.item-check-${gi}:checked`).length;
-            document.getElementById(`selected-item-count-${gi}`).textContent = checked;
-            document.getElementById(`item-batch-${gi}`).classList.toggle('hidden', checked === 0);
-        }
-        
-        // Tüm item'ları seç/kaldır
-        function toggleAllItems(gi, checked) {
-            document.querySelectorAll(`.item-check-${gi}`).forEach(cb => cb.checked = checked);
-            updateItemSelection(gi);
-        }
-        
-        // Seçili item'ları sil
-        function deleteSelectedItems(gi) {
-            const checkedItems = [...document.querySelectorAll(`.item-check-${gi}:checked`)];
-            if(checkedItems.length === 0) {
-                return showAlert('⚠️ Uyarı', 'Hiç öğe seçilmedi!', 'warning');
-            }
-            
-            showConfirm(
-                '🗑️ Öğeleri Sil',
-                `<strong>${checkedItems.length}</strong> varyasyon öğesi silinecek.<br><br>Bu işlem geri alınamaz. Devam etmek istiyor musunuz?`,
-                () => {
-                    const indices = [];
-                    checkedItems.forEach(cb => {
-                        const vItem = cb.closest('.v-item');
-                        if(vItem && vItem.dataset.item !== undefined) {
-                            indices.push(parseInt(vItem.dataset.item));
-                        }
-                    });
-                    indices.sort((a,b) => b-a);
-                    indices.forEach(i => DATA[CAT].products[PROD].variantGroups[gi].items.splice(i, 1));
-                    renderVars(DATA[CAT].products[PROD].variantGroups);
-                    showUnsaved();
-                },
-                'Sil',
-                'danger'
-            );
         }
 
         // --- UTILS ---
         function switchTab(t) { document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); event.target.classList.add('active'); document.getElementById('tab-'+t).classList.add('active'); }
         function registerFocus(el) { LAST_INPUT=el; }
-        
-        // Ürün adı değişince tree'de güncelle
-        function updateProdNameInTree() {
-            if(CAT > -1 && PROD > -1) {
-                const newName = document.getElementById('p-name').value;
-                DATA[CAT].products[PROD].name = newName;
-                // Tree'deki ilgili item'ı güncelle
-                const prodNameEl = document.querySelector(`.prod-name[data-cat="${CAT}"][data-prod="${PROD}"]`);
-                if(prodNameEl) {
-                    prodNameEl.innerHTML = `📦 ${newName || 'Adsız'}`;
-                }
-                showUnsaved();
-            }
-        }
-        
         function saveMem() { const p=DATA[CAT].products[PROD]; ['name','sku','thumb','desc','link','model'].forEach(k=>p[k]=document.getElementById('p-'+k).value); p.price=document.getElementById('p-price').value; }
-        // editCat artık inline düzenleme ile değiştirildi
+        function editCat(i) { const n=prompt("Kategori Adı:",DATA[i].name); if(n){ DATA[i].name=n; renderTree(); showUnsaved(); } }
         window.delCat = (e, i) => { 
-            e.stopPropagation(); 
-            const catName = DATA[i].name;
-            const prodCount = DATA[i].products.length;
-            
-            showConfirm(
-                '🗑️ Kategori Sil',
-                `<strong>"${catName}"</strong> kategorisi${prodCount > 0 ? ` ve içindeki <strong>${prodCount}</strong> ürün` : ''} silinecek.<br><br>Bu işlem geri alınamaz!`,
-                () => {
-                    DATA.splice(i, 1); 
-                    if (CAT === i) { 
-                        document.getElementById('editor-area').classList.add('hidden'); 
-                        CAT = -1; 
-                        PROD = -1; 
-                    } else if (CAT > i) { 
-                        CAT--; 
-                    } 
-                    renderTree(); 
-                    showUnsaved();
-                },
-                'Sil',
-                'danger'
-            );
-        }
+    e.stopPropagation(); 
+    if (confirm("Bu kategoriyi silmek istediğinize emin misiniz?")) { 
+        DATA.splice(i, 1); 
+        if (CAT === i) { 
+            document.getElementById('editor-area').classList.add('hidden'); 
+            CAT = -1; 
+            PROD = -1; 
+        } else if (CAT > i) { 
+            CAT--; 
+        } 
+        renderTree(); 
+        showUnsaved();
+    } 
+}
         window.newCat = () => { 
-            document.getElementById('cat-modal').classList.add('active');
-            document.getElementById('new-cat-name').value = '';
-            setTimeout(() => document.getElementById('new-cat-name').focus(), 100);
-        }
-        
-        function closeCatModal() {
-            document.getElementById('cat-modal').classList.remove('active');
-        }
-        
-        function confirmNewCat() {
-            const name = document.getElementById('new-cat-name').value.trim();
-            if(name) {
-                DATA.push({ name: name, products: [] });
-                renderTree();
-                showUnsaved();
-                closeCatModal();
-            } else {
-                document.getElementById('new-cat-name').focus();
-            }
-        }
-        
-        // Enter tuşu ile kategori oluştur
-        document.addEventListener('keydown', (e) => {
-            if(document.getElementById('cat-modal').classList.contains('active')) {
-                if(e.key === 'Enter') confirmNewCat();
-                if(e.key === 'Escape') closeCatModal();
-            }
-        });
+    const n = prompt("Yeni Kategori Adı:"); 
+    if (n) { 
+        DATA.push({ name: n, products: [] }); 
+        renderTree(); 
+        showUnsaved(); // Kaydedilmemiş değişiklik var
+    } 
+}
         window.newProd = () => { 
     if(!DATA.length) return alert("Önce bir kategori oluşturun!"); 
     if(CAT == -1) CAT = 0; 
@@ -1255,22 +664,8 @@
         window.updConf=(g,i,k,v)=>{ if(!DATA[CAT].products[PROD].variantGroups[g].items[i].textureConfig)DATA[CAT].products[PROD].variantGroups[g].items[i].textureConfig={}; DATA[CAT].products[PROD].variantGroups[g].items[i].textureConfig[k]=v; }
         window.addGrp=()=>{ DATA[CAT].products[PROD].variantGroups.push({groupName:"Yeni",items:[]}); renderVars(DATA[CAT].products[PROD].variantGroups); }
         window.addItem=(g)=>{ DATA[CAT].products[PROD].variantGroups[g].items.push({name:"Yeni",value:"",textureConfig:{}}); renderVars(DATA[CAT].products[PROD].variantGroups); }
-        window.delGrp=(e,g)=>{ 
-            e.stopPropagation(); 
-            const grpName = DATA[CAT].products[PROD].variantGroups[g].groupName || 'Adsız';
-            showConfirm(
-                '🗑️ Grup Sil',
-                `<strong>"${grpName}"</strong> grubu silinecek.<br><br>Bu işlem geri alınamaz!`,
-                () => {
-                    DATA[CAT].products[PROD].variantGroups.splice(g,1); 
-                    renderVars(DATA[CAT].products[PROD].variantGroups);
-                    showUnsaved();
-                },
-                'Sil',
-                'danger'
-            );
-        }
-        window.delItem=(g,i)=>{ DATA[CAT].products[PROD].variantGroups[g].items.splice(i,1); renderVars(DATA[CAT].products[PROD].variantGroups); showUnsaved(); }
+        window.delGrp=(e,g)=>{ e.stopPropagation(); if(confirm("Sil?")) DATA[CAT].products[PROD].variantGroups.splice(g,1); renderVars(DATA[CAT].products[PROD].variantGroups); }
+        window.delItem=(g,i)=>{ DATA[CAT].products[PROD].variantGroups[g].items.splice(i,1); renderVars(DATA[CAT].products[PROD].variantGroups); }
         
         // Global bir kilit değişkeni tanımlayalım (Script'in en tepesine de koyabilirsin ama burada da çalışır)
         let isSaving = false;
@@ -1291,37 +686,10 @@
             if(btnSave) { btnSave.innerText = "Kaydediliyor..."; btnSave.style.opacity = "0.7"; }
             document.getElementById('loader').style.display = 'flex'; 
 
-            try {
-                // ADIM 0: Pending GLB dosyasını R2'ye yükle (varsa)
-                if(window.pendingGlbFile) {
-                    const modelPath = document.getElementById('p-model').value;
-                    const cleanPath = modelPath.startsWith('/') ? modelPath.slice(1) : modelPath;
-                    console.log('📤 GLB dosyası R2\'ye yükleniyor:', cleanPath);
-                    
-                    try {
-                        await fetch(WORKER_URL + "/upload/" + cleanPath, { 
-                            method: "PUT", 
-                            body: window.pendingGlbFile 
-                        });
-                        console.log('✅ GLB dosyası R2\'ye yüklendi');
-                        
-                        // Pending dosyayı temizle
-                        window.pendingGlbFile = null;
-                        document.getElementById('p-model').dataset.pendingUpload = 'false';
-                        
-                        // Local URL'yi temizle
-                        if(localGlbUrl) {
-                            URL.revokeObjectURL(localGlbUrl);
-                            localGlbUrl = null;
-                        }
-                    } catch(uploadErr) {
-                        console.error('❌ GLB yükleme hatası:', uploadErr);
-                        throw new Error('GLB dosyası R2\'ye yüklenemedi: ' + uploadErr.message);
-                    }
-                }
+            const u = `https://api.github.com/repos/${CRED.owner}/${CRED.repo}/contents/${CRED.path}`; 
 
+            try {
                 // ADIM 1: GÜNCEL SHA'YI AL (Çakışmayı Önlemek İçin Kritik Hamle)
-                const u = `https://api.github.com/repos/${CRED.owner}/${CRED.repo}/contents/${CRED.path}`; 
                 // Kaydetmeden hemen önce GitHub'dan dosyanın SON halinin kimliğini alıyoruz.
                 const getRes = await fetch(u + `?ref=${CRED.branch}`, {
                     method: 'GET',
@@ -1358,7 +726,7 @@
                     SHA = resp.content.sha; // Bizim yerel SHA'mızı da güncelle
                     console.log("✅ Başarıyla Kaydedildi! Yeni SHA:", SHA); 
                     clearUnsaved();
-                    showAlert('✅ Başarılı', 'Değişiklikler GitHub\'a başarıyla kaydedildi!', 'success'); 
+                    alert("✅ GitHub'a başarıyla kaydedildi!"); 
                 } else { 
                     const err = await putRes.json(); 
                     throw new Error("Kayıt Hatası: " + (err.message || putRes.statusText)); 
@@ -1366,7 +734,7 @@
 
             } catch(e) { 
                 console.error(e);
-                showAlert('❌ Hata', e.message, 'error'); 
+                alert("❌ Hata: " + e.message); 
             } finally {
                 // 3. Ortalığı Topla
                 document.getElementById('loader').style.display = 'none';
