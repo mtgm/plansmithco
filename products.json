@@ -261,15 +261,32 @@
         "link": "",
         "model": "/1x2V3.glb",
         "price": "0"
-      },
-      {
-        "name": "Yeni",
-        "variantGroups": []
       }
     ]
   },
   {
     "name": "deneme",
-    "products": []
+    "products": [
+      {
+        "name": "Yeni Ürün",
+        "sku": "NEW",
+        "price": 0,
+        "variantGroups": [],
+        "description": "",
+        "listingUrl": "",
+        "masterModel": "",
+        "thumbnail": ""
+      },
+      {
+        "name": "Yeni",
+        "variantGroups": [],
+        "sku": "",
+        "price": 0,
+        "description": "",
+        "listingUrl": "",
+        "masterModel": "",
+        "thumbnail": ""
+      }
+    ]
   }
 ]
