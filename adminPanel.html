@@ -802,7 +802,20 @@
         }
         
         window.newProd=()=>{ if(!DATA.length)return; if(CAT==-1)CAT=0; DATA[CAT].products.push({name:"Yeni", variantGroups:[]}); renderTree(); }
-        window.newCat=()=>{ const n=prompt("Ad"); if(n)DATA.push({name:n, products:[]}); renderTree(); }
+        // --- YENİ KATEGORİ (OTO-KAYITLI) ---
+        window.newCat = async () => { 
+            const n = prompt("Yeni Kategori Adı:"); 
+            if (n) { 
+                // 1. Veriye Ekle
+                DATA.push({ name: n, products: [] }); 
+                
+                // 2. Arayüzü Yenile
+                renderTree(); 
+                
+                // 3. OTOMATİK KAYIT
+                await saveGithub(); 
+            } 
+        }
         window.delProd=()=>{ if(confirm("Sil?")){ DATA[CAT].products.splice(PROD,1); document.getElementById('editor-area').classList.add('hidden'); renderTree(); } }
         window.moveCat=()=>{ const n=document.getElementById('p-cat').value; saveMem(); const p=DATA[CAT].products.splice(PROD,1)[0]; DATA[n].products.push(p); renderTree(); }
 
