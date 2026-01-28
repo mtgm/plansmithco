@@ -1,14 +1,27 @@
 [
   {
+    "id": "cat_storage",
     "name": "Storage Tote Racks",
+    "description": "1x2 Storage Tote Rack Description",
+    "thumbnail": "/poster.webp",
     "products": [
       {
-        "name": "1x2 Storage Tote Rack",
+        "name": "1x2 Storage Tote Rack V1",
         "sku": "1X2V3",
-        "thumb": "/dneeme/Gemini_Generated_Image_qpffyyqpffyyqpff.png",
-        "desc": "1x2 Storage Tote Rack Description",
-        "link": "",
-        "model": "/models/1x2V3.glb",
+        "thumbnail": "/poster.webp",
+        "description": "1x2 Storage Tote Rack Description V1",
+        "listingUrl": "",
+        "masterModel": "/assets-r2/models/1x2V3.glb",
+        "price": "80",
+        "variantGroups": []
+      },
+      {
+        "name": "1x2 Storage Tote Rack V2",
+        "sku": "1X2V3",
+        "thumbnail": "/poster.webp",
+        "description": "1x2 Storage Tote Rack Description V2",
+        "listingUrl": "",
+        "masterModel": "/assets-r2/models/1x2V3.glb",
         "price": "80",
         "variantGroups": []
       }
