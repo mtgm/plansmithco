@@ -319,7 +319,12 @@
         "desc": "",
         "link": "",
         "model": ""
-      },
+      }
+    ]
+  },
+  {
+    "name": "deneme",
+    "products": [
       {
         "name": "Yeni",
         "variantGroups": [],
@@ -331,9 +336,5 @@
         "price": "0"
       }
     ]
-  },
-  {
-    "name": "deneme",
-    "products": []
   }
 ]
