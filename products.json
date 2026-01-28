@@ -10,7 +10,7 @@
         "sku": "1X2V3",
         "thumbnail": "/poster.webp",
         "description": "1x2 Storage Tote Rack Description V1",
-        "listingUrl": "",
+        "listingUrl": "https://plansmithco-showroom.vercel.app/",
         "masterModel": "/assets-r2/models/1x2V3.glb",
         "price": "80",
         "variantGroups": []
@@ -20,7 +20,7 @@
         "sku": "1X2V3",
         "thumbnail": "/poster.webp",
         "description": "1x2 Storage Tote Rack Description V2",
-        "listingUrl": "",
+        "listingUrl": "https://plansmithco-showroom.vercel.app/",
         "masterModel": "/assets-r2/models/1x2V3.glb",
         "price": "80",
         "variantGroups": []
