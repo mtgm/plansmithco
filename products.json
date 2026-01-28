@@ -313,24 +313,5 @@
         "model": ""
       }
     ]
-  },
-  {
-    "name": "Gardıroplar",
-    "products": [
-      {
-        "name": "Yeni",
-        "variantGroups": [],
-        "sku": "",
-        "thumb": "",
-        "desc": "",
-        "link": "",
-        "model": "",
-        "price": "0",
-        "description": "",
-        "listingUrl": "",
-        "masterModel": "",
-        "thumbnail": ""
-      }
-    ]
   }
 ]
