@@ -321,20 +321,5 @@
         "model": ""
       }
     ]
-  },
-  {
-    "name": "Yataklar",
-    "products": [
-      {
-        "name": "Yeni",
-        "variantGroups": [],
-        "sku": "",
-        "thumb": "",
-        "desc": "",
-        "link": "",
-        "model": "/1x2V3.glb",
-        "price": "0"
-      }
-    ]
   }
 ]
