@@ -273,13 +273,57 @@
     "name": "yeni kategori",
     "products": [
       {
-        "name": "555",
+        "name": "465",
         "sku": "1X2V3",
         "thumb": "/textures/1x2V3/dikme_normal.png",
         "desc": "555 açıklama",
         "link": "",
         "model": "/1x2V3.glb",
         "price": "0",
+        "variantGroups": []
+      },
+      {
+        "name": "Yeni Ürün",
+        "sku": "",
+        "thumb": "",
+        "desc": "",
+        "link": "",
+        "model": "/1x2V2.glb",
+        "price": "0",
+        "variantGroups": [
+          {
+            "groupName": "texture-3",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "texture-3_baseColor.png",
+                "textureConfig": {
+                  "materialName": "texture-3",
+                  "baseColor": "texture-3_baseColor.png"
+                }
+              },
+              {
+                "name": "Yeni",
+                "value": "",
+                "textureConfig": {}
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "ykkk",
+    "products": [
+      {
+        "name": "Yeni Ürün",
+        "sku": "",
+        "thumb": "",
+        "desc": "",
+        "link": "",
+        "model": "",
+        "price": 0,
         "variantGroups": []
       }
     ]
