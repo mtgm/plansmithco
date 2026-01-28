@@ -159,6 +159,16 @@
         "desc": "",
         "link": "",
         "model": ""
+      },
+      {
+        "name": "Yeni Ürün",
+        "sku": "",
+        "thumb": "",
+        "desc": "",
+        "link": "",
+        "model": "",
+        "price": 0,
+        "variantGroups": []
       }
     ]
   },
