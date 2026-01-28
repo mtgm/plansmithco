@@ -159,7 +159,7 @@
       {
         "sku": "1X2V3",
         "name": "1x2 Storage Tote Rack V3",
-        "price": 129,
+        "price": "129",
         "description": "Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.Modüler depolama sistemi. Ana model yüklenir, renkler anlık değişir.",
         "listingUrl": "https://www.etsy.com/shop/PlanSmithCo",
         "masterModel": "/assets-r2/models/1x2V3.glb",
@@ -306,87 +306,12 @@
               }
             ]
           }
-        ]
+        ],
+        "thumb": "",
+        "desc": "",
+        "link": "",
+        "model": ""
       }
     ]
-  },
-  {
-    "id": "cat_1769469838259",
-    "name": "Gardeoplar",
-    "products": [
-      {
-        "name": "Ürün 1",
-        "sku": "1X2V3",
-        "price": 50,
-        "variantGroups": [
-          {
-            "groupName": "Orijinal Parçalar",
-            "items": [
-              {
-                "name": "polished brass.001",
-                "value": "/assets-r2/textures/thumb_wood.jpg",
-                "textureConfig": {
-                  "materialName": "polished brass.001",
-                  "baseColor": ""
-                }
-              },
-              {
-                "name": "yellow low gloss plastic.001",
-                "value": "/assets-r2/textures/thumb_wood.jpg",
-                "textureConfig": {
-                  "materialName": "yellow low gloss plastic.001",
-                  "baseColor": ""
-                }
-              },
-              {
-                "name": "dark grey low gloss plastic.001",
-                "value": "/assets-r2/textures/thumb_wood.jpg",
-                "textureConfig": {
-                  "materialName": "dark grey low gloss plastic.001",
-                  "baseColor": ""
-                }
-              },
-              {
-                "name": "texture.001",
-                "value": "/assets-r2/textures/thumb_wood.jpg",
-                "textureConfig": {
-                  "materialName": "texture.001",
-                  "baseColor": ""
-                }
-              },
-              {
-                "name": "texture-1.001",
-                "value": "/assets-r2/textures/thumb_wood.jpg",
-                "textureConfig": {
-                  "materialName": "texture-1.001",
-                  "baseColor": ""
-                }
-              },
-              {
-                "name": "texture-3.001",
-                "value": "/assets-r2/textures/thumb_wood.jpg",
-                "textureConfig": {
-                  "materialName": "texture-3.001",
-                  "baseColor": ""
-                }
-              },
-              {
-                "name": "texture-2.001",
-                "value": "/assets-r2/textures/thumb_wood.jpg",
-                "textureConfig": {
-                  "materialName": "texture-2.001",
-                  "baseColor": ""
-                }
-              }
-            ]
-          }
-        ],
-        "description": "Denem Ürün eklendi. güncelleme yapıldı",
-        "listingUrl": "etsy.com",
-        "masterModel": "/assets-r2/models/1x2V3.glb",
-        "thumbnail": "/poster.webp"
-      }
-    ],
-    "thumbnail": ""
   }
 ]
