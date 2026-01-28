@@ -101,7 +101,7 @@ body {
     margin-bottom: 6px; cursor: pointer; transition: all 0.2s;
 }
 .prod-item.active { background: #fff7ed; border-color: var(--accent-color); box-shadow: 0 0 0 1px var(--accent-color); }
-.prod-thumb { width: 44px; height: 44px; border-radius: 6px; background: #e2e8f0; object-fit: cover; }
+.prod-thumb { width: 60px; height: 60px; border-radius: 6px; background: #e2e8f0; object-fit: cover; }
 
 /* --- SAĞ PANEL (3D SAHNE) --- */
 #stage-wrapper {
