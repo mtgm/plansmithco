@@ -314,8 +314,18 @@
       },
       {
         "name": "Yeni",
-        "variantGroups": []
+        "variantGroups": [],
+        "sku": "",
+        "thumb": "",
+        "desc": "",
+        "link": "",
+        "model": "",
+        "price": "0"
       }
     ]
+  },
+  {
+    "name": "Yataklar",
+    "products": []
   }
 ]
