@@ -311,12 +311,7 @@
         "desc": "",
         "link": "",
         "model": ""
-      }
-    ]
-  },
-  {
-    "name": "Yataklar",
-    "products": [
+      },
       {
         "name": "Yeni",
         "variantGroups": [],
@@ -328,5 +323,9 @@
         "price": "0"
       }
     ]
+  },
+  {
+    "name": "Yataklar",
+    "products": []
   }
 ]
