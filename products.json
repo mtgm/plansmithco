@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "name": "Storage Tote Racks",
+    "products": [
+      {
+        "name": "1x2 Storage Tote Rack",
+        "sku": "1X2V3",
+        "thumb": "/dneeme/Gemini_Generated_Image_qpffyyqpffyyqpff.png",
+        "desc": "1x2 Storage Tote Rack Description",
+        "link": "",
+        "model": "/models/1x2V3.glb",
+        "price": "80",
+        "variantGroups": []
+      }
+    ]
+  }
+]
