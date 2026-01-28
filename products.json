@@ -1,6 +1,8 @@
 [
   {
+    "id": "cat_storage",
     "name": "Storage Tote Racks",
+    "thumbnail": "/poster.webp",
     "products": [
       {
         "name": "1x2 Storage Tote Rack",
