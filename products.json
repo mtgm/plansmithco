@@ -9,7 +9,7 @@
         "id": "prod_1x2_v3",
         "name": "Yeni Ürün 1.0",
         "sku": "1X2V3",
-        "thumbnail": "/assets-r2/poster.webp",
+        "thumbnail": "/assets-r2/textures/1x2V3/polished_brass_normal.png",
         "description": "111 description",
         "listingUrl": "https://www.etsy.com/shop/PlanSmithCo",
         "masterModel": "/assets-r2/models/1x2V3.glb",
