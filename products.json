@@ -4,6 +4,57 @@
     "name": "Storage Tote Racks",
     "description": "1x2 Storage Tote Rack Description",
     "thumbnail": "/poster.webp",
-    "products": []
+    "products": [
+      {
+        "name": "Yeni Ürün 1",
+        "sku": "1X2V3",
+        "thumb": "/poster.webp",
+        "desc": "111 description",
+        "link": "https://www.etsy.com/shop/PlanSmithCo",
+        "model": "/models/1x2V3.glb",
+        "price": "111",
+        "variantGroups": [
+          {
+            "groupName": "dark grey low gloss plastic.001",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "dark grey low gloss plastic.001_baseColor.png",
+                "textureConfig": {
+                  "materialName": "dark grey low gloss plastic.001",
+                  "baseColor": "dark grey low gloss plastic.001_baseColor.png"
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "texture.001",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "texture.001_baseColor.png",
+                "textureConfig": {
+                  "materialName": "texture.001",
+                  "baseColor": "texture.001_baseColor.png"
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "texture-1.001",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "texture-1.001_baseColor.png",
+                "textureConfig": {
+                  "materialName": "texture-1.001",
+                  "baseColor": "texture-1.001_baseColor.png"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 ]
