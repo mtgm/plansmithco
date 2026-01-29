@@ -19,10 +19,10 @@
             "items": [
               {
                 "name": "Orijinal",
-                "value": "dark grey low gloss plastic.001_baseColor.png",
+                "value": "/textures/1x2V3/dark_grey_low_gloss_plastic_baseColor.png",
                 "textureConfig": {
                   "materialName": "dark grey low gloss plastic.001",
-                  "baseColor": "dark grey low gloss plastic.001_baseColor.png"
+                  "baseColor": "/textures/1x2V3/dark_grey_low_gloss_plastic_baseColor.png"
                 }
               }
             ]
