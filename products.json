@@ -6,13 +6,23 @@
     "thumbnail": "/poster.webp",
     "products": [
       {
-        "name": "1x2 Storage Tote Rack V1.0",
-        "sku": "1X2V3",
+        "name": "Yeni Ürün1",
+        "sku": "",
         "thumbnail": "/poster.webp",
-        "description": "1x2 Storage Tote Rack Description V1",
-        "listingUrl": "https://plansmithco-showroom.vercel.app/",
-        "masterModel": "/assets-r2/models/1x2V3.glb",
-        "price": "80",
+        "description": "111",
+        "listingUrl": "",
+        "masterModel": "",
+        "price": 0,
+        "variantGroups": []
+      },
+      {
+        "name": "Yeni Ürün",
+        "sku": "",
+        "thumbnail": "",
+        "description": "",
+        "listingUrl": "",
+        "masterModel": "",
+        "price": 0,
         "variantGroups": []
       }
     ]
