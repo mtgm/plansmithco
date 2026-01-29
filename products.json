@@ -29,25 +29,26 @@
             ]
           }
         ]
-      },
-      {
-        "id": "prod_1769722746253",
-        "name": "Yeni Ürün2",
-        "sku": "1X2V3",
-        "thumbnail": "/textures/1x2V3/polished_brass_normal.png",
-        "description": "qefefdfsd",
-        "listingUrl": "https://www.etsy.com/shop/PlanSmithCo",
-        "masterModel": "/models/1x2V3.glb",
-        "price": 4564444,
-        "variantGroups": []
       }
     ]
   },
   {
     "id": "cat_yk",
     "name": "yk",
-    "thumbnail": "",
-    "description": "",
-    "products": []
+    "thumbnail": "/assets-r2/textures/1x2V3/polished_brass_normal.png",
+    "description": "12413241",
+    "products": [
+      {
+        "id": "prod_1769728168700",
+        "name": "Yeni Ürün2.0",
+        "sku": "1X2V3",
+        "thumbnail": "/assets-r2/textures/1x2V3/ray_baseColor.png",
+        "description": "ıobm klıuhjkn",
+        "listingUrl": "https://www.etsy.com/shop/PlanSmithCo",
+        "masterModel": "/assets-r2/models/1x2V3.glb",
+        "price": 24534,
+        "variantGroups": []
+      }
+    ]
   }
 ]
