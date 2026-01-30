@@ -1,0 +1,73 @@
+[
+  {
+    "id": "cat_storage",
+    "name": "Storage Tote Racks",
+    "description": "1x2 Storage Tote Rack Description",
+    "thumbnail": "/poster.webp",
+    "products": [
+      {
+        "id": "prod_1x2_v3",
+        "name": "Yeni Ürün 1.0",
+        "sku": "1X2V3",
+        "thumbnail": "/assets-r2/textures/1x2V3/polished_brass_normal.png",
+        "description": "111 description",
+        "listingUrl": "https://www.etsy.com/shop/PlanSmithCo",
+        "masterModel": "/assets-r2/models/1x2V3.glb",
+        "price": 1524,
+        "variantGroups": [
+          {
+            "groupName": "dark grey low gloss plastic.001",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "/assets-r2/textures/1x2V3/dark_grey_low_gloss_plastic_baseColor.png",
+                "textureConfig": {
+                  "materialName": "dark grey low gloss plastic.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/dark_grey_low_gloss_plastic_baseColor.png"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cat_yk",
+    "name": "yk",
+    "thumbnail": "/assets-r2/textures/1x2V3/polished_brass_normal.png",
+    "description": "12413241",
+    "products": [
+      {
+        "id": "prod_1769728168700",
+        "name": "Yeni Ürün2.0",
+        "sku": "1X2V3",
+        "thumbnail": "/assets-r2/textures/1x2V3/ray_baseColor.png",
+        "description": "ıobm klıuhjkn",
+        "listingUrl": "https://www.etsy.com/shop/PlanSmithCo",
+        "masterModel": "/assets-r2/models/1x2V3.glb",
+        "price": 24534,
+        "variantGroups": []
+      }
+    ]
+  },
+  {
+    "id": "cat_111",
+    "name": "111",
+    "thumbnail": "/assets-r2/logov2.webp",
+    "description": "ghfghdgh",
+    "products": [
+      {
+        "id": "prod_1769729388320",
+        "name": "Yeni Ürün",
+        "sku": "1X2V3",
+        "thumbnail": "/assets-r2/textures/1x2V3/texture-2_baseColor.png",
+        "description": "567568",
+        "listingUrl": "https://www.etsy.com/shop/PlanSmithCo",
+        "masterModel": "/assets-r2/models/1x2V3.glb",
+        "price": 56456,
+        "variantGroups": []
+      }
+    ]
+  }
+]

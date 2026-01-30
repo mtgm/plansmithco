@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>PlanSmithCo Panel v8.1 (Windows Pro)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+    <style>
+        /* WINDOWS 11 TARZI UI */
+        :root { --primary: #0067c0; --bg: #f3f3f3; --border: #e5e5e5; --hover: #e0eef9; --select: #cce8ff; --text: #202020; }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; overflow: hidden; font-size: 13px; }
+
+        /* --- DOSYA GEZGİNİ --- */
+        #media-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .media-content { background: white; width: 90%; height: 90%; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border: 1px solid #ccc; }
+        
+        /* Toolbar */
+        .media-toolbar { padding: 8px 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #fff; gap: 10px; }
+        .toolbar-group { display: flex; gap: 5px; align-items: center; }
+        .search-box { padding: 5px 10px; border: 1px solid #d1d1d1; border-radius: 4px; width: 250px; font-size: 12px; outline: none; }
+        .search-box:focus { border-color: var(--primary); border-bottom: 2px solid var(--primary); }
+        
+        .icon-btn { padding: 5px 8px; background: transparent; border: 1px solid transparent; border-radius: 3px; cursor: pointer; color: #555; font-size: 14px; }
+        .icon-btn:hover { background: var(--hover); }
+        .icon-btn.active { background: var(--select); border-color: #99c9ef; color: #000; }
+
+        /* Address Bar */
+        .address-bar { padding: 6px 12px; background: white; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+        .nav-up-btn { cursor: pointer; padding: 2px 6px; border-radius: 3px; color: #555; }
+        .nav-up-btn:hover { background: var(--hover); }
+        .path-box { flex: 1; border: 1px solid #d1d1d1; padding: 4px 8px; font-size: 12px; border-radius: 3px; color: #444; display: flex; align-items: center; }
+        .path-icon { margin-right: 6px; color: #e8b628; }
+
+        /* Content Area */
+        .media-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; background: white; }
+        
+        /* HEADER (Sıralama Başlıkları) */
+        .details-header { display: grid; grid-template-columns: 3fr 1fr 1fr; padding: 0 10px; border-bottom: 1px solid var(--border); background: white; font-size: 12px; color: #555; user-select: none; }
+        .d-head-col { padding: 6px 5px; border-right: 1px solid transparent; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .d-head-col:hover { background: var(--hover); }
+        .d-head-col:active { background: var(--select); }
+        .d-head-col:last-child { border-right: none; }
+        .sort-arrow { font-size: 10px; color: #777; }
+
+        /* LİSTE KONTEYNERİ */
+        #file-container { flex: 1; overflow-y: auto; padding: 10px; }
+
+        /* --- GÖRÜNÜM MODLARI --- */
+
+        /* 1. Details (Ayrıntılar - Windows Style) */
+        .view-details { display: flex; flex-direction: column; gap: 0; padding: 0 !important; }
+        .view-details .media-item { 
+            display: grid; grid-template-columns: 3fr 1fr 1fr; 
+            padding: 4px 10px; border: 1px solid transparent; 
+            cursor: default; align-items: center; font-size: 12px; color: #333;
+        }
+        .view-details .media-item:hover { background: var(--hover); }
+        .view-details .media-item.selected { background: var(--select); border-color: #99c9ef; }
+        .view-details .item-icon-box { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; margin-right: 8px; }
+        .view-details .item-thumb { width: 16px; height: 16px; object-fit: contain; }
+        .view-details .item-emoji { font-size: 16px; color: #e8b628; } /* Klasör rengi */
+        .view-details .file-emoji { font-size: 16px; color: #888; }
+        .view-details .name-col { display: flex; align-items: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .view-details .meta-col { color: #666; }
+
+        /* 2. Grid (Izgara - Büyük) */
+        .view-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 5px; }
+        .view-grid .media-item { 
+            display: flex; flex-direction: column; align-items: center; 
+            padding: 5px; border: 1px solid transparent; border-radius: 4px; 
+            cursor: default; height: 110px; 
+        }
+        .view-grid .media-item:hover { background: var(--hover); }
+        .view-grid .media-item.selected { background: var(--select); border-color: #99c9ef; }
+        .view-grid .item-icon-box { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+        .view-grid .item-thumb { width: 100%; height: 100%; object-fit: contain; }
+        .view-grid .item-emoji { font-size: 48px; color: #e8b628; }
+        .view-grid .file-emoji { font-size: 40px; color: #ccc; }
+        .view-grid .item-name { font-size: 11px; text-align: center; word-wrap: break-word; line-height: 1.2; max-height: 36px; overflow: hidden; width: 100%; }
+        .view-grid .meta-col { display: none; } /* Gridde tarih/boyut gizle */
+
+        .disabled-item { opacity: 0.5; filter: grayscale(100%); pointer-events: none; }
+
+        /* --- DİĞER CSSLER (Login, Panel) --- */
+        #login-overlay { position: fixed; inset: 0; background: #202020; z-index: 999; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: white; padding: 40px; border-radius: 8px; width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px; }
+        #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 50; display: none; align-items: center; justify-content: center; }
+        aside { width: 250px; background: #fff; border-right: 1px solid #ddd; display: flex; flex-direction: column; }
+        .brand { padding: 20px; font-weight: 700; font-size: 18px; border-bottom: 1px solid #eee; }
+        .tree-view { flex: 1; padding: 10px; overflow-y: auto; }
+        .actions { padding: 15px; border-top: 1px solid #eee; }
+        main { flex: 1; display: flex; overflow: hidden; background: #f9f9f9; }
+        .editor-area { flex: 1; padding: 30px; overflow-y: auto; }
+        .tools-area { width: 300px; background: #fff; border-left: 1px solid #ddd; padding: 20px; overflow-y: auto; }
+        .card { background: white; border: 1px solid #e5e5e5; border-radius: 6px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .full { grid-column: span 2; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .input-with-btn { display: flex; gap: 5px; }
+        .btn { padding: 8px 12px; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; }
+        .btn-primary { background: #0067c0; color: white; }
+        .btn-success { background: #107c10; color: white; }
+        .btn-danger { background: #c42b1c; color: white; }
+        .hidden { display: none !important; }
+        .v-group { background: #fdfdfd; padding: 10px; border: 1px solid #eee; margin-bottom: 10px; }
+        .v-item { background: white; padding: 10px; border: 1px solid #eee; margin-bottom: 5px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        /* GLB Tool */
+        .drop-zone { border: 2px dashed #ccc; padding: 30px; text-align: center; border-radius: 6px; color: #888; cursor: pointer; }
+        .drop-zone:hover { border-color: #0067c0; background: #f0f8ff; }
+        .mat-item { padding: 5px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; font-size: 11px; }
+        .mat-item:hover { background: #e0eef9; color: #0067c0; }
+    </style>
+</head>
+<body>
+
+    <script>
+        let WORKER_URL = "https://plansmithco-adminpanel-api.serhatyildirim123.workers.dev"; 
+        let R2_PUBLIC_URL = "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev"; 
+    </script>
+
+    <div id="media-modal">
+        <div class="media-content">
+            <div class="media-toolbar">
+                <div class="toolbar-group">
+                    <button class="btn btn-primary" style="font-size:12px;" onclick="document.getElementById('r2-up').click()">+ Dosya Yükle</button>
+                    <input type="file" id="r2-up" hidden onchange="uploadToR2(this.files[0])">
+                </div>
+                
+                <div class="toolbar-group" style="flex:1; justify-content:center;">
+                    <input type="text" class="search-box" id="search-input" placeholder="Bu klasörde ara" oninput="handleSearch(this.value)">
+                </div>
+
+                <div class="toolbar-group">
+                    <button class="icon-btn active" id="view-details" onclick="changeView('details')" title="Ayrıntılar">≡</button>
+                    <button class="icon-btn" id="view-grid" onclick="changeView('grid')" title="Büyük Simgeler">▦</button>
+                    <button class="btn btn-danger" style="padding:4px 10px; font-size:12px;" onclick="closeMediaModal()">✕</button>
+                </div>
+            </div>
+            
+            <div class="address-bar">
+                <div class="nav-up-btn" onclick="navUp()">⬆</div>
+                <div class="path-box">
+                    <span class="path-icon">📂</span>
+                    <span id="current-path">Ana Dizin</span>
+                </div>
+            </div>
+
+            <div class="details-header" id="explorer-header">
+                <div class="d-head-col" onclick="handleSort('name')">Ad <span id="sort-icon-name" class="sort-arrow"></span></div>
+                <div class="d-head-col" onclick="handleSort('date')">Değiştirilme Tarihi <span id="sort-icon-date" class="sort-arrow"></span></div>
+                <div class="d-head-col" onclick="handleSort('size')">Boyut <span id="sort-icon-size" class="sort-arrow"></span></div>
+            </div>
+
+            <div class="media-body">
+                <div id="file-container" class="view-details">Yükleniyor...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2>PlanSmithCo v8.1</h2>
+            <div class="input-group"><input type="password" id="gh-token" placeholder="GitHub Token"></div>
+            <div class="input-group"><input type="text" id="gh-owner" placeholder="User" value="mtgm"></div>
+            <div class="input-group"><input type="text" id="gh-repo" placeholder="Repo" value="plansmithco"></div>
+            <div class="input-group"><input type="text" id="gh-branch" placeholder="Branch" value="v2-showroom"></div>
+            <div class="input-group"><input type="text" id="gh-path" placeholder="File" value="products.json"></div>
+            <button class="btn btn-primary" style="width:100%" onclick="startLogin()">BAĞLAN</button>
+        </div>
+    </div>
+    <div id="loader"><div class="spinner" style="width:40px;height:40px;border:4px solid #ccc;border-top-color:#0067c0;border-radius:50%;animation:spin 1s linear infinite;"></div></div>
+
+    <aside>
+        <div class="brand">PANEL</div>
+        <div class="tree-view" id="tree-root"></div>
+        <div class="actions">
+            <button class="btn btn-primary" onclick="newProd()">+ Ürün</button>
+            <button class="btn btn-success" onclick="newCat()">+ Kategori</button>
+        </div>
+    </aside>
+
+    <main>
+        <div class="editor-area">
+            <div id="editor" class="hidden">
+                <div class="card">
+                    <h3>Ürün Düzenle</h3>
+                    <div class="form-grid">
+                        <div class="full"><label>Kategori</label><select id="p-cat" onchange="moveCat()"></select></div>
+                        <div><label>Ad</label><input id="p-name"></div>
+                        <div><label>SKU</label><input id="p-sku"></div>
+                        <div><label>Fiyat</label><input type="number" id="p-price"></div>
+                        <div>
+                            <label>Poster</label>
+                            <div class="input-with-btn">
+                                <input id="p-thumb"><button class="btn" onclick="openMedia('p-thumb','image')">SEÇ</button>
+                            </div>
+                        </div>
+                        <div class="full"><label>Açıklama</label><textarea id="p-desc"></textarea></div>
+                        <div class="full"><label>Etsy</label><input id="p-link"></div>
+                        <div class="full">
+                            <label>Model (GLB)</label>
+                            <div class="input-with-btn">
+                                <input id="p-model"><button class="btn" onclick="openMedia('p-model','model')">SEÇ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between;">
+                        <h3>Varyasyonlar</h3>
+                        <button class="btn" onclick="addGrp()">+ Grup</button>
+                    </div>
+                    <div id="v-container"></div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; margin-top:20px;">
+                    <button class="btn btn-danger" onclick="delProd()">SİL</button>
+                    <button class="btn btn-success" onclick="saveGithub()">KAYDET</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="tools-area">
+            <div class="card">
+                <label style="font-weight:bold; color:#0067c0;">GLB Dedektifi</label>
+                <div class="drop-zone" id="drop-zone">Dosyayı Buraya Sürükle</div>
+                <input type="file" id="glb-in" hidden>
+                <button class="btn btn-primary hidden" id="btn-auto" style="width:100%; margin-top:10px;" onclick="autoFill()">✨ Orijinali Ekle</button>
+                <div id="mat-list" style="margin-top:10px; max-height:200px; overflow-y:auto; border:1px solid #eee;"></div>
+                <model-viewer id="viewer" camera-controls style="width:100%; height:200px; background:#f0f0f0; margin-top:10px;"></model-viewer>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let DATA=[], CAT=-1, PROD=-1, CRED={}, SHA="", TARGET_ID="", R2_FILES=[], CUR_PATH="";
+        let VIEW_MODE = 'details'; 
+        let SORT_KEY = 'name', SORT_ASC = true;
+        let SEARCH_QUERY = '';
+        let FILTER_TYPE = 'all'; 
+        let LAST_INPUT = null;
+
+        window.onload = () => { if(localStorage.getItem('gh_token')) document.getElementById('gh-token').value = localStorage.getItem('gh_token'); }
+
+        async function startLogin() {
+            if(WORKER_URL.endsWith('/list')) WORKER_URL = WORKER_URL.replace('/list', '');
+            if(WORKER_URL.endsWith('/')) WORKER_URL = WORKER_URL.slice(0, -1);
+            if(R2_PUBLIC_URL.endsWith('/')) R2_PUBLIC_URL = R2_PUBLIC_URL.slice(0, -1);
+
+            CRED = {
+                token: document.getElementById('gh-token').value,
+                owner: document.getElementById('gh-owner').value,
+                repo: document.getElementById('gh-repo').value,
+                branch: document.getElementById('gh-branch').value,
+                path: document.getElementById('gh-path').value
+            };
+            if(!CRED.token) return alert("Token eksik!");
+            localStorage.setItem('gh_token', CRED.token);
+            document.getElementById('loader').style.display='flex';
+
+            try {
+                if(WORKER_URL) {
+                    const r = await fetch(WORKER_URL + "/list");
+                    if(r.ok) { R2_FILES = await r.json(); }
+                }
+                const u = `https://api.github.com/repos/${CRED.owner}/${CRED.repo}/contents/${CRED.path}?ref=${CRED.branch}`;
+                const res = await fetch(u, {headers:{'Authorization':`token ${CRED.token}`}});
+                if(!res.ok) throw new Error("GitHub Hatası");
+                const d = await res.json();
+                SHA = d.sha;
+                DATA = JSON.parse(decodeURIComponent(escape(window.atob(d.content))));
+                document.getElementById('login-overlay').style.display='none';
+                renderTree();
+            } catch(e) { alert(e.message); }
+            finally { document.getElementById('loader').style.display='none'; }
+        }
+
+        // --- WINDOWS EXPLORER LOGIC ---
+        function openMedia(id, type) {
+            TARGET_ID = id;
+            FILTER_TYPE = type;
+            CUR_PATH = "";
+            SEARCH_QUERY = "";
+            document.getElementById('search-input').value = "";
+            document.getElementById('media-modal').style.display='flex';
+            refreshExplorer();
+        }
+
+        function handleSort(key) {
+            if(SORT_KEY === key) SORT_ASC = !SORT_ASC; // Tersi
+            else { SORT_KEY = key; SORT_ASC = true; } // Yeni sütun
+            refreshExplorer();
+        }
+
+        function changeView(mode) {
+            VIEW_MODE = mode;
+            document.getElementById('view-details').classList.toggle('active', mode==='details');
+            document.getElementById('view-grid').classList.toggle('active', mode==='grid');
+            document.getElementById('explorer-header').style.display = mode==='details' ? 'grid' : 'none';
+            refreshExplorer();
+        }
+
+        function refreshExplorer() {
+            const container = document.getElementById('file-container');
+            container.className = `view-${VIEW_MODE}`; 
+            container.innerHTML = "";
+            document.getElementById('current-path').innerText = SEARCH_QUERY ? `Arama Sonuçları` : (CUR_PATH || "Ana Dizin");
+
+            // Ok İşaretleri
+            ['name','date','size'].forEach(k => document.getElementById(`sort-icon-${k}`).innerText = "");
+            document.getElementById(`sort-icon-${SORT_KEY}`).innerText = SORT_ASC ? "▲" : "▼";
+
+            // 1. Hazırla
+            let items = [];
+            const sourceList = SEARCH_QUERY ? R2_FILES : R2_FILES.filter(f => f.key.startsWith(CUR_PATH));
+
+            sourceList.forEach(f => {
+                const relative = f.key.slice(CUR_PATH.length);
+                const parts = relative.split('/');
+                
+                if (SEARCH_QUERY) {
+                    if (f.key.toLowerCase().includes(SEARCH_QUERY.toLowerCase())) items.push({type:'file', ...f, name:f.key});
+                } else {
+                    if (parts.length > 1 && parts[0]) {
+                        if (!items.find(i => i.name === parts[0] && i.type === 'folder')) items.push({type:'folder', name:parts[0]});
+                    } else if (parts.length === 1 && parts[0] !== "") {
+                        items.push({type:'file', ...f, name:parts[0]});
+                    }
+                }
+            });
+
+            // 2. Sırala
+            items.sort((a, b) => {
+                if(a.type !== b.type) return a.type === 'folder' ? -1 : 1;
+                let valA = a[SORT_KEY], valB = b[SORT_KEY];
+                
+                // Tarih düzeltme
+                if(SORT_KEY==='date') { valA = new Date(a.uploaded||0); valB = new Date(b.uploaded||0); }
+                // İsim düzeltme
+                if(SORT_KEY==='name') { valA = a.name.toLowerCase(); valB = b.name.toLowerCase(); }
+                // Boyut
+                if(SORT_KEY==='size') { valA = a.size||0; valB = b.size||0; }
+
+                if (valA < valB) return SORT_ASC ? -1 : 1;
+                if (valA > valB) return SORT_ASC ? 1 : -1;
+                return 0;
+            });
+
+            // 3. Çiz
+            if(items.length===0) container.innerHTML = "<div style='padding:20px; color:#999'>Klasör boş.</div>";
+
+            items.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'media-item';
+                
+                let selectable = true;
+                if(item.type === 'file') {
+                    const isImg = item.name.match(/\.(jpg|png|webp)$/i);
+                    const isGlb = item.name.match(/\.glb$/i);
+                    if(FILTER_TYPE === 'image' && !isImg) selectable = false;
+                    if(FILTER_TYPE === 'model' && !isGlb) selectable = false;
+                }
+                if(!selectable) el.classList.add('disabled-item');
+
+                // İkon
+                let iconHTML = `<span class="file-emoji">📄</span>`;
+                if(item.type === 'folder') iconHTML = `<span class="item-emoji">📂</span>`;
+                else if(item.name.match(/\.(jpg|png|webp)$/i)) iconHTML = `<img src="${R2_PUBLIC_URL}/${item.key || (CUR_PATH+item.name)}" class="item-thumb">`;
+                else if(item.name.match(/\.glb$/i)) iconHTML = `<span class="item-emoji">📦</span>`;
+
+                // Meta
+                const dateStr = item.uploaded ? new Date(item.uploaded).toLocaleDateString() + ' ' + new Date(item.uploaded).toLocaleTimeString().slice(0,5) : '-';
+                const sizeStr = item.size ? formatBytes(item.size) : '-';
+
+                if(VIEW_MODE === 'details') {
+                    el.innerHTML = `
+                        <div class="name-col"><div class="item-icon-box">${iconHTML}</div> ${item.name}</div>
+                        <div class="meta-col">${dateStr}</div>
+                        <div class="meta-col">${sizeStr}</div>
+                    `;
+                } else {
+                    el.innerHTML = `
+                        <div class="item-icon-box">${iconHTML}</div>
+                        <div class="item-name">${item.name}</div>
+                    `;
+                }
+
+                el.onclick = (e) => {
+                    // Seçim Efekti
+                    document.querySelectorAll('.media-item').forEach(x => x.classList.remove('selected'));
+                    el.classList.add('selected');
+
+                    if(item.type === 'folder') {
+                        // Çift tıklama yerine tek tıkla girsin mi? Windows'ta çifttir ama webde tek daha hızlı.
+                        // Şimdilik tek tık yapalım.
+                        setTimeout(() => {
+                            CUR_PATH += item.name + "/";
+                            SEARCH_QUERY = "";
+                            document.getElementById('search-input').value = "";
+                            refreshExplorer();
+                        }, 100);
+                    } else if (selectable) {
+                        // Seç ve kapat
+                        if(confirm("Seçilsin mi: " + item.name)) {
+                            const finalKey = item.key || (CUR_PATH + item.name);
+                            document.getElementById(TARGET_ID).value = "/" + finalKey;
+                            document.getElementById('media-modal').style.display='none';
+                            if(TARGET_ID.startsWith('vi-') || TARGET_ID.startsWith('vt-')) {
+                                document.getElementById(TARGET_ID).dispatchEvent(new Event('input'));
+                            }
+                        }
+                    }
+                };
+                container.appendChild(el);
+            });
+        }
+
+        // Helpers
+        function handleSearch(val) { SEARCH_QUERY = val; refreshExplorer(); }
+        function navUp() {
+            if(!CUR_PATH) return;
+            const parts = CUR_PATH.split('/'); parts.pop(); parts.pop();
+            CUR_PATH = parts.length > 0 ? parts.join('/') + "/" : "";
+            refreshExplorer();
+        }
+        function formatBytes(bytes) {
+            if (!+bytes) return '0 B';
+            const k = 1024, i = Math.floor(Math.log(bytes) / Math.log(k));
+            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${['B', 'KB', 'MB', 'GB'][i]}`;
+        }
+        function closeMediaModal() { document.getElementById('media-modal').style.display='none'; }
+        
+        async function uploadToR2(file) {
+            if(!file || !WORKER_URL) return;
+            const key = CUR_PATH + file.name;
+            if(!confirm(`Yüklensin mi?\n📂 ${CUR_PATH || "Ana Dizin"}\n📄 ${file.name}`)) return;
+            try {
+                const r = await fetch(WORKER_URL + "/upload/" + key, { method:"PUT", body:file });
+                if(r.ok) {
+                    const lr = await fetch(WORKER_URL+"/list"); R2_FILES = await lr.json();
+                    refreshExplorer();
+                } else alert("Hata");
+            } catch(e) { alert(e.message); }
+        }
+
+        // --- GLB DEDEKTİFİ (DÜZGÜN) ---
+        const dropZone = document.getElementById('drop-zone');
+        const glbInput = document.getElementById('glb-in');
+        
+        dropZone.onclick = () => glbInput.click();
+        dropZone.ondragover = (e) => { e.preventDefault(); dropZone.style.background = '#e0f2fe'; };
+        dropZone.ondragleave = () => { dropZone.style.background = '#fff'; };
+        dropZone.ondrop = (e) => {
+            e.preventDefault();
+            dropZone.style.background = '#fff';
+            handleGLB(e.dataTransfer.files[0]);
+        };
+        glbInput.onchange = (e) => handleGLB(e.target.files[0]);
+
+        function handleGLB(file) {
+            if(!file) return;
+            const url = URL.createObjectURL(file);
+            const v = document.getElementById('viewer');
+            v.src = url;
+            
+            v.addEventListener('load', () => {
+                const list = document.getElementById('mat-list');
+                list.innerHTML = '';
+                window.MATS = [];
+                
+                if(v.model && v.model.materials) {
+                    v.model.materials.forEach(m => {
+                        window.MATS.push(m.name);
+                        const div = document.createElement('div');
+                        div.className = 'mat-item';
+                        div.innerHTML = `<span>${m.name}</span> <span>➤</span>`;
+                        div.onclick = () => {
+                            // Vurgula
+                            const orig = m.pbrMetallicRoughness.baseColorFactor.slice();
+                            m.pbrMetallicRoughness.setBaseColorFactor([1, 0, 0, 1]);
+                            setTimeout(() => m.pbrMetallicRoughness.setBaseColorFactor(orig), 500);
+                            
+                            // Inputa Yaz
+                            if(LAST_INPUT) {
+                                LAST_INPUT.value = m.name;
+                                LAST_INPUT.dispatchEvent(new Event('input'));
+                                LAST_INPUT.style.backgroundColor = '#dcfce7';
+                                setTimeout(() => LAST_INPUT.style.backgroundColor = '', 500);
+                            }
+                        };
+                        list.appendChild(div);
+                    });
+                    document.getElementById('btn-auto').classList.remove('hidden');
+                }
+            }, {once:true});
+        }
+        function registerFocus(el) { LAST_INPUT = el; }
+
+        // --- CORE ---
+        function renderTree() {
+            const root = document.getElementById('tree-root'); root.innerHTML='';
+            const sel = document.getElementById('p-cat'); sel.innerHTML='';
+            DATA.forEach((c,i) => {
+                sel.innerHTML += `<option value="${i}">${c.name}</option>`;
+                root.innerHTML += `<div style="font-weight:bold; margin-top:10px; color:#555; font-size:12px;">📁 ${c.name}</div>`;
+                c.products.forEach((p,j) => {
+                    root.innerHTML += `<div class="tree-item" style="padding:4px 10px; cursor:pointer;" onclick="loadProd(${i},${j})">📦 ${p.name||'Adsız'}</div>`;
+                });
+            });
+        }
+        function loadProd(i,j) {
+            if(PROD>-1) saveMem();
+            CAT=i; PROD=j;
+            document.getElementById('editor').classList.remove('hidden');
+            const p = DATA[i].products[j];
+            ['p-name','p-sku','p-thumb','p-desc','p-link','p-model'].forEach(k => document.getElementById(k).value = p[k.split('-')[1]] || '');
+            document.getElementById('p-price').value = p.price || 0;
+            document.getElementById('p-cat').value = i;
+            renderVars(p.variantGroups||[]);
+        }
+        function renderVars(grps) {
+            const div = document.getElementById('v-container'); div.innerHTML='';
+            grps.forEach((g,gi) => {
+                let html = `<div class="v-group"><div style="display:flex; justify-content:space-between;"><input value="${g.groupName}" oninput="DATA[CAT].products[PROD].variantGroups[${gi}].groupName=this.value" style="width:50%; font-weight:bold;"> <button class="btn btn-danger" onclick="delGrp(${gi})">X</button></div>`;
+                g.items.forEach((it,ii) => {
+                    html += `<div class="v-item">
+                        <div class="full"><label>Ad</label><input value="${it.name}" oninput="updVar(${gi},${ii},'name',this.value)"></div>
+                        <div><label>Resim</label><div class="input-with-btn"><input value="${it.value}" id="vi-${gi}-${ii}" oninput="updVar(${gi},${ii},'value',this.value)"><button class="btn" onclick="openMedia('vi-${gi}-${ii}','image')">Seç</button></div></div>
+                        <div><label>Mat ID</label><input value="${it.textureConfig?.materialName||''}" onfocus="registerFocus(this)" oninput="updConf(${gi},${ii},'materialName',this.value)"></div>
+                        <div class="full"><label>Doku</label><div class="input-with-btn"><input value="${it.textureConfig?.baseColor||''}" id="vt-${gi}-${ii}" oninput="updConf(${gi},${ii},'baseColor',this.value)"><button class="btn" onclick="openMedia('vt-${gi}-${ii}','image')">Seç</button></div></div>
+                    </div>`;
+                });
+                div.innerHTML += html + `<button class="btn" style="width:100%" onclick="addItem(${gi})">+ Ekle</button></div>`;
+            });
+        }
+        window.updVar = (g,i,k,v) => DATA[CAT].products[PROD].variantGroups[g].items[i][k]=v;
+        window.updConf = (g,i,k,v) => {
+            if(!DATA[CAT].products[PROD].variantGroups[g].items[i].textureConfig) DATA[CAT].products[PROD].variantGroups[g].items[i].textureConfig={};
+            DATA[CAT].products[PROD].variantGroups[g].items[i].textureConfig[k]=v;
+        }
+        window.addGrp = () => { DATA[CAT].products[PROD].variantGroups.push({groupName:"Yeni",items:[]}); renderVars(DATA[CAT].products[PROD].variantGroups); }
+        window.addItem = (g) => { DATA[CAT].products[PROD].variantGroups[g].items.push({name:"Yeni",value:"",textureConfig:{}}); renderVars(DATA[CAT].products[PROD].variantGroups); }
+        window.delGrp = (g) => { if(confirm("Sil?")) DATA[CAT].products[PROD].variantGroups.splice(g,1); renderVars(DATA[CAT].products[PROD].variantGroups); }
+        window.saveMem = () => { const p = DATA[CAT].products[PROD]; ['name','sku','thumb','desc','link','model'].forEach(k => p[k] = document.getElementById('p-'+k).value); p.price = document.getElementById('p-price').value; }
+        async function saveGithub() {
+            if(PROD>-1) saveMem();
+            document.getElementById('loader').style.display='flex';
+            const u = `https://api.github.com/repos/${CRED.owner}/${CRED.repo}/contents/${CRED.path}`;
+            const b = { message:"Upd", content:btoa(unescape(encodeURIComponent(JSON.stringify(DATA,null,2)))), sha:SHA, branch:CRED.branch };
+            try {
+                const r = await fetch(u, {method:'PUT', headers:{'Authorization':`token ${CRED.token}`}, body:JSON.stringify(b)});
+                if(r.ok) { SHA = (await r.json()).content.sha; alert("Kaydedildi!"); }
+            } catch(e) { alert(e); }
+            document.getElementById('loader').style.display='none';
+        }
+        window.autoFill = () => {
+            if(!window.MATS) return;
+            const grp = {groupName:"Orijinal", items:[]};
+            window.MATS.forEach(m => grp.items.push({name:m, value:"", textureConfig:{materialName:m, baseColor:""}}));
+            DATA[CAT].products[PROD].variantGroups.push(grp);
+            renderVars(DATA[CAT].products[PROD].variantGroups);
+        }
+        window.newProd = () => { if(!DATA.length) return; if(CAT==-1) CAT=0; DATA[CAT].products.push({name:"Yeni", variantGroups:[]}); renderTree(); }
+        window.newCat = () => { const n=prompt("Ad"); if(n) DATA.push({name:n, products:[]}); renderTree(); }
+        window.delProd = () => { if(confirm("Sil?")) { DATA[CAT].products.splice(PROD,1); location.reload(); } }
+        window.moveCat = () => { const newC = document.getElementById('p-cat').value; saveMem(); const p = DATA[CAT].products.splice(PROD,1)[0]; DATA[newC].products.push(p); renderTree(); }
+    </script>
+</body>
+</html>
