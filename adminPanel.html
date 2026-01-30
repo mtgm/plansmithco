@@ -404,6 +404,7 @@
             <div class="login-logo">PlanSmithCo.</div>
             <p style="color:#64748b; margin-bottom:30px;">Build it smart</p>
             <input type="password" id="gh-token" placeholder="GitHub Token" style="margin-bottom:15px; background:#f1f5f9;">
+            <input type="password" id="r2-key" placeholder="R2 Secret Key (Opsiyonel)" style="margin-bottom:15px; background:#f1f5f9;">
             <input type="text" id="gh-owner" placeholder="User" value="mtgm" style="margin-bottom:15px; background:#f1f5f9;">
             <input type="text" id="gh-repo" placeholder="Repo" value="plansmithco" style="margin-bottom:15px; background:#f1f5f9;">
             <input type="text" id="gh-branch" placeholder="Branch" value="v2-showroom" style="margin-bottom:15px; background:#f1f5f9;">
@@ -429,49 +430,99 @@
     <main>
         <div class="center-panel">
             <div id="editor-area" class="hidden" style="height:100%; display:flex; flex-direction:column;">
-                <div class="tabs-header">
-                    <div class="tab-btn active" onclick="switchTab('genel')">Genel Bilgiler</div>
-                    <div class="tab-btn" onclick="switchTab('varyasyon')">Varyasyonlar & Konfigürasyon</div>
-                </div>
+                
+                <!-- ÜRÜN DÜZENLEME PANELİ -->
+                <div id="product-editor">
+                    <div class="tabs-header">
+                        <div class="tab-btn active" onclick="switchTab('genel')">Genel Bilgiler</div>
+                        <div class="tab-btn" onclick="switchTab('varyasyon')">Varyasyonlar & Konfigürasyon</div>
+                    </div>
 
-                <div class="editor-content">
-                    <div id="tab-genel" class="tab-content active">
-                        <div class="card">
-                            <div class="form-grid">
-                                <div class="full"><label>Kategori</label><select id="p-cat" onchange="moveCat()"></select></div>
-                                <div><label>Ürün Adı</label><input id="p-name" oninput="updateProdNameInTree()"></div>
-                                <div><label>SKU</label><input id="p-sku"></div>
-                                <div><label>Fiyat</label><input type="number" id="p-price"></div>
-                                <div>
-                                    <label>Poster</label>
-                                    <div class="input-group-btn">
-                                        <input id="p-thumb"><button class="btn btn-primary" onclick="openMedia('p-thumb','image')">Seç</button>
+                    <div class="editor-content">
+                        <div id="tab-genel" class="tab-content active">
+                            <div class="card">
+                                <div class="form-grid">
+                                    <div class="full"><label>Kategori</label><select id="p-cat" onchange="moveCat()"></select></div>
+                                    <div><label>Ürün Adı</label><input id="p-name" oninput="updateProdNameInTree()"></div>
+                                    <div><label>SKU</label><input id="p-sku"></div>
+                                    <div><label>Fiyat</label><input type="number" id="p-price"></div>
+                                    <div>
+                                        <label>Poster</label>
+                                        <div class="input-group-btn">
+                                            <input id="p-thumb"><button class="btn btn-primary" onclick="openMedia('p-thumb','image')">Seç</button>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="full"><label>Açıklama</label><textarea id="p-desc" rows="4"></textarea></div>
-                                <div class="full"><label>Etsy Linki</label><input id="p-link"></div>
-                                <div class="full">
-                                    <label>Model Dosyası (.glb)</label>
-                                    <div class="input-group-btn">
-                                        <input id="p-model" onchange="localGlbUrl=null; updateGlbPreview()">
-                                        <button class="btn btn-primary" onclick="openMedia('p-model','model')" title="R2'den Seç">📂</button>
-                                        <button class="btn btn-success" onclick="selectLocalGlb()" title="Bilgisayardan Yükle">💻</button>
+                                    <div class="full"><label>Açıklama</label><textarea id="p-desc" rows="4"></textarea></div>
+                                    <div class="full"><label>Etsy Linki</label><input id="p-link"></div>
+                                    <div class="full">
+                                        <label>Model Dosyası (.glb)</label>
+                                        <div class="input-group-btn">
+                                            <input id="p-model" onchange="localGlbUrl=null; updateGlbPreview()">
+                                            <button class="btn btn-primary" onclick="openMedia('p-model','model')" title="R2'den Seç">📂</button>
+                                            <button class="btn btn-success" onclick="selectLocalGlb()" title="Bilgisayardan Yükle">💻</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div id="tab-varyasyon" class="tab-content">
-                        <div style="background:rgba(234, 179, 8, 0.1); padding:20px; border-radius:12px; margin-bottom:25px; text-align:center; border:1px dashed var(--primary);">
-                            <h4 style="margin:0 0 8px 0; color:var(--primary);">Otomatik Varyasyon Sihirbazı</h4>
-                            <p style="font-size:12px; margin-bottom:15px; color:var(--text-muted);">GLB dosyasındaki materyalleri analiz eder ve grupları otomatik oluşturur.</p>
-                            <button class="btn btn-primary" onclick="autoFill()">⚡ GLB'den Grupları Oluştur</button>
+                        <div id="tab-varyasyon" class="tab-content">
+                            <div style="background:rgba(234, 179, 8, 0.1); padding:20px; border-radius:12px; margin-bottom:25px; text-align:center; border:1px dashed var(--primary);">
+                                <h4 style="margin:0 0 8px 0; color:var(--primary);">Otomatik Varyasyon Sihirbazı</h4>
+                                <p style="font-size:12px; margin-bottom:15px; color:var(--text-muted);">GLB dosyasındaki materyalleri analiz eder ve grupları otomatik oluşturur.</p>
+                                <button class="btn btn-primary" onclick="autoFill()">⚡ GLB'den Grupları Oluştur</button>
+                            </div>
+                            <div id="v-container"></div>
+                            <button class="btn btn-ghost" style="width:100%; margin-top:15px; border-style:dashed; border-color:#cbd5e1; color:var(--text-muted);" onclick="addGrp()">+ Manuel Grup Ekle</button>
                         </div>
-                        <div id="v-container"></div>
-                        <button class="btn btn-ghost" style="width:100%; margin-top:15px; border-style:dashed; border-color:#cbd5e1; color:var(--text-muted);" onclick="addGrp()">+ Manuel Grup Ekle</button>
                     </div>
                 </div>
+                
+                <!-- KATEGORİ DÜZENLEME PANELİ -->
+                <div id="category-editor" class="hidden">
+                    <div class="tabs-header">
+                        <div class="tab-btn active">📂 Kategori Düzenle</div>
+                    </div>
+                    
+                    <div class="editor-content">
+                        <div class="card" style="background:#fff; padding:30px; border-radius:12px; border:1px solid #e2e8f0;">
+                            <h3 style="margin:0 0 25px 0; color:var(--secondary); display:flex; align-items:center; gap:10px;">
+                                <span style="font-size:24px;">📂</span> Kategori Bilgileri
+                            </h3>
+                            
+                            <div class="form-grid">
+                                <div>
+                                    <label>Kategori ID</label>
+                                    <input id="cat-id" readonly style="background:#f1f5f9; cursor:not-allowed;" title="ID otomatik oluşturulur ve değiştirilemez">
+                                    <small style="color:var(--text-muted); font-size:11px; margin-top:4px; display:block;">Otomatik oluşturulur, değiştirilemez</small>
+                                </div>
+                                <div>
+                                    <label>Kategori Adı</label>
+                                    <input id="cat-name" oninput="updateCatData('name', this.value)">
+                                </div>
+                                <div class="full">
+                                    <label>Kategori Thumbnail</label>
+                                    <div class="input-group-btn">
+                                        <input id="cat-thumb" oninput="updateCatData('thumbnail', this.value)">
+                                        <button class="btn btn-primary" onclick="openMedia('cat-thumb','image')">Seç</button>
+                                    </div>
+                                </div>
+                                <div class="full">
+                                    <label>Kategori Açıklaması</label>
+                                    <textarea id="cat-desc" rows="4" oninput="updateCatData('description', this.value)"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top:25px; padding-top:20px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+                                <div style="color:var(--text-muted); font-size:12px;">
+                                    <strong id="cat-product-count">0</strong> ürün bu kategoride
+                                </div>
+                                <button class="btn btn-danger" onclick="deleteCategoryFromEditor()">🗑️ Kategoriyi Sil</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
         </div>
 
@@ -612,7 +663,8 @@
         }
 
         window.onload = () => { 
-            if(localStorage.getItem('gh_token')) document.getElementById('gh-token').value = localStorage.getItem('gh_token'); 
+            if(localStorage.getItem('gh_token')) document.getElementById('gh-token').value = localStorage.getItem('gh_token');
+            if(localStorage.getItem('r2_key')) document.getElementById('r2-key').value = localStorage.getItem('r2_key');
             loadSavedLogo();
         }
 
@@ -626,21 +678,74 @@
                 branch: document.getElementById('gh-branch').value,
                 path: document.getElementById('gh-path').value
             };
-            if(!CRED.token) return alert("Token Giriniz!");
-            localStorage.setItem('gh_token', CRED.token);
+            if(!CRED.token) return alert("GitHub Token Giriniz!");
+            
+            // R2 Secret Key'i al
+            const r2Key = document.getElementById('r2-key').value;
+            
             document.getElementById('loader').style.display='flex';
+            
             try {
-                if(WORKER_URL) { try { const r = await fetch(WORKER_URL + "/list"); if(r.ok) R2_FILES = await r.json(); } catch(e) { console.warn("R2:",e); } }
+                // ADIM 1: Önce GitHub'ı test et
                 const u = `https://api.github.com/repos/${CRED.owner}/${CRED.repo}/contents/${CRED.path}?ref=${CRED.branch}`;
                 const res = await fetch(u, {headers:{'Authorization':`token ${CRED.token}`}});
                 if(!res.ok) throw new Error("GitHub Hatası: " + res.status);
                 const d = await res.json();
                 SHA = d.sha;
                 DATA = JSON.parse(decodeURIComponent(escape(window.atob(d.content))));
+                
+                // GitHub başarılı, token'ı kaydet
+                localStorage.setItem('gh_token', CRED.token);
+                
+                // ADIM 2: R2'yi test et (WORKER_URL varsa)
+                if(WORKER_URL) {
+                    // Geçici olarak R2 key'i kaydet (test için)
+                    if(r2Key) localStorage.setItem('r2_key', r2Key);
+                    
+                    try { 
+                        const r = await fetch(WORKER_URL + "/list", { headers: getR2Headers() }); 
+                        
+                        // 401 kontrolü - Şifre hatalı
+                        if(r.status === 401) {
+                            localStorage.removeItem('r2_key');
+                            throw new Error("R2 Şifresi Hatalı! Lütfen doğru şifreyi girin.");
+                        }
+                        
+                        if(r.ok) {
+                            R2_FILES = await r.json();
+                            console.log("✅ R2 bağlantısı başarılı, " + R2_FILES.length + " dosya bulundu.");
+                        } else {
+                            console.warn("R2 bağlantı hatası:", r.status);
+                        }
+                    } catch(e) { 
+                        if(e.message.includes("R2 Şifresi Hatalı")) {
+                            alert(e.message);
+                            document.getElementById('loader').style.display='none';
+                            return; // Girişi engelle
+                        }
+                        console.warn("R2:", e); 
+                    }
+                }
+                
+                // Her şey başarılı, giriş yap
                 document.getElementById('login-overlay').style.display='none';
                 renderTree();
-            } catch(e) { alert(e.message); } 
-            finally { document.getElementById('loader').style.display='none'; }
+                
+            } catch(e) { 
+                alert(e.message); 
+            } finally { 
+                document.getElementById('loader').style.display='none'; 
+            }
+        }
+        
+        // R2 API istekleri için header oluştur
+        function getR2Headers() {
+            const headers = {};
+            const r2Key = localStorage.getItem('r2_key');
+            if(r2Key) {
+                headers['X-Custom-Auth'] = r2Key;
+            }
+            return headers;
         }
 
         // --- DOSYA YÖNETİCİSİ ---
@@ -676,7 +781,7 @@
                 if(VIEW_MODE === 'list') {
                     // Liste görünümü - küçük thumbnail
                     let thumbHtml = it.type==='folder' ? '<div style="font-size:24px; text-align:center;">📂</div>' : '<div style="font-size:24px; text-align:center;">📄</div>';
-                    if(isImage) thumbHtml = `<img src="${WORKER_URL}/get/${it.key}" class="file-thumb">`;
+                    if(isImage) thumbHtml = `<img src="${resolveAssetUrl(it.key)}" class="file-thumb">`;
                     const dateStr = it.date ? new Date(it.date).toLocaleDateString() : '-'; 
                     const sizeStr = it.size ? (it.size/1024).toFixed(1)+' KB' : '-';
                     el.appendChild(chk); 
@@ -686,12 +791,27 @@
                 } else {
                     // Grid görünümü
                     let thumbHtml = it.type==='folder' ? '<div style="font-size:36px;">📂</div>' : '<div style="font-size:36px;">📄</div>';
-                    if(isImage) thumbHtml = `<img src="${WORKER_URL}/get/${it.key}" class="file-thumb">`;
+                    if(isImage) thumbHtml = `<img src="${resolveAssetUrl(it.key)}" class="file-thumb">`;
                     el.appendChild(chk); 
                     el.insertAdjacentHTML('beforeend', `<div style="width:60px; height:60px; display:flex; align-items:center; justify-content:center; overflow:hidden;">${thumbHtml}</div><div class="file-name" title="${it.name}">${it.name}</div>`);
                     const actions = document.createElement('div'); actions.className = 'grid-actions'; actions.appendChild(editBtn); actions.appendChild(delBtn); el.appendChild(actions);
                 }
-                el.onclick = () => { if(it.type==='folder') { CUR_PATH += it.name + "/"; document.getElementById('search-in').value=""; renderFiles(); updateHeaderCheck(); } else { if(TARGET_ID) { document.getElementById(TARGET_ID).value = "/" + it.key; closeMedia(); if(TARGET_ID==='p-model') updateGlbPreview(); else document.getElementById(TARGET_ID).dispatchEvent(new Event('input')); } } };
+                el.onclick = () => { 
+                    if(it.type==='folder') { 
+                        CUR_PATH += it.name + "/"; 
+                        document.getElementById('search-in').value=""; 
+                        renderFiles(); 
+                        updateHeaderCheck(); 
+                    } else { 
+                        if(TARGET_ID) { 
+                            // Dosya yoluna /assets-r2/ prefix ekle
+                            document.getElementById(TARGET_ID).value = "/assets-r2/" + it.key; 
+                            closeMedia(); 
+                            if(TARGET_ID==='p-model') updateGlbPreview(); 
+                            else document.getElementById(TARGET_ID).dispatchEvent(new Event('input')); 
+                        } 
+                    } 
+                };
                 container.appendChild(el);
             });
             updateToolbar();
@@ -707,10 +827,17 @@
         }
         async function createNewFolder() {
             const folderName = prompt("Klasör Adı:"); if(!folderName) return;
-            const safeName = folderName.replace(/[^a-zA-Z0-9_\-\s]/g, ""); await fetch(WORKER_URL + "/upload/" + CUR_PATH + safeName + "/.keep", { method: "PUT", body: "" }); await refreshList();
+            const safeName = folderName.replace(/[^a-zA-Z0-9_\-\s]/g, ""); 
+            // RESTful: /upload/ olmadan direkt dosya yolu, Method: PUT
+            await fetch(WORKER_URL + "/" + CUR_PATH + safeName + "/.keep", { 
+                method: "PUT", 
+                headers: getR2Headers(),
+                body: "" 
+            }); 
+            await refreshList();
         }
-        async function copyReq(src, dest) { try { await fetch(WORKER_URL + "/copy", { method: 'POST', body: JSON.stringify({source: src, destination: dest}) }); } catch(e) { console.error(e); } }
-        async function moveReq(src, dest) { try { await fetch(WORKER_URL + "/move", { method: 'POST', body: JSON.stringify({source: src, destination: dest}) }); } catch(e) { console.error(e); } }
+        async function copyReq(src, dest) { try { await fetch(WORKER_URL + "/copy", { method: 'POST', headers: { ...getR2Headers(), 'Content-Type': 'application/json' }, body: JSON.stringify({source: src, destination: dest}) }); } catch(e) { console.error(e); } }
+        async function moveReq(src, dest) { try { await fetch(WORKER_URL + "/move", { method: 'POST', headers: { ...getR2Headers(), 'Content-Type': 'application/json' }, body: JSON.stringify({source: src, destination: dest}) }); } catch(e) { console.error(e); } }
         function copySelected() { if(CHECKED_FILES.size === 0) return; CLIPBOARD = Array.from(CHECKED_FILES); CLIPBOARD_ACTION = 'copy'; CHECKED_FILES.clear(); renderFiles(); updateToolbar(); alert("Kopyalandı!"); }
         function moveSelected() { if(CHECKED_FILES.size === 0) return; CLIPBOARD = Array.from(CHECKED_FILES); CLIPBOARD_ACTION = 'move'; CHECKED_FILES.clear(); renderFiles(); updateToolbar(); alert("Kesildi!"); }
         async function pasteFiles() {
@@ -733,15 +860,29 @@
         }
         async function deleteBatch() {
             if(!confirm(`${CHECKED_FILES.size} öğe silinsin mi?`)) return; document.getElementById('btn-batch-delete').innerText = "Siliniyor...";
-            for(const key of CHECKED_FILES) { if(key.endsWith('/')) { const files = R2_FILES.filter(f => f.key.startsWith(key)); for(const f of files) await fetch(WORKER_URL + "/delete/" + f.key, {method:'DELETE'}); } else { await fetch(WORKER_URL + "/delete/" + key, {method:'DELETE'}); } }
+            for(const key of CHECKED_FILES) { 
+                if(key.endsWith('/')) { 
+                    const files = R2_FILES.filter(f => f.key.startsWith(key)); 
+                    // RESTful: /delete/ olmadan direkt dosya yolu, Method: DELETE
+                    for(const f of files) await fetch(WORKER_URL + "/" + f.key, { method:'DELETE', headers: getR2Headers() }); 
+                } else { 
+                    await fetch(WORKER_URL + "/" + key, { method:'DELETE', headers: getR2Headers() }); 
+                } 
+            }
             CHECKED_FILES.clear(); await refreshList(); updateToolbar(); updateHeaderCheck();
         }
         async function deleteSingleItem(key, type) {
             if(!confirm(`"${key}" silinsin mi?`)) return;
-            if(type === 'folder') { const files = R2_FILES.filter(f => f.key.startsWith(key)); for(const f of files) await fetch(WORKER_URL + "/delete/" + f.key, {method:'DELETE'}); } 
-            else { await fetch(WORKER_URL + "/delete/" + key, {method:'DELETE'}); } await refreshList();
+            // RESTful: /delete/ olmadan direkt dosya yolu, Method: DELETE
+            if(type === 'folder') { 
+                const files = R2_FILES.filter(f => f.key.startsWith(key)); 
+                for(const f of files) await fetch(WORKER_URL + "/" + f.key, { method:'DELETE', headers: getR2Headers() }); 
+            } else { 
+                await fetch(WORKER_URL + "/" + key, { method:'DELETE', headers: getR2Headers() }); 
+            } 
+            await refreshList();
         }
-        async function refreshList() { const r = await fetch(WORKER_URL+"/list"); if(r.ok) R2_FILES = await r.json(); renderFiles(); }
+        async function refreshList() { const r = await fetch(WORKER_URL+"/list", { headers: getR2Headers() }); if(r.ok) R2_FILES = await r.json(); renderFiles(); }
         function updateToolbar() {
             const btnDel = document.getElementById('btn-batch-delete'); const btnCopy = document.getElementById('btn-copy'); const btnMove = document.getElementById('btn-move'); const btnPaste = document.getElementById('btn-paste');
             if(CHECKED_FILES.size > 0) { btnDel.innerHTML = `🗑️ Sil (${CHECKED_FILES.size})`; btnDel.style.opacity = '1'; btnDel.style.pointerEvents = 'auto'; btnCopy.style.display = 'inline-flex'; btnCopy.innerHTML = `📋 Kopyala (${CHECKED_FILES.size})`; btnMove.style.display = 'inline-flex'; btnMove.innerHTML = `✂️ Taşı (${CHECKED_FILES.size})`; } 
@@ -752,7 +893,15 @@
         function updateHeaderCheck() { document.getElementById('master-check').checked = false; }
         async function uploadToR2(file) {
             if(!file) return; const k = CUR_PATH + file.name; if(!confirm(`Yüklensin mi: ${file.name}`)) return; document.getElementById('loader').style.display='flex';
-            try { await fetch(WORKER_URL + "/upload/" + k, { method:"PUT", body:file }); await refreshList(); } catch(e) { alert(e.message); } finally { document.getElementById('loader').style.display='none'; }
+            try { 
+                // RESTful: /upload/ olmadan direkt dosya yolu, Method: PUT
+                await fetch(WORKER_URL + "/" + k, { 
+                    method:"PUT", 
+                    headers: getR2Headers(),
+                    body:file 
+                }); 
+                await refreshList(); 
+            } catch(e) { alert(e.message); } finally { document.getElementById('loader').style.display='none'; }
         }
         function navUp() { if(!CUR_PATH)return; const p=CUR_PATH.split('/'); p.pop(); p.pop(); CUR_PATH=p.length>0?p.join('/')+"/":""; renderFiles(); updateHeaderCheck(); }
         function closeMedia() { document.getElementById('media-modal').style.display='none'; }
@@ -776,6 +925,10 @@
                         <span class="cat-btn cat-del" onclick="delCat(event, ${i})" title="Kategori Sil">🗑️</span>
                     </div>
                 `;
+                
+                // Kategori ismine tek tıklayınca kategori düzenleme panelini aç
+                header.querySelector('.cat-name').onclick = (e) => { e.stopPropagation(); loadCategory(i); };
+                
                 // Kategori ismine çift tıklayınca inline düzenleme
                 header.querySelector('.cat-name').ondblclick = (e) => { e.stopPropagation(); inlineEditCat(i, e.target); };
                 div.appendChild(header);
@@ -798,6 +951,77 @@
             });
         }
         
+        // Kategori düzenleme panelini yükle
+        let CURRENT_CAT_INDEX = -1;
+        
+        function loadCategory(catIndex) {
+            // Önceki ürünü kaydet
+            if(PROD > -1 && CAT > -1) saveMem();
+            
+            CURRENT_CAT_INDEX = catIndex;
+            PROD = -1; // Ürün seçimini temizle
+            
+            const cat = DATA[catIndex];
+            
+            // Editor alanını göster
+            document.getElementById('editor-area').classList.remove('hidden');
+            
+            // Ürün panelini gizle, kategori panelini göster
+            document.getElementById('product-editor').classList.add('hidden');
+            document.getElementById('category-editor').classList.remove('hidden');
+            
+            // Formu doldur
+            document.getElementById('cat-id').value = cat.id || 'ID yok (eski kategori)';
+            document.getElementById('cat-name').value = cat.name || '';
+            document.getElementById('cat-thumb').value = cat.thumbnail || '';
+            document.getElementById('cat-desc').value = cat.description || '';
+            document.getElementById('cat-product-count').textContent = cat.products.length;
+            
+            // Tree'deki vurgulamayı temizle
+            document.querySelectorAll('.tree-item').forEach(el => el.classList.remove('active'));
+        }
+        
+        // Kategori verilerini güncelle
+        function updateCatData(field, value) {
+            if(CURRENT_CAT_INDEX === -1) return;
+            
+            DATA[CURRENT_CAT_INDEX][field] = value;
+            
+            // Eğer isim değiştiyse tree'yi güncelle
+            if(field === 'name') {
+                renderTree();
+                // Kategori panelini tekrar göster
+                document.getElementById('product-editor').classList.add('hidden');
+                document.getElementById('category-editor').classList.remove('hidden');
+            }
+            
+            showUnsaved();
+        }
+        
+        // Kategori düzenleme panelinden silme
+        function deleteCategoryFromEditor() {
+            if(CURRENT_CAT_INDEX === -1) return;
+            
+            const catName = DATA[CURRENT_CAT_INDEX].name;
+            const prodCount = DATA[CURRENT_CAT_INDEX].products.length;
+            
+            showConfirm(
+                '🗑️ Kategori Sil',
+                `<strong>"${catName}"</strong> kategorisi${prodCount > 0 ? ` ve içindeki <strong>${prodCount}</strong> ürün` : ''} silinecek.<br><br>Bu işlem geri alınamaz!`,
+                () => {
+                    DATA.splice(CURRENT_CAT_INDEX, 1);
+                    document.getElementById('editor-area').classList.add('hidden');
+                    CURRENT_CAT_INDEX = -1;
+                    CAT = -1;
+                    PROD = -1;
+                    renderTree();
+                    showUnsaved();
+                },
+                'Sil',
+                'danger'
+            );
+        }
+        
         // Inline kategori ismi düzenleme
         function inlineEditCat(catIndex, el) {
             const oldName = DATA[catIndex].name;
@@ -811,6 +1035,16 @@
                 const newName = input.value.trim();
                 if(newName && newName !== oldName) {
                     DATA[catIndex].name = newName;
+                    
+                    // Eğer kategori ID'si yoksa veya eski tipte ise, yeni ID oluştur
+                    if(!DATA[catIndex].id || !DATA[catIndex].id.startsWith('cat_')) {
+                        const newId = 'cat_' + sanitizeId(newName);
+                        // ID benzersizliğini kontrol et
+                        if(!DATA.some((c, idx) => idx !== catIndex && c.id === newId)) {
+                            DATA[catIndex].id = newId;
+                        }
+                    }
+                    
                     showUnsaved();
                 }
                 renderTree();
@@ -863,7 +1097,19 @@
         
         // Belirli kategoriye ürün ekle
         function addProdToCat(catIndex) {
-            DATA[catIndex].products.push({name:"Yeni Ürün", sku:"", thumb:"", desc:"", link:"", model:"", price:0, variantGroups:[]});
+            // Yeni ürün için benzersiz ID oluştur
+            const newProdId = 'prod_' + Date.now();
+            DATA[catIndex].products.push({
+                id: newProdId,
+                name: "Yeni Ürün", 
+                sku: "", 
+                thumbnail: "",      // thumb -> thumbnail
+                description: "",    // desc -> description
+                listingUrl: "",     // link -> listingUrl
+                masterModel: "",    // model -> masterModel
+                price: 0, 
+                variantGroups: []
+            });
             renderTree();
             showUnsaved();
         }
@@ -901,10 +1147,20 @@
             renderTree(); 
             
             document.getElementById('editor-area').classList.remove('hidden');
+            
+            // Kategori düzenleme panelini gizle, ürün düzenleme panelini göster
+            document.getElementById('category-editor').classList.add('hidden');
+            document.getElementById('product-editor').classList.remove('hidden');
+            
             const p = DATA[i].products[j];
             
-            // Formu doldur
-            ['p-name','p-sku','p-thumb','p-desc','p-link','p-model'].forEach(k => document.getElementById(k).value = p[k.split('-')[1]] || '');
+            // Formu doldur - DOĞRU DEĞİŞKEN İSİMLERİ İLE
+            document.getElementById('p-name').value = p.name || '';
+            document.getElementById('p-sku').value = p.sku || '';
+            document.getElementById('p-thumb').value = p.thumbnail || '';      // thumbnail
+            document.getElementById('p-desc').value = p.description || '';     // description
+            document.getElementById('p-link').value = p.listingUrl || '';      // listingUrl
+            document.getElementById('p-model').value = p.masterModel || '';    // masterModel
             document.getElementById('p-price').value = p.price || 0; 
             document.getElementById('p-cat').value = i;
             
@@ -932,8 +1188,14 @@
             if(path.startsWith('blob:') || localGlbUrl) {
                 srcUrl = localGlbUrl || path;
             } else {
-                const cleanPath = path.startsWith('/') ? path.slice(1) : path; 
-                srcUrl = WORKER_URL + "/get/" + cleanPath + "?t=" + new Date().getTime();
+                // /assets-r2/ prefix'ini temizle ve gerçek R2 URL'sine çevir (RESTful - /get/ yok)
+                let cleanPath = path;
+                if(cleanPath.startsWith('/assets-r2/')) {
+                    cleanPath = cleanPath.replace('/assets-r2/', '');
+                } else if(cleanPath.startsWith('/')) {
+                    cleanPath = cleanPath.slice(1);
+                }
+                srcUrl = WORKER_URL + "/" + cleanPath + "?t=" + new Date().getTime();
             }
             
             viewer.src = srcUrl;
@@ -962,6 +1224,19 @@
             }, {once:true});
         }
         
+        // /assets-r2/ prefix'ini gerçek R2 URL'sine çeviren yardımcı fonksiyon (RESTful)
+        function resolveAssetUrl(path) {
+            if(!path) return '';
+            let cleanPath = path;
+            if(cleanPath.startsWith('/assets-r2/')) {
+                cleanPath = cleanPath.replace('/assets-r2/', '');
+            } else if(cleanPath.startsWith('/')) {
+                cleanPath = cleanPath.slice(1);
+            }
+            // RESTful: /get/ olmadan direkt dosya yolu
+            return WORKER_URL + "/" + cleanPath;
+        }
+        
         // GLB dosyasını bilgisayardan seçip local olarak yükle
         function selectLocalGlb() {
             const input = document.createElement('input');
@@ -975,8 +1250,8 @@
                 if(localGlbUrl) URL.revokeObjectURL(localGlbUrl);
                 localGlbUrl = URL.createObjectURL(file);
                 
-                // Input'a dosya adını yaz (daha sonra R2'ye yüklenecek path)
-                document.getElementById('p-model').value = `/models/${file.name}`;
+                // Input'a dosya adını yaz (daha sonra R2'ye yüklenecek path) - /assets-r2/ prefix ile
+                document.getElementById('p-model').value = `/assets-r2/models/${file.name}`;
                 document.getElementById('p-model').dataset.localFile = file.name;
                 document.getElementById('p-model').dataset.pendingUpload = 'true';
                 
@@ -1169,7 +1444,17 @@
             }
         }
         
-        function saveMem() { const p=DATA[CAT].products[PROD]; ['name','sku','thumb','desc','link','model'].forEach(k=>p[k]=document.getElementById('p-'+k).value); p.price=document.getElementById('p-price').value; }
+        function saveMem() { 
+            const p=DATA[CAT].products[PROD]; 
+            // Form alanlarından değerleri oku ve doğru JSON key'lerine ata
+            p.name = document.getElementById('p-name').value;
+            p.sku = document.getElementById('p-sku').value;
+            p.thumbnail = document.getElementById('p-thumb').value;  // thumb -> thumbnail
+            p.description = document.getElementById('p-desc').value;  // desc -> description
+            p.listingUrl = document.getElementById('p-link').value;   // link -> listingUrl
+            p.masterModel = document.getElementById('p-model').value; // model -> masterModel
+            p.price = parseFloat(document.getElementById('p-price').value) || 0;
+        }
         // editCat artık inline düzenleme ile değiştirildi
         window.delCat = (e, i) => { 
             e.stopPropagation(); 
@@ -1208,13 +1493,57 @@
         function confirmNewCat() {
             const name = document.getElementById('new-cat-name').value.trim();
             if(name) {
-                DATA.push({ name: name, products: [] });
+                // Kategori ID'si oluştur: Türkçe karakterleri temizle, küçük harf yap, boşlukları _ ile değiştir
+                const catId = 'cat_' + sanitizeId(name);
+                
+                // ID benzersizliğini kontrol et
+                if(DATA.some(c => c.id === catId)) {
+                    showAlert('⚠️ Uyarı', `Bu ID zaten mevcut: <strong>${catId}</strong><br><br>Farklı bir kategori adı deneyin.`, 'warning');
+                    return;
+                }
+                
+                DATA.push({ 
+                    id: catId,           // Benzersiz kategori ID'si
+                    name: name, 
+                    thumbnail: "",       // Kategori thumbnail
+                    description: "",     // Kategori açıklaması
+                    products: [] 
+                });
                 renderTree();
                 showUnsaved();
                 closeCatModal();
             } else {
                 document.getElementById('new-cat-name').focus();
             }
+        }
+        
+        // ID Sanitization: Türkçe karakterleri ve özel karakterleri temizle
+        function sanitizeId(text) {
+            // Türkçe karakter haritası
+            const turkishMap = {
+                'ç': 'c', 'Ç': 'c',
+                'ğ': 'g', 'Ğ': 'g',
+                'ı': 'i', 'İ': 'i',
+                'ö': 'o', 'Ö': 'o',
+                'ş': 's', 'Ş': 's',
+                'ü': 'u', 'Ü': 'u'
+            };
+            
+            let result = text.toLowerCase();
+            
+            // Türkçe karakterleri değiştir
+            for(const [tr, en] of Object.entries(turkishMap)) {
+                result = result.replace(new RegExp(tr, 'g'), en);
+            }
+            
+            // Sadece alfanumerik ve _ bırak, boşlukları _ yap
+            result = result
+                .replace(/\s+/g, '_')           // Boşlukları _ yap
+                .replace(/[^a-z0-9_]/g, '')     // Sadece a-z, 0-9 ve _ bırak
+                .replace(/_+/g, '_')            // Çoklu _'ları tek yap
+                .replace(/^_|_$/g, '');         // Baş ve sondaki _'ları sil
+            
+            return result || 'unnamed';
         }
         
         // Enter tuşu ile kategori oluştur
@@ -1227,7 +1556,19 @@
         window.newProd = () => { 
     if(!DATA.length) return alert("Önce bir kategori oluşturun!"); 
     if(CAT == -1) CAT = 0; 
-    DATA[CAT].products.push({name:"Yeni Ürün", sku:"", thumb:"", desc:"", link:"", model:"", price:0, variantGroups:[]}); 
+    // Yeni ürün için benzersiz ID oluştur
+    const newProdId = 'prod_' + Date.now();
+    DATA[CAT].products.push({
+        id: newProdId,
+        name: "Yeni Ürün", 
+        sku: "", 
+        thumbnail: "",      // thumb -> thumbnail
+        description: "",    // desc -> description  
+        listingUrl: "",     // link -> listingUrl
+        masterModel: "",    // model -> masterModel
+        price: 0, 
+        variantGroups: []
+    }); 
     renderTree(); 
     showUnsaved();
 }
@@ -1295,12 +1636,20 @@
                 // ADIM 0: Pending GLB dosyasını R2'ye yükle (varsa)
                 if(window.pendingGlbFile) {
                     const modelPath = document.getElementById('p-model').value;
-                    const cleanPath = modelPath.startsWith('/') ? modelPath.slice(1) : modelPath;
+                    // /assets-r2/ prefix'ini temizle
+                    let cleanPath = modelPath;
+                    if(cleanPath.startsWith('/assets-r2/')) {
+                        cleanPath = cleanPath.replace('/assets-r2/', '');
+                    } else if(cleanPath.startsWith('/')) {
+                        cleanPath = cleanPath.slice(1);
+                    }
                     console.log('📤 GLB dosyası R2\'ye yükleniyor:', cleanPath);
                     
                     try {
-                        await fetch(WORKER_URL + "/upload/" + cleanPath, { 
+                        // RESTful: /upload/ olmadan direkt dosya yolu, Method: PUT
+                        await fetch(WORKER_URL + "/" + cleanPath, { 
                             method: "PUT", 
+                            headers: getR2Headers(),
                             body: window.pendingGlbFile 
                         });
                         console.log('✅ GLB dosyası R2\'ye yüklendi');
