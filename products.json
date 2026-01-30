@@ -16,14 +16,51 @@
         "price": 1524,
         "variantGroups": [
           {
-            "groupName": "dark grey low gloss plastic.001",
+            "groupName": "Dikmeler",
             "items": [
               {
                 "name": "Orijinal",
-                "value": "/assets-r2/textures/1x2V3/dark_grey_low_gloss_plastic_baseColor.png",
+                "value": "/assets-r2/textures/1x2V3/texture-1_baseColor.png",
                 "textureConfig": {
-                  "materialName": "dark grey low gloss plastic.001",
-                  "baseColor": "/assets-r2/textures/1x2V3/dark_grey_low_gloss_plastic_baseColor.png"
+                  "materialName": "texture-1.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/texture-1_baseColor.png"
+                }
+              },
+              {
+                "name": "Ceviz",
+                "value": "/assets-r2/textures/1x2V3/dikme_baseColor.png",
+                "textureConfig": {
+                  "materialName": "texture-1.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
+                }
+              },
+              {
+                "name": "Plastik",
+                "value": "/assets-r2/textures/1x2V3/yellow_low_gloss_plastic_baseColor.png",
+                "textureConfig": {
+                  "materialName": "texture-1.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/yellow_low_gloss_plastic_baseColor.png"
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "Raylar",
+            "items": [
+              {
+                "name": "Ray 1",
+                "value": "/assets-r2/textures/1x2V3/dark_grey_low_gloss_plastic_occlusionRoughnessMetallic.png",
+                "textureConfig": {
+                  "materialName": "texture.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/dark_grey_low_gloss_plastic_occlusionRoughnessMetallic.png"
+                }
+              },
+              {
+                "name": "Ray 2",
+                "value": "/assets-r2/textures/1x2V3/ray_baseColor.png",
+                "textureConfig": {
+                  "materialName": "texture.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/ray_baseColor.png"
                 }
               }
             ]
