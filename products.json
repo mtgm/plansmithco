@@ -78,11 +78,11 @@
       {
         "id": "prod_1769728168700",
         "name": "Yeni Ürün2.0",
-        "sku": "1X2V3",
+        "sku": "1X2V2",
         "thumbnail": "/assets-r2/textures/1x2V3/ray_baseColor.png",
         "description": "ıobm klıuhjkn",
         "listingUrl": "https://www.etsy.com/shop/PlanSmithCo",
-        "masterModel": "/assets-r2/models/1x2V3.glb",
+        "masterModel": "/assets-r2/models/1x2V2.glb",
         "price": 24534,
         "variantGroups": []
       }
@@ -97,11 +97,11 @@
       {
         "id": "prod_1769729388320",
         "name": "Yeni Ürün",
-        "sku": "1X2V3",
+        "sku": "1X2V2",
         "thumbnail": "/assets-r2/textures/1x2V3/texture-2_baseColor.png",
         "description": "567568",
         "listingUrl": "https://www.etsy.com/shop/PlanSmithCo",
-        "masterModel": "/assets-r2/models/1x2V3.glb",
+        "masterModel": "/assets-r2/models/1x2V2.glb",
         "price": 56456,
         "variantGroups": []
       }
