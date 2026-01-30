@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         /* --- 1. RENK PALETİ VE CAM EFEKTİ (PROFESYONEL) --- */
         :root {
@@ -308,6 +309,92 @@
         }
         .v-item-batch-actions.hidden { display: none; }
         
+        /* Sağ Tık Menüsü (Context Menu) */
+        .context-menu {
+            position: fixed;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            z-index: 3000;
+            min-width: 180px;
+            padding: 6px 0;
+            display: none;
+            animation: contextFadeIn 0.15s ease;
+        }
+        @keyframes contextFadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .context-menu.active { display: block; }
+        .context-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-on-light);
+            transition: all 0.15s;
+        }
+        .context-item:hover { background: #f1f5f9; }
+        .context-item.danger { color: var(--danger); }
+        .context-item.danger:hover { background: #fee2e2; }
+        .context-item.disabled { opacity: 0.4; pointer-events: none; }
+        .context-divider { height: 1px; background: #e2e8f0; margin: 6px 0; }
+        .context-item-icon { width: 18px; text-align: center; }
+        
+        /* Sürükle-Bırak */
+        .file-item.dragging { opacity: 0.5; transform: scale(0.98); }
+        .file-item.drag-over { 
+            background: rgba(234, 179, 8, 0.15) !important; 
+            border: 2px dashed var(--primary) !important;
+            border-radius: 8px;
+        }
+        .mw-body.drag-over-empty {
+            background: rgba(234, 179, 8, 0.1);
+            border: 2px dashed var(--primary);
+            border-radius: 8px;
+        }
+        
+        /* Seçim Kutusu (Lasso Selection) */
+        .selection-box {
+            position: fixed;
+            border: 2px dashed var(--primary);
+            background: rgba(234, 179, 8, 0.1);
+            pointer-events: none;
+            z-index: 2500;
+        }
+        
+        /* Toast Bildirimi (Alert yerine) */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 3500;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            background: #1e293b;
+            color: #fff;
+            padding: 14px 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 280px;
+            animation: toastSlideIn 0.3s ease;
+        }
+        @keyframes toastSlideIn { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+        .toast.success { background: linear-gradient(135deg, #10b981, #059669); }
+        .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .toast.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .toast.info { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .toast-icon { font-size: 18px; }
+        .toast-message { flex: 1; font-size: 13px; }
+        .toast-close { cursor: pointer; opacity: 0.7; padding: 4px; }
+        .toast-close:hover { opacity: 1; }
+        
         #login-overlay { position: fixed; inset: 0; background: var(--bg-gradient); z-index: 3000; display: flex; align-items: center; justify-content: center; }
         .login-box { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); padding: 50px; border-radius: 24px; width: 420px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
         .login-logo { font-size: 28px; font-weight: 800; background: linear-gradient(to right, var(--primary), #FCD34D); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px; }
@@ -315,6 +402,293 @@
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .full { grid-column: span 2; }
         .input-group-btn { display: flex; gap: 8px; }
+        
+        /* --- KATALOG OLUŞTURUCU STİLLERİ --- */
+        .catalog-container {
+            padding: 20px;
+            overflow-y: auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .catalog-toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        .catalog-selector {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px;
+            flex: 1;
+            min-height: 400px;
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        /* Özel scrollbar stili */
+        .catalog-selector::-webkit-scrollbar {
+            width: 8px;
+        }
+        .catalog-selector::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .catalog-selector::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .catalog-selector::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .catalog-category {
+            margin-bottom: 8px;
+        }
+        .catalog-category-header {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--secondary);
+            padding: 10px 12px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+        .catalog-category-header input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+        .catalog-product-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px 10px 24px;
+            margin: 3px 0;
+            background: #fff;
+            border: 1px solid #f1f5f9;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .catalog-product-item:hover {
+            background: #fefce8;
+            border-color: var(--primary);
+        }
+        .catalog-product-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .catalog-product-item .product-name {
+            flex: 1;
+            font-size: 13px;
+            color: var(--secondary);
+        }
+        .catalog-product-item .product-sku {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        
+        /* A4 Katalog Sayfası */
+        .a4-preview {
+            background: #e2e8f0;
+            padding: 30px;
+            border-radius: 12px;
+            min-height: 500px;
+            overflow-y: auto;
+        }
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+            background: #fff;
+            margin: 0 auto 30px auto;
+            padding: 12mm 15mm;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            box-sizing: border-box;
+        }
+        .a4-page-header {
+            text-align: center;
+            padding-bottom: 8mm;
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: 8mm;
+        }
+        .a4-page-header h1 {
+            margin: 0;
+            font-size: 22pt;
+            color: var(--secondary);
+            font-weight: 700;
+        }
+        .a4-page-header p {
+            margin: 4px 0 0 0;
+            color: var(--text-muted);
+            font-size: 10pt;
+        }
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6mm;
+        }
+        .catalog-card {
+            border: 1.5px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: 55px 1fr 65px;
+            gap: 10px;
+            align-items: center;
+            background: #fafafa;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        .catalog-card-image {
+            width: 55px;
+            height: 55px;
+            object-fit: cover;
+            border-radius: 4px;
+            background: #e2e8f0;
+        }
+        .catalog-card-info {
+            min-width: 0;
+        }
+        .catalog-card-info .info-row {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+            margin-bottom: 3px;
+            font-size: 9pt;
+            line-height: 1.3;
+        }
+        .catalog-card-info .info-label {
+            color: var(--text-muted);
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+        .catalog-card-info .info-value {
+            color: var(--secondary);
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .catalog-card-qr {
+            width: 65px;
+            height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .catalog-card-qr svg {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        /* Print Stilleri - Geliştirilmiş */
+        @media print {
+            /* Tüm sayfayı gizle */
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+            }
+            body * {
+                visibility: hidden !important;
+            }
+            
+            /* Sadece A4 preview ve içeriğini göster */
+            #catalog-preview-area,
+            #catalog-preview-area *,
+            .a4-preview,
+            .a4-preview * {
+                visibility: visible !important;
+            }
+            
+            #catalog-preview-area {
+                position: fixed !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                overflow: visible !important;
+                background: #fff !important;
+            }
+            
+            .a4-preview {
+                position: relative !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                background: #fff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+                overflow: visible !important;
+            }
+            
+            .a4-page {
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 10mm 12mm !important;
+                width: 100% !important;
+                min-height: auto !important;
+                page-break-after: always;
+                break-after: page;
+            }
+            
+            .a4-page:last-child {
+                page-break-after: avoid;
+            }
+            
+            .catalog-toolbar,
+            .no-print,
+            .tabs-header,
+            aside,
+            .right-panel,
+            #toast-container,
+            .custom-modal {
+                display: none !important;
+                visibility: hidden !important;
+            }
+            
+            /* QR kodları net göster */
+            .catalog-card-qr {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            .catalog-card-qr svg {
+                width: 60px !important;
+                height: 60px !important;
+            }
+            
+            /* Yazı tipi netliği */
+            .catalog-card-info .info-value,
+            .catalog-card-info .info-label {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            @page {
+                size: A4 portrait;
+                margin: 5mm;
+            }
+        }
     </style>
 </head>
 <body>
@@ -346,6 +720,36 @@
             <div class="mw-body" id="mw-body"></div>
         </div>
     </div>
+
+    <!-- Sağ Tık Menüsü (Context Menu) -->
+    <div id="context-menu" class="context-menu">
+        <div class="context-item" onclick="contextAction('open')">
+            <span class="context-item-icon">📂</span> Aç
+        </div>
+        <div class="context-item" onclick="contextAction('select')">
+            <span class="context-item-icon">☑️</span> Seç
+        </div>
+        <div class="context-divider"></div>
+        <div class="context-item" onclick="contextAction('copy')">
+            <span class="context-item-icon">📋</span> Kopyala
+        </div>
+        <div class="context-item" onclick="contextAction('cut')">
+            <span class="context-item-icon">✂️</span> Kes
+        </div>
+        <div class="context-item" id="ctx-paste" onclick="contextAction('paste')">
+            <span class="context-item-icon">📥</span> Yapıştır
+        </div>
+        <div class="context-divider"></div>
+        <div class="context-item" onclick="contextAction('rename')">
+            <span class="context-item-icon">✏️</span> Yeniden Adlandır
+        </div>
+        <div class="context-item danger" onclick="contextAction('delete')">
+            <span class="context-item-icon">🗑️</span> Sil
+        </div>
+    </div>
+
+    <!-- Toast Bildirimleri -->
+    <div id="toast-container" class="toast-container"></div>
 
     <!-- Yeni Kategori Modal -->
     <div id="cat-modal" class="custom-modal">
@@ -398,6 +802,36 @@
         </div>
     </div>
 
+    <!-- Ayarlar Modal -->
+    <div id="settings-modal" class="custom-modal">
+        <div class="custom-modal-content" style="width:450px;">
+            <div class="custom-modal-header">
+                <h3>⚙️ Ayarlar</h3>
+                <button class="modal-close" onclick="closeSettingsModal()">✕</button>
+            </div>
+            <div class="custom-modal-body">
+                <div style="margin-bottom:20px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:600; color:var(--secondary);">Site Adresi (Base URL)</label>
+                    <input type="text" id="settings-base-url" placeholder="https://plansmithco.vercel.app" style="width:100%;">
+                    <small style="color:var(--text-muted); font-size:11px; margin-top:4px; display:block;">QR kodlar bu adrese yönlendirecek. Örn: https://plansmithco.vercel.app</small>
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:600; color:var(--secondary);">R2 Worker URL</label>
+                    <input type="text" id="settings-worker-url" placeholder="https://your-worker.workers.dev" style="width:100%;">
+                    <small style="color:var(--text-muted); font-size:11px; margin-top:4px; display:block;">Cloudflare R2 Worker adresi</small>
+                </div>
+                <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0;">
+                    <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">💡 QR Kod Formatı:</div>
+                    <code style="font-size:11px; color:var(--secondary); background:#e2e8f0; padding:4px 8px; border-radius:4px; display:block;">[BASE_URL]/?sku=[ÜRÜN_SKU]</code>
+                </div>
+            </div>
+            <div class="custom-modal-footer">
+                <button class="btn btn-ghost" onclick="closeSettingsModal()">İptal</button>
+                <button class="btn btn-success" onclick="saveSettings()">💾 Kaydet</button>
+            </div>
+        </div>
+    </div>
+
     <div id="loader"><div class="spinner"></div></div>
     <div id="login-overlay">
         <div class="login-box">
@@ -422,8 +856,10 @@
         <div class="tree-view" id="tree-root"></div>
         <div class="sidebar-footer">
             <button class="btn btn-ghost" style="width:100%; color:#e2e8f0; border-color:rgba(255,255,255,0.2);" onclick="openFileManager()">📂 R2 Dosya Yöneticisi</button>
+            <button class="btn btn-ghost" style="width:100%; color:#e2e8f0; border-color:rgba(255,255,255,0.2);" onclick="openCatalogCreator()">🖨️ Katalog Hazırla</button>
             <button class="btn btn-warning" style="width:100%" onclick="newCat()">+ Yeni Kategori</button>
             <button class="btn btn-success" style="width:100%" onclick="saveGithub()">💾 GitHub'a Kaydet</button>
+            <button class="btn btn-ghost" style="width:100%; color:#94a3b8; border-color:rgba(255,255,255,0.1); font-size:12px;" onclick="openSettings()">⚙️ Ayarlar</button>
         </div>
     </aside>
 
@@ -524,6 +960,45 @@
                 </div>
                 
             </div>
+            
+            <!-- KATALOG OLUŞTURUCU PANELİ -->
+            <div id="catalog-creator" class="hidden" style="height:100%; display:flex; flex-direction:column;">
+                <div class="tabs-header">
+                    <div class="tab-btn active">🖨️ QR Katalog Oluşturucu</div>
+                    <div style="flex:1"></div>
+                    <button class="btn btn-ghost no-print" style="font-size:12px;" onclick="closeCatalogCreator()">✕ Kapat</button>
+                </div>
+                
+                <div class="catalog-container">
+                    <!-- Seçim Alanı -->
+                    <div id="catalog-selector-area" class="no-print">
+                        <div class="catalog-toolbar">
+                            <button class="btn btn-primary" onclick="selectAllProducts(true)">☑️ Tümünü Seç</button>
+                            <button class="btn btn-ghost" onclick="selectAllProducts(false)">☐ Tümünü Kaldır</button>
+                            <div style="flex:1"></div>
+                            <span id="selected-count" style="color:var(--text-muted); font-size:13px;">0 ürün seçildi</span>
+                            <button class="btn btn-success" onclick="generateCatalog()">📄 Kataloğu Oluştur</button>
+                        </div>
+                        
+                        <div class="catalog-selector" id="catalog-product-list">
+                            <!-- Ürün listesi buraya gelecek -->
+                        </div>
+                    </div>
+                    
+                    <!-- A4 Önizleme Alanı -->
+                    <div id="catalog-preview-area" class="hidden">
+                        <div class="catalog-toolbar no-print">
+                            <button class="btn btn-ghost" onclick="backToSelection()">← Seçime Dön</button>
+                            <div style="flex:1"></div>
+                            <button class="btn btn-primary" onclick="window.print()">🖨️ Yazdır (PDF)</button>
+                        </div>
+                        
+                        <div class="a4-preview" id="a4-preview">
+                            <!-- A4 sayfalar buraya gelecek -->
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="right-panel">
@@ -538,8 +1013,8 @@
 
     <script>
         // AYARLAR & DEĞİŞKENLER
-        let WORKER_URL = "https://plansmithco-adminpanel-api.serhatyildirim123.workers.dev"; 
-        let R2_PUBLIC_URL = "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev"; 
+        let WORKER_URL = ""; 
+        let R2_PUBLIC_URL = ""; 
         let DATA=[], CAT=-1, PROD=-1, CRED={}, SHA="", R2_FILES=[], CUR_PATH="";
         let TARGET_ID=null, LAST_INPUT=null, VIEW_MODE='list';
         let CHECKED_FILES = new Set(), CLIPBOARD = [], CLIPBOARD_ACTION = 'copy'; 
@@ -665,6 +1140,10 @@
         window.onload = () => { 
             if(localStorage.getItem('gh_token')) document.getElementById('gh-token').value = localStorage.getItem('gh_token');
             if(localStorage.getItem('r2_key')) document.getElementById('r2-key').value = localStorage.getItem('r2_key');
+            // Kayıtlı WORKER_URL'yi yükle
+            if(localStorage.getItem('worker_url')) {
+                WORKER_URL = localStorage.getItem('worker_url');
+            }
             loadSavedLogo();
         }
 
@@ -812,9 +1291,356 @@
                         } 
                     } 
                 };
+                
+                // Sağ tık menüsü
+                el.oncontextmenu = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showContextMenu(e, uniqueId, it.type, it.name);
+                };
+                
+                // Sürükle-bırak özellikleri
+                el.draggable = true;
+                el.dataset.key = uniqueId;
+                el.dataset.type = it.type;
+                
+                el.ondragstart = (e) => {
+                    e.dataTransfer.setData('text/plain', uniqueId);
+                    e.dataTransfer.setData('itemType', it.type);
+                    el.classList.add('dragging');
+                    // Seçili değilse seç
+                    if(!CHECKED_FILES.has(uniqueId)) {
+                        CHECKED_FILES.add(uniqueId);
+                        el.classList.add('selected-row');
+                    }
+                };
+                
+                el.ondragend = () => {
+                    el.classList.remove('dragging');
+                    document.querySelectorAll('.drag-over').forEach(x => x.classList.remove('drag-over'));
+                };
+                
+                // Klasörlere bırakma
+                if(it.type === 'folder') {
+                    el.ondragover = (e) => {
+                        e.preventDefault();
+                        el.classList.add('drag-over');
+                    };
+                    el.ondragleave = () => {
+                        el.classList.remove('drag-over');
+                    };
+                    el.ondrop = async (e) => {
+                        e.preventDefault();
+                        el.classList.remove('drag-over');
+                        const draggedKey = e.dataTransfer.getData('text/plain');
+                        if(draggedKey && draggedKey !== uniqueId) {
+                            await handleDrop(draggedKey, uniqueId);
+                        }
+                    };
+                }
+                
                 container.appendChild(el);
             });
+            
+            // Boş alana bırakma (üst klasöre)
+            container.ondragover = (e) => {
+                e.preventDefault();
+                if(e.target === container) {
+                    container.classList.add('drag-over-empty');
+                }
+            };
+            container.ondragleave = (e) => {
+                if(e.target === container) {
+                    container.classList.remove('drag-over-empty');
+                }
+            };
+            container.ondrop = async (e) => {
+                e.preventDefault();
+                container.classList.remove('drag-over-empty');
+                // Sadece container'a doğrudan bırakıldıysa
+                if(e.target === container || e.target.classList.contains('mw-body')) {
+                    const draggedKey = e.dataTransfer.getData('text/plain');
+                    if(draggedKey) {
+                        await handleDropToCurrentFolder(draggedKey);
+                    }
+                }
+            };
+            
+            // Seçim kutusu (lasso) için event listeners
+            setupLassoSelection(container);
+            
             updateToolbar();
+        }
+        
+        // Sürükle-bırak: Klasöre taşıma
+        async function handleDrop(sourceKey, targetFolderKey) {
+            const sourceName = sourceKey.replace(/\/$/, '').split('/').pop();
+            const targetName = targetFolderKey.replace(/\/$/, '').split('/').pop();
+            
+            showConfirm(
+                '📁 Taşı',
+                `<strong>"${sourceName}"</strong> klasörü <strong>"${targetName}"</strong> içine taşınsın mı?`,
+                async () => {
+                    document.getElementById('loader').style.display='flex';
+                    
+                    // Tüm seçili öğeleri taşı
+                    const itemsToMove = CHECKED_FILES.size > 0 ? Array.from(CHECKED_FILES) : [sourceKey];
+                    
+                    for(const item of itemsToMove) {
+                        const itemName = item.replace(/\/$/, '').split('/').pop();
+                        const isFolder = item.endsWith('/');
+                        
+                        if(isFolder) {
+                            const files = R2_FILES.filter(f => f.key.startsWith(item));
+                            for(const f of files) {
+                                const relativePath = f.key.slice(item.length);
+                                const dest = targetFolderKey + itemName + "/" + relativePath;
+                                await moveReq(f.key, dest);
+                            }
+                        } else {
+                            const dest = targetFolderKey + itemName;
+                            await moveReq(item, dest);
+                        }
+                    }
+                    
+                    CHECKED_FILES.clear();
+                    await refreshList();
+                    document.getElementById('loader').style.display='none';
+                    showToast('✅ Taşındı', `${itemsToMove.length} öğe taşındı`, 'success');
+                },
+                'Taşı',
+                'success'
+            );
+        }
+        
+        // Sürükle-bırak: Mevcut klasöre taşıma
+        async function handleDropToCurrentFolder(sourceKey) {
+            // Aynı klasördeyse bir şey yapma
+            const sourceDir = sourceKey.substring(0, sourceKey.lastIndexOf('/') + 1);
+            if(sourceDir === CUR_PATH) return;
+            
+            const sourceName = sourceKey.replace(/\/$/, '').split('/').pop();
+            
+            showConfirm(
+                '📁 Taşı',
+                `<strong>"${sourceName}"</strong> bu klasöre taşınsın mı?`,
+                async () => {
+                    document.getElementById('loader').style.display='flex';
+                    
+                    const itemsToMove = CHECKED_FILES.size > 0 ? Array.from(CHECKED_FILES) : [sourceKey];
+                    
+                    for(const item of itemsToMove) {
+                        const itemName = item.replace(/\/$/, '').split('/').pop();
+                        const isFolder = item.endsWith('/');
+                        
+                        if(isFolder) {
+                            const files = R2_FILES.filter(f => f.key.startsWith(item));
+                            for(const f of files) {
+                                const relativePath = f.key.slice(item.length);
+                                const dest = CUR_PATH + itemName + "/" + relativePath;
+                                await moveReq(f.key, dest);
+                            }
+                        } else {
+                            const dest = CUR_PATH + itemName;
+                            await moveReq(item, dest);
+                        }
+                    }
+                    
+                    CHECKED_FILES.clear();
+                    await refreshList();
+                    document.getElementById('loader').style.display='none';
+                    showToast('✅ Taşındı', `${itemsToMove.length} öğe taşındı`, 'success');
+                },
+                'Taşı',
+                'success'
+            );
+        }
+        
+        // Seçim kutusu (Lasso Selection)
+        let lassoActive = false;
+        let lassoStart = { x: 0, y: 0 };
+        let lassoBox = null;
+        
+        function setupLassoSelection(container) {
+            container.onmousedown = (e) => {
+                // Sadece sol tık ve direkt container üzerinde
+                if(e.button !== 0 || e.target !== container) return;
+                
+                lassoActive = true;
+                lassoStart = { x: e.clientX, y: e.clientY };
+                
+                // Seçim kutusunu oluştur
+                lassoBox = document.createElement('div');
+                lassoBox.className = 'selection-box';
+                lassoBox.style.left = e.clientX + 'px';
+                lassoBox.style.top = e.clientY + 'px';
+                lassoBox.style.width = '0px';
+                lassoBox.style.height = '0px';
+                document.body.appendChild(lassoBox);
+                
+                // Ctrl basılı değilse önceki seçimleri temizle
+                if(!e.ctrlKey && !e.metaKey) {
+                    CHECKED_FILES.clear();
+                    document.querySelectorAll('.file-item.selected-row').forEach(el => el.classList.remove('selected-row'));
+                }
+            };
+            
+            document.addEventListener('mousemove', (e) => {
+                if(!lassoActive || !lassoBox) return;
+                
+                const x = Math.min(e.clientX, lassoStart.x);
+                const y = Math.min(e.clientY, lassoStart.y);
+                const w = Math.abs(e.clientX - lassoStart.x);
+                const h = Math.abs(e.clientY - lassoStart.y);
+                
+                lassoBox.style.left = x + 'px';
+                lassoBox.style.top = y + 'px';
+                lassoBox.style.width = w + 'px';
+                lassoBox.style.height = h + 'px';
+                
+                // Seçim kutusuna giren öğeleri seç
+                const boxRect = lassoBox.getBoundingClientRect();
+                document.querySelectorAll('#mw-body .file-item').forEach(el => {
+                    const elRect = el.getBoundingClientRect();
+                    const overlaps = !(elRect.right < boxRect.left || 
+                                       elRect.left > boxRect.right || 
+                                       elRect.bottom < boxRect.top || 
+                                       elRect.top > boxRect.bottom);
+                    
+                    const key = el.dataset.key;
+                    if(overlaps) {
+                        CHECKED_FILES.add(key);
+                        el.classList.add('selected-row');
+                        el.querySelector('.item-check').checked = true;
+                    }
+                });
+                
+                updateToolbar();
+            });
+            
+            document.addEventListener('mouseup', () => {
+                if(lassoActive && lassoBox) {
+                    lassoBox.remove();
+                    lassoBox = null;
+                    lassoActive = false;
+                    updateToolbar();
+                }
+            });
+        }
+        
+        // Sağ tık menüsü göster
+        let contextTarget = null;
+        let contextTargetType = null;
+        
+        function showContextMenu(e, key, type, name) {
+            contextTarget = key;
+            contextTargetType = type;
+            
+            const menu = document.getElementById('context-menu');
+            
+            // Yapıştır butonu durumu
+            const pasteItem = document.getElementById('ctx-paste');
+            if(CLIPBOARD.length > 0) {
+                pasteItem.classList.remove('disabled');
+            } else {
+                pasteItem.classList.add('disabled');
+            }
+            
+            // Menüyü konumlandır
+            menu.style.left = e.clientX + 'px';
+            menu.style.top = e.clientY + 'px';
+            
+            // Ekran sınırlarını kontrol et
+            menu.classList.add('active');
+            const menuRect = menu.getBoundingClientRect();
+            if(menuRect.right > window.innerWidth) {
+                menu.style.left = (e.clientX - menuRect.width) + 'px';
+            }
+            if(menuRect.bottom > window.innerHeight) {
+                menu.style.top = (e.clientY - menuRect.height) + 'px';
+            }
+        }
+        
+        // Sağ tık menüsünü kapat
+        document.addEventListener('click', () => {
+            document.getElementById('context-menu').classList.remove('active');
+        });
+        
+        // Sağ tık menü aksiyonları
+        function contextAction(action) {
+            const menu = document.getElementById('context-menu');
+            menu.classList.remove('active');
+            
+            switch(action) {
+                case 'open':
+                    if(contextTargetType === 'folder') {
+                        CUR_PATH = contextTarget;
+                        renderFiles();
+                    }
+                    break;
+                case 'select':
+                    if(!CHECKED_FILES.has(contextTarget)) {
+                        CHECKED_FILES.add(contextTarget);
+                    } else {
+                        CHECKED_FILES.delete(contextTarget);
+                    }
+                    renderFiles();
+                    updateToolbar();
+                    break;
+                case 'copy':
+                    if(!CHECKED_FILES.has(contextTarget)) {
+                        CHECKED_FILES.add(contextTarget);
+                    }
+                    copySelected();
+                    break;
+                case 'cut':
+                    if(!CHECKED_FILES.has(contextTarget)) {
+                        CHECKED_FILES.add(contextTarget);
+                    }
+                    moveSelected();
+                    break;
+                case 'paste':
+                    pasteFiles();
+                    break;
+                case 'rename':
+                    renameItem(contextTarget, contextTargetType);
+                    break;
+                case 'delete':
+                    if(!CHECKED_FILES.has(contextTarget)) {
+                        CHECKED_FILES.add(contextTarget);
+                    }
+                    deleteBatch();
+                    break;
+            }
+        }
+        
+        // Toast bildirimi göster
+        function showToast(title, message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+            
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
+                <span class="toast-message"><strong>${title}</strong><br>${message}</span>
+                <span class="toast-close" onclick="this.parentElement.remove()">✕</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            // 4 saniye sonra otomatik kapat
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
         }
 
         // --- DOSYA İŞLEMLERİ ---
@@ -838,49 +1664,86 @@
         }
         async function copyReq(src, dest) { try { await fetch(WORKER_URL + "/copy", { method: 'POST', headers: { ...getR2Headers(), 'Content-Type': 'application/json' }, body: JSON.stringify({source: src, destination: dest}) }); } catch(e) { console.error(e); } }
         async function moveReq(src, dest) { try { await fetch(WORKER_URL + "/move", { method: 'POST', headers: { ...getR2Headers(), 'Content-Type': 'application/json' }, body: JSON.stringify({source: src, destination: dest}) }); } catch(e) { console.error(e); } }
-        function copySelected() { if(CHECKED_FILES.size === 0) return; CLIPBOARD = Array.from(CHECKED_FILES); CLIPBOARD_ACTION = 'copy'; CHECKED_FILES.clear(); renderFiles(); updateToolbar(); alert("Kopyalandı!"); }
-        function moveSelected() { if(CHECKED_FILES.size === 0) return; CLIPBOARD = Array.from(CHECKED_FILES); CLIPBOARD_ACTION = 'move'; CHECKED_FILES.clear(); renderFiles(); updateToolbar(); alert("Kesildi!"); }
+        function copySelected() { if(CHECKED_FILES.size === 0) return; CLIPBOARD = Array.from(CHECKED_FILES); CLIPBOARD_ACTION = 'copy'; CHECKED_FILES.clear(); renderFiles(); updateToolbar(); showToast('📋 Kopyalandı', `${CLIPBOARD.length} öğe panoya kopyalandı`, 'info'); }
+        function moveSelected() { if(CHECKED_FILES.size === 0) return; CLIPBOARD = Array.from(CHECKED_FILES); CLIPBOARD_ACTION = 'move'; CHECKED_FILES.clear(); renderFiles(); updateToolbar(); showToast('✂️ Kesildi', `${CLIPBOARD.length} öğe kesildi`, 'warning'); }
         async function pasteFiles() {
-            if(CLIPBOARD.length === 0) return; if(!confirm(`${CLIPBOARD.length} öğe yapıştırılsın mı?`)) return;
-            document.getElementById('loader').style.display='flex';
-            for(const item of CLIPBOARD) {
-                const isFolder = item.endsWith('/');
-                if(!isFolder) {
-                    let fileName = item.split('/').pop(); let dest = CUR_PATH + fileName;
-                    if(item === dest && CLIPBOARD_ACTION === 'copy') { const parts = fileName.split('.'); const ext = parts.length > 1 ? parts.pop() : ""; dest = CUR_PATH + parts.join('.') + " kopya" + (ext ? "."+ext : ""); }
-                    if(CLIPBOARD_ACTION === 'copy') await copyReq(item, dest); else if(item !== dest) await moveReq(item, dest);
-                } else {
-                    const folderName = item.split('/').filter(x=>x).pop(); const oldPrefix = item; let newPrefix = CUR_PATH + folderName + "/";
-                    if(oldPrefix === newPrefix && CLIPBOARD_ACTION === 'copy') { newPrefix = CUR_PATH + folderName + " kopya/"; }
-                    const files = R2_FILES.filter(f => f.key.startsWith(oldPrefix));
-                    for(const f of files) { const dest = newPrefix + f.key.slice(oldPrefix.length); if(CLIPBOARD_ACTION === 'copy') await copyReq(f.key, dest); else if(f.key !== dest) await moveReq(f.key, dest); }
-                }
-            }
-            await refreshList(); CLIPBOARD = []; updateToolbar(); document.getElementById('loader').style.display='none';
+            if(CLIPBOARD.length === 0) return;
+            showConfirm(
+                '📥 Yapıştır',
+                `<strong>${CLIPBOARD.length}</strong> öğe bu klasöre yapıştırılsın mı?`,
+                async () => {
+                    document.getElementById('loader').style.display='flex';
+                    for(const item of CLIPBOARD) {
+                        const isFolder = item.endsWith('/');
+                        if(!isFolder) {
+                            let fileName = item.split('/').pop(); let dest = CUR_PATH + fileName;
+                            if(item === dest && CLIPBOARD_ACTION === 'copy') { const parts = fileName.split('.'); const ext = parts.length > 1 ? parts.pop() : ""; dest = CUR_PATH + parts.join('.') + " kopya" + (ext ? "."+ext : ""); }
+                            if(CLIPBOARD_ACTION === 'copy') await copyReq(item, dest); else if(item !== dest) await moveReq(item, dest);
+                        } else {
+                            const folderName = item.split('/').filter(x=>x).pop(); const oldPrefix = item; let newPrefix = CUR_PATH + folderName + "/";
+                            if(oldPrefix === newPrefix && CLIPBOARD_ACTION === 'copy') { newPrefix = CUR_PATH + folderName + " kopya/"; }
+                            const files = R2_FILES.filter(f => f.key.startsWith(oldPrefix));
+                            for(const f of files) { const dest = newPrefix + f.key.slice(oldPrefix.length); if(CLIPBOARD_ACTION === 'copy') await copyReq(f.key, dest); else if(f.key !== dest) await moveReq(f.key, dest); }
+                        }
+                    }
+                    await refreshList(); 
+                    showToast('✅ Başarılı', `${CLIPBOARD.length} öğe yapıştırıldı`, 'success');
+                    CLIPBOARD = []; 
+                    updateToolbar(); 
+                    document.getElementById('loader').style.display='none';
+                },
+                'Yapıştır',
+                'success'
+            );
         }
         async function deleteBatch() {
-            if(!confirm(`${CHECKED_FILES.size} öğe silinsin mi?`)) return; document.getElementById('btn-batch-delete').innerText = "Siliniyor...";
-            for(const key of CHECKED_FILES) { 
-                if(key.endsWith('/')) { 
-                    const files = R2_FILES.filter(f => f.key.startsWith(key)); 
-                    // RESTful: /delete/ olmadan direkt dosya yolu, Method: DELETE
-                    for(const f of files) await fetch(WORKER_URL + "/" + f.key, { method:'DELETE', headers: getR2Headers() }); 
-                } else { 
-                    await fetch(WORKER_URL + "/" + key, { method:'DELETE', headers: getR2Headers() }); 
-                } 
-            }
-            CHECKED_FILES.clear(); await refreshList(); updateToolbar(); updateHeaderCheck();
+            if(CHECKED_FILES.size === 0) return;
+            showConfirm(
+                '🗑️ Sil',
+                `<strong>${CHECKED_FILES.size}</strong> öğe silinecek.<br><br>Bu işlem geri alınamaz!`,
+                async () => {
+                    document.getElementById('btn-batch-delete').innerText = "Siliniyor...";
+                    document.getElementById('loader').style.display='flex';
+                    const count = CHECKED_FILES.size;
+                    for(const key of CHECKED_FILES) { 
+                        if(key.endsWith('/')) { 
+                            const files = R2_FILES.filter(f => f.key.startsWith(key)); 
+                            for(const f of files) await fetch(WORKER_URL + "/" + f.key, { method:'DELETE', headers: getR2Headers() }); 
+                        } else { 
+                            await fetch(WORKER_URL + "/" + key, { method:'DELETE', headers: getR2Headers() }); 
+                        } 
+                    }
+                    CHECKED_FILES.clear(); 
+                    await refreshList(); 
+                    updateToolbar(); 
+                    updateHeaderCheck();
+                    document.getElementById('loader').style.display='none';
+                    showToast('🗑️ Silindi', `${count} öğe silindi`, 'success');
+                },
+                'Sil',
+                'danger'
+            );
         }
         async function deleteSingleItem(key, type) {
-            if(!confirm(`"${key}" silinsin mi?`)) return;
-            // RESTful: /delete/ olmadan direkt dosya yolu, Method: DELETE
-            if(type === 'folder') { 
-                const files = R2_FILES.filter(f => f.key.startsWith(key)); 
-                for(const f of files) await fetch(WORKER_URL + "/" + f.key, { method:'DELETE', headers: getR2Headers() }); 
-            } else { 
-                await fetch(WORKER_URL + "/" + key, { method:'DELETE', headers: getR2Headers() }); 
-            } 
-            await refreshList();
+            const displayName = key.replace(/\/$/, '').split('/').pop();
+            showConfirm(
+                '🗑️ Sil',
+                `<strong>"${displayName}"</strong> silinecek.<br><br>Bu işlem geri alınamaz!`,
+                async () => {
+                    document.getElementById('loader').style.display='flex';
+                    if(type === 'folder') { 
+                        const files = R2_FILES.filter(f => f.key.startsWith(key)); 
+                        for(const f of files) await fetch(WORKER_URL + "/" + f.key, { method:'DELETE', headers: getR2Headers() }); 
+                    } else { 
+                        await fetch(WORKER_URL + "/" + key, { method:'DELETE', headers: getR2Headers() }); 
+                    } 
+                    await refreshList();
+                    document.getElementById('loader').style.display='none';
+                    showToast('🗑️ Silindi', `"${displayName}" silindi`, 'success');
+                },
+                'Sil',
+                'danger'
+            );
         }
         async function refreshList() { const r = await fetch(WORKER_URL+"/list", { headers: getR2Headers() }); if(r.ok) R2_FILES = await r.json(); renderFiles(); }
         function updateToolbar() {
@@ -892,16 +1755,31 @@
         function toggleSelectAll(masterChk) { const items = window.CURRENT_ITEMS || []; items.forEach(it => { const uid = it.type === 'folder' ? (CUR_PATH + it.name + "/") : it.key; if(masterChk.checked) CHECKED_FILES.add(uid); else CHECKED_FILES.delete(uid); }); renderFiles(); updateToolbar(); }
         function updateHeaderCheck() { document.getElementById('master-check').checked = false; }
         async function uploadToR2(file) {
-            if(!file) return; const k = CUR_PATH + file.name; if(!confirm(`Yüklensin mi: ${file.name}`)) return; document.getElementById('loader').style.display='flex';
-            try { 
-                // RESTful: /upload/ olmadan direkt dosya yolu, Method: PUT
-                await fetch(WORKER_URL + "/" + k, { 
-                    method:"PUT", 
-                    headers: getR2Headers(),
-                    body:file 
-                }); 
-                await refreshList(); 
-            } catch(e) { alert(e.message); } finally { document.getElementById('loader').style.display='none'; }
+            if(!file) return; 
+            const k = CUR_PATH + file.name; 
+            
+            showConfirm(
+                '☁️ Yükle',
+                `<strong>"${file.name}"</strong> dosyası yüklensin mi?`,
+                async () => {
+                    document.getElementById('loader').style.display='flex';
+                    try { 
+                        await fetch(WORKER_URL + "/" + k, { 
+                            method:"PUT", 
+                            headers: getR2Headers(),
+                            body:file 
+                        }); 
+                        await refreshList();
+                        showToast('✅ Yüklendi', `"${file.name}" başarıyla yüklendi`, 'success');
+                    } catch(e) { 
+                        showToast('❌ Hata', e.message, 'error'); 
+                    } finally { 
+                        document.getElementById('loader').style.display='none'; 
+                    }
+                },
+                'Yükle',
+                'success'
+            );
         }
         function navUp() { if(!CUR_PATH)return; const p=CUR_PATH.split('/'); p.pop(); p.pop(); CUR_PATH=p.length>0?p.join('/')+"/":""; renderFiles(); updateHeaderCheck(); }
         function closeMedia() { document.getElementById('media-modal').style.display='none'; }
@@ -1721,6 +2599,318 @@
                 document.getElementById('loader').style.display = 'none';
                 if(btnSave) { btnSave.innerText = "Değişiklikleri Kaydet"; btnSave.style.opacity = "1"; }
             }
+        }
+        
+        // =============================================
+        // AYARLAR MODÜLÜ
+        // =============================================
+        
+        function openSettings() {
+            const modal = document.getElementById('settings-modal');
+            // Mevcut değerleri yükle
+            document.getElementById('settings-base-url').value = localStorage.getItem('base_url') || '';
+            document.getElementById('settings-worker-url').value = localStorage.getItem('worker_url') || WORKER_URL || '';
+            modal.classList.add('active');
+        }
+        
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.remove('active');
+        }
+        
+        function saveSettings() {
+            const baseUrl = document.getElementById('settings-base-url').value.trim();
+            const workerUrl = document.getElementById('settings-worker-url').value.trim();
+            
+            // Kaydet
+            if(baseUrl) localStorage.setItem('base_url', baseUrl);
+            if(workerUrl) {
+                localStorage.setItem('worker_url', workerUrl);
+                WORKER_URL = workerUrl;
+            }
+            
+            closeSettingsModal();
+            showToast('✅ Kaydedildi', 'Ayarlar başarıyla kaydedildi', 'success');
+        }
+        
+        // Base URL'yi al (varsayılan ile)
+        function getBaseUrl() {
+            return localStorage.getItem('base_url') || 'https://plansmithco.vercel.app';
+        }
+        
+        // =============================================
+        // KATALOG OLUŞTURUCU MODÜLÜ
+        // =============================================
+        
+        let selectedProducts = new Set();
+        
+        function openCatalogCreator() {
+            // Editor ve diğer panelleri gizle
+            document.getElementById('editor-area').classList.add('hidden');
+            document.getElementById('catalog-creator').classList.remove('hidden');
+            
+            // Ürün listesini render et
+            renderCatalogProductList();
+            
+            // Seçim alanını göster, önizlemeyi gizle
+            document.getElementById('catalog-selector-area').classList.remove('hidden');
+            document.getElementById('catalog-preview-area').classList.add('hidden');
+        }
+        
+        function closeCatalogCreator() {
+            document.getElementById('catalog-creator').classList.add('hidden');
+            selectedProducts.clear();
+            updateSelectedCount();
+        }
+        
+        function renderCatalogProductList() {
+            const container = document.getElementById('catalog-product-list');
+            container.innerHTML = '';
+            
+            if(!DATA || DATA.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);">Henüz ürün bulunmuyor</div>';
+                return;
+            }
+            
+            DATA.forEach((category, catIndex) => {
+                const catDiv = document.createElement('div');
+                catDiv.className = 'catalog-category';
+                
+                // Kategori başlığı
+                const header = document.createElement('div');
+                header.className = 'catalog-category-header';
+                header.innerHTML = `
+                    <input type="checkbox" id="cat-check-${catIndex}" onchange="toggleCategory(${catIndex}, this.checked)">
+                    <span>📂 ${category.name}</span>
+                    <span style="margin-left:auto; font-size:11px; color:var(--text-muted); font-weight:400;">${category.products.length} ürün</span>
+                `;
+                catDiv.appendChild(header);
+                
+                // Ürünler
+                category.products.forEach((product, prodIndex) => {
+                    const prodDiv = document.createElement('div');
+                    prodDiv.className = 'catalog-product-item';
+                    const productKey = `${catIndex}-${prodIndex}`;
+                    
+                    prodDiv.innerHTML = `
+                        <input type="checkbox" id="prod-check-${productKey}" 
+                               ${selectedProducts.has(productKey) ? 'checked' : ''}
+                               onchange="toggleProduct('${productKey}', this.checked)">
+                        <span class="product-name">📦 ${product.name || 'Adsız'}</span>
+                        <span class="product-sku">${product.sku || '-'}</span>
+                    `;
+                    catDiv.appendChild(prodDiv);
+                });
+                
+                container.appendChild(catDiv);
+            });
+            
+            updateSelectedCount();
+        }
+        
+        function toggleCategory(catIndex, checked) {
+            const category = DATA[catIndex];
+            category.products.forEach((_, prodIndex) => {
+                const key = `${catIndex}-${prodIndex}`;
+                if(checked) {
+                    selectedProducts.add(key);
+                } else {
+                    selectedProducts.delete(key);
+                }
+                const checkbox = document.getElementById(`prod-check-${key}`);
+                if(checkbox) checkbox.checked = checked;
+            });
+            updateSelectedCount();
+        }
+        
+        function toggleProduct(key, checked) {
+            if(checked) {
+                selectedProducts.add(key);
+            } else {
+                selectedProducts.delete(key);
+            }
+            updateSelectedCount();
+        }
+        
+        function selectAllProducts(select) {
+            selectedProducts.clear();
+            
+            DATA.forEach((category, catIndex) => {
+                const catCheckbox = document.getElementById(`cat-check-${catIndex}`);
+                if(catCheckbox) catCheckbox.checked = select;
+                
+                category.products.forEach((_, prodIndex) => {
+                    const key = `${catIndex}-${prodIndex}`;
+                    if(select) selectedProducts.add(key);
+                    const checkbox = document.getElementById(`prod-check-${key}`);
+                    if(checkbox) checkbox.checked = select;
+                });
+            });
+            
+            updateSelectedCount();
+        }
+        
+        function updateSelectedCount() {
+            document.getElementById('selected-count').textContent = `${selectedProducts.size} ürün seçildi`;
+        }
+        
+        function generateCatalog() {
+            if(selectedProducts.size === 0) {
+                showAlert('⚠️ Uyarı', 'Lütfen en az bir ürün seçin.', 'warning');
+                return;
+            }
+            
+            // Seçili ürünleri topla
+            const products = [];
+            selectedProducts.forEach(key => {
+                const [catIndex, prodIndex] = key.split('-').map(Number);
+                const category = DATA[catIndex];
+                const product = category.products[prodIndex];
+                products.push({
+                    ...product,
+                    categoryName: category.name
+                });
+            });
+            
+            // Önizleme alanına geç
+            document.getElementById('catalog-selector-area').classList.add('hidden');
+            document.getElementById('catalog-preview-area').classList.remove('hidden');
+            
+            // A4 sayfaları oluştur
+            renderA4Pages(products);
+        }
+        
+        function renderA4Pages(products) {
+            const container = document.getElementById('a4-preview');
+            container.innerHTML = '';
+            
+            const baseUrl = getBaseUrl();
+            const productsPerPage = 6; // Bir sayfaya 6 ürün
+            const totalPages = Math.ceil(products.length / productsPerPage);
+            
+            for(let page = 0; page < totalPages; page++) {
+                const pageProducts = products.slice(page * productsPerPage, (page + 1) * productsPerPage);
+                
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'a4-page';
+                
+                // Sayfa başlığı
+                const header = document.createElement('div');
+                header.className = 'a4-page-header';
+                header.innerHTML = `
+                    <h1>🚀 PlanSmithCo. Ürün Kataloğu</h1>
+                    <p>Sayfa ${page + 1} / ${totalPages} • ${new Date().toLocaleDateString('tr-TR')}</p>
+                `;
+                pageDiv.appendChild(header);
+                
+                // Ürün kartları grid
+                const grid = document.createElement('div');
+                grid.className = 'catalog-grid';
+                
+                pageProducts.forEach((product, idx) => {
+                    const card = document.createElement('div');
+                    card.className = 'catalog-card';
+                    
+                    // Ürün resmi
+                    const imgSrc = product.thumbnail ? resolveAssetUrl(product.thumbnail) : '';
+                    
+                    // QR kod için benzersiz ID
+                    const qrId = `qr-${page}-${idx}`;
+                    
+                    // QR link
+                    const qrLink = `${baseUrl}/?sku=${encodeURIComponent(product.sku || '')}`;
+                    
+                    card.innerHTML = `
+                        <img class="catalog-card-image" src="${imgSrc}" alt="${product.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 60 60%22><rect fill=%22%23e2e8f0%22 width=%2260%22 height=%2260%22/><text x=%2230%22 y=%2235%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22 font-size=%2220%22>📦</text></svg>'">
+                        <div class="catalog-card-info">
+                            <div class="info-row">
+                                <span class="info-label">Ürün Adı:</span>
+                                <span class="info-value">${product.name || 'Adsız Ürün'}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Kategori:</span>
+                                <span class="info-value">${product.categoryName}</span>
+                            </div>
+                        </div>
+                        <div class="catalog-card-qr" id="${qrId}" title="${qrLink}"></div>
+                    `;
+                    
+                    grid.appendChild(card);
+                    
+                    // QR kodu SVG olarak oluştur (daha net baskı için)
+                    setTimeout(() => {
+                        const qrContainer = document.getElementById(qrId);
+                        if(qrContainer) {
+                            generateSVGQRCode(qrContainer, qrLink);
+                        }
+                    }, 50);
+                });
+                
+                pageDiv.appendChild(grid);
+                container.appendChild(pageDiv);
+            }
+            
+            showToast('✅ Hazır', `${products.length} ürün için ${totalPages} sayfa oluşturuldu`, 'success');
+        }
+        
+        // SVG tabanlı QR kod oluşturucu (vektörel - net baskı için)
+        function generateSVGQRCode(container, text) {
+            // QRCode kütüphanesini kullanarak önce canvas oluştur, sonra SVG'ye çevir
+            if(typeof QRCode === 'undefined') {
+                container.innerHTML = '<span style="font-size:10px; color:#94a3b8;">QR Yok</span>';
+                return;
+            }
+            
+            // Geçici div oluştur
+            const tempDiv = document.createElement('div');
+            tempDiv.style.display = 'none';
+            document.body.appendChild(tempDiv);
+            
+            // QR kod oluştur
+            const qr = new QRCode(tempDiv, {
+                text: text,
+                width: 256,
+                height: 256,
+                colorDark: '#1e293b',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
+            });
+            
+            // Canvas'tan SVG'ye çevir
+            setTimeout(() => {
+                const canvas = tempDiv.querySelector('canvas');
+                if(canvas) {
+                    const ctx = canvas.getContext('2d');
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const moduleCount = Math.sqrt(imageData.data.length / 4);
+                    const moduleSize = canvas.width / moduleCount;
+                    
+                    // SVG oluştur
+                    let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${canvas.width} ${canvas.height}" width="65" height="65">`;
+                    svgContent += `<rect width="100%" height="100%" fill="#ffffff"/>`;
+                    
+                    // Her modül için rect ekle
+                    for(let y = 0; y < canvas.height; y += moduleSize) {
+                        for(let x = 0; x < canvas.width; x += moduleSize) {
+                            const idx = (Math.floor(y) * canvas.width + Math.floor(x)) * 4;
+                            // Koyu piksel mi kontrol et
+                            if(imageData.data[idx] < 128) {
+                                svgContent += `<rect x="${x}" y="${y}" width="${moduleSize}" height="${moduleSize}" fill="#1e293b"/>`;
+                            }
+                        }
+                    }
+                    
+                    svgContent += '</svg>';
+                    container.innerHTML = svgContent;
+                }
+                
+                // Geçici div'i temizle
+                document.body.removeChild(tempDiv);
+            }, 100);
+        }
+        
+        function backToSelection() {
+            document.getElementById('catalog-selector-area').classList.remove('hidden');
+            document.getElementById('catalog-preview-area').classList.add('hidden');
         }
     </script>
 </body>
