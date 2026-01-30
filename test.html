@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PlanSmithCo - Digital Catalog</title>
-    
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Tailwind Config - Lovable Design System -->
     <script>
         tailwind.config = {
@@ -53,20 +54,45 @@
             }
         }
     </script>
-    
+
     <!-- Custom Styles -->
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: 'Inter', system-ui, sans-serif; }
-        
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
         /* Scrollbar */
-        .scrollbar-thin { scrollbar-width: thin; scrollbar-color: hsl(40 12% 88%) transparent; }
-        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
-        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-        .scrollbar-thin::-webkit-scrollbar-thumb { background-color: hsl(40 12% 88%); border-radius: 3px; }
-        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
-        .scrollbar-none::-webkit-scrollbar { display: none; }
-        
+        .scrollbar-thin {
+            scrollbar-width: thin;
+            scrollbar-color: hsl(40 12% 88%) transparent;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background-color: hsl(40 12% 88%);
+            border-radius: 3px;
+        }
+
+        .scrollbar-none {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .scrollbar-none::-webkit-scrollbar {
+            display: none;
+        }
+
         /* Button Styles */
         .btn-primary {
             background: hsl(42 92% 50%);
@@ -77,8 +103,12 @@
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px -2px hsl(42 92% 50% / 0.4);
         }
-        .btn-primary:hover { filter: brightness(1.05); box-shadow: 0 4px 16px -2px hsl(42 92% 50% / 0.5); }
-        
+
+        .btn-primary:hover {
+            filter: brightness(1.05);
+            box-shadow: 0 4px 16px -2px hsl(42 92% 50% / 0.5);
+        }
+
         .btn-secondary {
             background: hsl(40 15% 95%);
             color: hsl(30 10% 25%);
@@ -88,8 +118,11 @@
             border: 1px solid hsl(40 12% 88%);
             transition: all 0.2s;
         }
-        .btn-secondary:hover { background: hsl(40 10% 93%); }
-        
+
+        .btn-secondary:hover {
+            background: hsl(40 10% 93%);
+        }
+
         .btn-ghost {
             color: hsl(30 8% 45%);
             font-weight: 500;
@@ -97,8 +130,12 @@
             border-radius: 0.5rem;
             transition: all 0.2s;
         }
-        .btn-ghost:hover { background: hsl(40 15% 95%); color: hsl(30 10% 12%); }
-        
+
+        .btn-ghost:hover {
+            background: hsl(40 15% 95%);
+            color: hsl(30 10% 12%);
+        }
+
         .btn-icon {
             width: 2.5rem;
             height: 2.5rem;
@@ -111,10 +148,20 @@
             border: 1px solid hsl(40 12% 88%);
             transition: all 0.2s;
         }
-        .btn-icon:hover { background: hsl(40 15% 95%); color: hsl(30 10% 12%); }
-        
+
+        .btn-icon:hover {
+            background: hsl(40 15% 95%);
+            color: hsl(30 10% 12%);
+        }
+
         /* Viewer */
-        .viewer-container { background: hsl(40 10% 94%); border-radius: 1rem; overflow: hidden; position: relative; }
+        .viewer-container {
+            background: hsl(40 10% 94%);
+            border-radius: 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+
         .viewer-control {
             background: hsl(0 0% 100% / 0.9);
             backdrop-filter: blur(8px);
@@ -125,8 +172,11 @@
             font-weight: 500;
             transition: all 0.2s;
         }
-        .viewer-control:hover { background: hsl(0 0% 100%); }
-        
+
+        .viewer-control:hover {
+            background: hsl(0 0% 100%);
+        }
+
         /* Category & Product Cards */
         .category-card {
             display: flex;
@@ -137,9 +187,15 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .category-card:hover { background: hsl(40 15% 95%); }
-        .category-card-active { background: hsl(42 75% 95%); }
-        
+
+        .category-card:hover {
+            background: hsl(40 15% 95%);
+        }
+
+        .category-card-active {
+            background: hsl(42 75% 95%);
+        }
+
         .product-item {
             display: flex;
             align-items: center;
@@ -149,9 +205,15 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .product-item:hover { background: hsl(40 15% 95%); }
-        .product-item-active { background: hsl(42 75% 95%); }
-        
+
+        .product-item:hover {
+            background: hsl(40 15% 95%);
+        }
+
+        .product-item-active {
+            background: hsl(42 75% 95%);
+        }
+
         /* Tabs */
         .tab-trigger {
             padding: 0.75rem 1.5rem;
@@ -161,9 +223,16 @@
             border-bottom: 2px solid transparent;
             transition: all 0.2s;
         }
-        .tab-trigger:hover { color: hsl(30 10% 12%); }
-        .tab-trigger-active { color: hsl(30 10% 12%); border-bottom-color: hsl(42 92% 50%); }
-        
+
+        .tab-trigger:hover {
+            color: hsl(30 10% 12%);
+        }
+
+        .tab-trigger-active {
+            color: hsl(30 10% 12%);
+            border-bottom-color: hsl(42 92% 50%);
+        }
+
         /* Swatch */
         .swatch {
             width: 3rem;
@@ -175,23 +244,65 @@
             background-size: cover;
             background-position: center;
         }
-        .swatch:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .swatch-active { ring: 2px; ring-color: hsl(42 92% 50%); ring-offset: 2px; box-shadow: 0 0 0 2px hsl(42 92% 50%), 0 0 0 4px white; }
-        
+
+        .swatch:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .swatch-active {
+            ring: 2px;
+            ring-color: hsl(42 92% 50%);
+            ring-offset: 2px;
+            box-shadow: 0 0 0 2px hsl(42 92% 50%), 0 0 0 4px white;
+        }
+
         /* Animations */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
-        
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .animate-spin { animation: spin 1s linear infinite; }
-        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
         /* Line Clamp */
-        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
         /* Model Viewer */
-        model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
-        model-viewer::part(default-ar-button) { display: none; }
-        
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            --poster-color: transparent;
+        }
+
+        model-viewer::part(default-ar-button) {
+            display: none;
+        }
+
         /* Badge */
         .badge {
             display: inline-flex;
@@ -203,28 +314,50 @@
             background: hsl(40 15% 95%);
             color: hsl(30 10% 25%);
         }
-        
+
         /* Accordion */
-        .accordion-trigger { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0.75rem 0; }
-        .accordion-trigger svg { transition: transform 0.2s; }
-        .accordion-trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
-        .accordion-content { overflow: hidden; transition: max-height 0.3s ease; }
-        .accordion-content.collapsed { max-height: 0; }
+        .accordion-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0.75rem 0;
+        }
+
+        .accordion-trigger svg {
+            transition: transform 0.2s;
+        }
+
+        .accordion-trigger[aria-expanded="true"] svg {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .accordion-content.collapsed {
+            max-height: 0;
+        }
     </style>
 </head>
+
 <body class="bg-background text-foreground antialiased">
 
     <!-- MAIN LAYOUT - 3 Column Desktop -->
     <div id="main-layout" class="flex h-screen overflow-hidden">
-        
+
         <!-- LEFT SIDEBAR - Catalog Navigation -->
-        <aside id="sidebar" class="w-[280px] h-screen bg-sidebar border-r border-sidebar-border flex flex-col flex-shrink-0">
-            
+        <aside id="sidebar"
+            class="w-[280px] h-screen bg-sidebar border-r border-sidebar-border flex flex-col flex-shrink-0">
+
             <!-- Brand Header -->
             <div class="flex items-center gap-3 px-6 py-5">
                 <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-button">
                     <svg class="w-5 h-5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
                 </div>
                 <div>
@@ -232,73 +365,93 @@
                     <p class="text-xs text-muted-foreground">Digital Catalog</p>
                 </div>
             </div>
-            
+
             <!-- Divider -->
             <div class="h-px bg-sidebar-border mx-4"></div>
-            
+
             <!-- Content Area -->
             <div id="sidebar-content" class="flex-1 overflow-hidden flex flex-col">
-                
+
                 <!-- Category List View -->
                 <div id="category-view" class="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-1">
-                    <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3 px-3">Kategoriler</p>
+                    <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3 px-3">Kategoriler
+                    </p>
                     <div id="category-grid"></div>
                 </div>
-                
+
                 <!-- Product List View (Hidden by default) -->
                 <div id="product-view" class="hidden flex-col h-full">
-                    
+
                     <!-- Back Button + Category Info -->
                     <div class="p-4 pb-2">
-                        <button id="back-btn" onclick="goBackToCategories()" class="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg px-2 py-1 -ml-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        <button id="back-btn" onclick="goBackToCategories()"
+                            class="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg px-2 py-1 -ml-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 19l-7-7 7-7" />
+                            </svg>
                             Tüm Kategoriler
                         </button>
                         <h2 id="category-title" class="text-lg font-semibold text-foreground mt-3">Kategori Adı</h2>
                         <p id="category-count" class="text-xs text-muted-foreground">0 ürün</p>
-                        
+
                         <!-- Category Description -->
                         <div id="category-desc-wrapper" class="mt-3 hidden">
-                            <p id="category-desc" class="text-sm text-muted-foreground leading-relaxed line-clamp-2"></p>
-                            <button id="desc-toggle" onclick="toggleCategoryDesc()" class="flex items-center gap-1 text-xs text-primary hover:opacity-80 mt-1 transition-colors hidden">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            <p id="category-desc" class="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                            </p>
+                            <button id="desc-toggle" onclick="toggleCategoryDesc()"
+                                class="flex items-center gap-1 text-xs text-primary hover:opacity-80 mt-1 transition-colors hidden">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
                                 <span>Devamını oku</span>
                             </button>
                         </div>
                     </div>
-                    
+
                     <!-- Search -->
                     <div class="px-4 pb-3">
                         <div class="relative">
-                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                            <input type="text" id="search-input" placeholder="Ürün ara..." oninput="filterProducts()" class="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <input type="text" id="search-input" placeholder="Ürün ara..." oninput="filterProducts()"
+                                class="w-full pl-9 pr-4 py-2.5 bg-background border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
                     </div>
-                    
+
                     <!-- Product List -->
                     <div id="product-list" class="flex-1 overflow-y-auto scrollbar-thin px-4 pb-4 space-y-1"></div>
                 </div>
             </div>
         </aside>
-        
+
         <!-- CENTER - 3D Viewer -->
         <main id="viewer-area" class="flex-1 p-4">
             <div class="viewer-container h-full relative flex flex-col">
-                
+
                 <!-- Loader Overlay -->
-                <div id="loader-overlay" class="absolute inset-0 bg-white/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center transition-opacity duration-300">
+                <div id="loader-overlay"
+                    class="absolute inset-0 bg-white/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center transition-opacity duration-300">
                     <svg class="w-10 h-10 text-primary animate-spin mb-4" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
                     </svg>
                     <p class="text-sm text-muted-foreground">Model yükleniyor...</p>
                 </div>
-                
+
                 <!-- Default Poster (No Product Selected) -->
                 <div id="default-poster" class="absolute inset-0 flex flex-col items-center justify-center z-5">
                     <div class="w-24 h-24 rounded-3xl bg-primary/10 flex items-center justify-center mb-6">
                         <svg class="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         </svg>
                     </div>
                     <div class="text-center">
@@ -306,51 +459,76 @@
                         <p class="text-muted-foreground">Bir ürün seçin</p>
                     </div>
                 </div>
-                
+
                 <!-- Model Viewer -->
-                <model-viewer id="mv" src="" ar ar-scale="fixed" ar-placement="floor" camera-controls disable-zoom interaction-prompt="none" environment-image="/studio.hdr" shadow-intensity="1" exposure="1.5" tone-mapping="neutral" loading="eager" class="flex-1"></model-viewer>
-                
+                <model-viewer id="mv" src="" ar ar-scale="fixed" ar-placement="floor" camera-controls disable-zoom
+                    interaction-prompt="none" environment-image="/studio.hdr" shadow-intensity="1" exposure="1.5"
+                    tone-mapping="neutral" loading="eager" class="flex-1"></model-viewer>
+
                 <!-- Viewer Controls -->
-                <div id="viewer-controls" class="absolute bottom-4 left-4 right-4 flex items-center justify-between pointer-events-none hidden">
+                <div id="viewer-controls"
+                    class="absolute bottom-4 left-4 right-4 flex items-center justify-between pointer-events-none hidden">
                     <div class="flex items-center gap-2 pointer-events-auto">
                         <button onclick="resetView()" class="viewer-control flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
                             <span class="hidden sm:inline">Sıfırla</span>
                         </button>
-                        <button id="rotate-btn" onclick="toggleAutoRotate()" class="viewer-control flex items-center gap-2">
-                            <svg id="pause-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <svg id="play-icon" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <button id="rotate-btn" onclick="toggleAutoRotate()"
+                            class="viewer-control flex items-center gap-2">
+                            <svg id="pause-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <svg id="play-icon" class="w-4 h-4 hidden" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
                             <span class="hidden sm:inline" id="rotate-text">Durdur</span>
                         </button>
                     </div>
                     <button onclick="toggleFullscreen()" class="viewer-control pointer-events-auto">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                        </svg>
                     </button>
                 </div>
             </div>
         </main>
-        
+
         <!-- RIGHT PANEL - Product Details -->
-        <aside id="detail-panel" class="w-[360px] h-screen bg-card border-l border-border flex flex-col flex-shrink-0 hidden">
-            
+        <aside id="detail-panel"
+            class="w-[360px] h-screen bg-card border-l border-border flex flex-col flex-shrink-0 hidden">
+
             <!-- Header -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-border">
                 <h2 id="detail-title" class="font-semibold text-foreground truncate pr-4">Ürün Adı</h2>
                 <button onclick="closeDetailPanel()" class="btn-icon flex-shrink-0">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
             </div>
-            
+
             <!-- Tabs -->
             <div class="flex border-b border-border">
-                <button onclick="switchTab('info')" id="tab-info" class="tab-trigger tab-trigger-active flex-1">Bilgi</button>
-                <button onclick="switchTab('variation')" id="tab-variation" class="tab-trigger flex-1">Varyasyon</button>
+                <button onclick="switchTab('info')" id="tab-info"
+                    class="tab-trigger tab-trigger-active flex-1">Bilgi</button>
+                <button onclick="switchTab('variation')" id="tab-variation"
+                    class="tab-trigger flex-1">Varyasyon</button>
                 <button onclick="switchTab('ar')" id="tab-ar" class="tab-trigger flex-1">AR</button>
             </div>
-            
+
             <!-- Tab Content -->
             <div id="tab-content" class="flex-1 overflow-y-auto scrollbar-thin p-6">
-                
+
                 <!-- Info Tab -->
                 <div id="content-info" class="space-y-6 animate-fade-in">
                     <!-- Product Header -->
@@ -366,96 +544,137 @@
                         </div>
                         <p id="info-desc" class="text-sm text-muted-foreground mt-3 leading-relaxed">Açıklama</p>
                     </div>
-                    
+
                     <!-- Etsy Button -->
-                    <a id="etsy-link" href="#" target="_blank" class="btn-primary w-full flex items-center justify-center gap-2">
+                    <a id="etsy-link" href="#" target="_blank"
+                        class="btn-primary w-full flex items-center justify-center gap-2">
                         Etsy'de İncele
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
                     </a>
-                    
+
                     <!-- Share Button -->
-                    <button onclick="shareProduct()" class="btn-secondary w-full flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                    <button onclick="shareProduct()"
+                        class="btn-secondary w-full flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+                        Paylaş
+                    </button>
+
+                    <!-- Share Button -->
+                    <button onclick="shareProduct()"
+                        class="btn-secondary w-full flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
                         Paylaş
                     </button>
                 </div>
-                
+
                 <!-- Variation Tab -->
                 <div id="content-variation" class="space-y-5 animate-fade-in hidden">
                     <!-- Action Buttons -->
                     <div class="flex items-center gap-2">
                         <button onclick="resetVariations()" class="btn-ghost flex items-center gap-2 text-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
                             Sıfırla
                         </button>
                     </div>
-                    
+
                     <!-- Variant Group Tabs -->
                     <div>
-                        <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Parça Seçin</p>
+                        <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Parça Seçin
+                        </p>
                         <div id="variant-tabs" class="flex gap-2 overflow-x-auto scrollbar-none pb-1"></div>
                     </div>
-                    
+
                     <!-- Swatch Grid -->
                     <div>
                         <div class="flex items-center justify-between mb-3">
-                            <p id="swatch-title" class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Renkler</p>
+                            <p id="swatch-title"
+                                class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Renkler</p>
                             <span id="swatch-count" class="text-xs text-muted-foreground">0 seçenek</span>
                         </div>
                         <div id="swatch-grid" class="grid grid-cols-4 gap-2"></div>
                     </div>
                 </div>
-                
+
                 <!-- AR Tab -->
                 <div id="content-ar" class="space-y-6 animate-fade-in hidden">
                     <!-- AR Preview Card -->
-                    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-6">
+                    <div
+                        class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 p-6">
                         <div class="absolute top-4 right-4">
                             <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
                             </div>
                         </div>
                         <div class="pr-20">
                             <h3 class="text-lg font-semibold text-foreground mb-2">AR ile Görüntüle</h3>
-                            <p id="ar-desc" class="text-sm text-muted-foreground leading-relaxed">Modeli gerçek ortamınızda deneyimleyin.</p>
+                            <p id="ar-desc" class="text-sm text-muted-foreground leading-relaxed">Modeli gerçek
+                                ortamınızda deneyimleyin.</p>
                         </div>
                     </div>
-                    
+
                     <!-- AR Button -->
-                    <button onclick="activateAR()" class="btn-primary w-full flex items-center justify-center gap-3 py-4">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <button onclick="activateAR()"
+                        class="btn-primary w-full flex items-center justify-center gap-3 py-4">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
                         AR Modunu Başlat
                     </button>
-                    
+
                     <!-- Instructions -->
                     <div class="space-y-3">
-                        <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Nasıl Kullanılır</p>
+                        <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Nasıl Kullanılır
+                        </p>
                         <div class="space-y-3">
                             <div class="flex items-start gap-3 p-3 rounded-xl bg-secondary/50">
-                                <div class="w-8 h-8 rounded-lg bg-background flex items-center justify-center flex-shrink-0">
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-background flex items-center justify-center flex-shrink-0">
                                     <span class="text-sm font-semibold text-primary">1</span>
                                 </div>
                                 <div>
                                     <p class="text-sm font-medium text-foreground">Kamerayı Açın</p>
-                                    <p class="text-xs text-muted-foreground mt-0.5">AR modunu başlatmak için kamera iznini verin</p>
+                                    <p class="text-xs text-muted-foreground mt-0.5">AR modunu başlatmak için kamera
+                                        iznini verin</p>
                                 </div>
                             </div>
                             <div class="flex items-start gap-3 p-3 rounded-xl bg-secondary/50">
-                                <div class="w-8 h-8 rounded-lg bg-background flex items-center justify-center flex-shrink-0">
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-background flex items-center justify-center flex-shrink-0">
                                     <span class="text-sm font-semibold text-primary">2</span>
                                 </div>
                                 <div>
                                     <p class="text-sm font-medium text-foreground">Yüzeyi Tarayın</p>
-                                    <p class="text-xs text-muted-foreground mt-0.5">Kameranızı düz bir yüzeye doğrultun</p>
+                                    <p class="text-xs text-muted-foreground mt-0.5">Kameranızı düz bir yüzeye doğrultun
+                                    </p>
                                 </div>
                             </div>
                             <div class="flex items-start gap-3 p-3 rounded-xl bg-secondary/50">
-                                <div class="w-8 h-8 rounded-lg bg-background flex items-center justify-center flex-shrink-0">
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-background flex items-center justify-center flex-shrink-0">
                                     <span class="text-sm font-semibold text-primary">3</span>
                                 </div>
                                 <div>
                                     <p class="text-sm font-medium text-foreground">Yerleştirin</p>
-                                    <p class="text-xs text-muted-foreground mt-0.5">Ekrana dokunarak modeli yerleştirin</p>
+                                    <p class="text-xs text-muted-foreground mt-0.5">Ekrana dokunarak modeli yerleştirin
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -467,7 +686,7 @@
 
     <!-- Model Viewer Library -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
-    
+
     <!-- Main JavaScript - Logic from plansmithco-2-showroom -->
     <script>
         // === DOM REFERENCES ===
@@ -480,7 +699,7 @@
         const loader = document.getElementById('loader-overlay');
         const defaultPoster = document.getElementById('default-poster');
         const viewerControls = document.getElementById('viewer-controls');
-        
+
         // === STATE ===
         let allData = [];
         let currentCategory = null;
@@ -491,10 +710,10 @@
         let currentVariantGroup = 0;
         let isAutoRotating = true;
         let isDescExpanded = false;
-        
+
         // === R2 ASSET URL RESOLVER ===
         const R2_PUBLIC_URL = 'https://plansmithco-adminpanel-api.serhatyildirim123.workers.dev';
-        
+
         function resolveAssetUrl(path) {
             if (!path) return '/poster.webp';
             if (path.startsWith('http')) return path;
@@ -503,7 +722,7 @@
             }
             return path;
         }
-        
+
         // === DATA LOADING ===
         fetch('products.json')
             .then(res => res.json())
@@ -517,7 +736,7 @@
                 console.error('Veri yüklenemedi:', err);
                 loader.innerHTML = '<p class="text-red-500">Veri yüklenemedi</p>';
             });
-        
+
         // === CATEGORY RENDERING ===
         function renderCategories() {
             categoryGrid.innerHTML = '';
@@ -538,21 +757,21 @@
                 categoryGrid.appendChild(card);
             });
         }
-        
+
         // === OPEN CATEGORY ===
         function openCategory(category) {
             currentCategory = category;
             currentProducts = category.products || [];
-            
+
             // Update UI
             document.getElementById('category-title').textContent = category.name;
             document.getElementById('category-count').textContent = `${currentProducts.length} ürün`;
-            
+
             // Description
             const descWrapper = document.getElementById('category-desc-wrapper');
             const descEl = document.getElementById('category-desc');
             const descToggle = document.getElementById('desc-toggle');
-            
+
             if (category.description) {
                 descEl.textContent = category.description;
                 descWrapper.classList.remove('hidden');
@@ -564,43 +783,43 @@
             } else {
                 descWrapper.classList.add('hidden');
             }
-            
+
             // Switch views
             categoryView.classList.add('hidden');
             productView.classList.remove('hidden');
             productView.classList.add('flex');
-            
+
             // Render products
             renderProductList();
-            
+
             // Select first product
             if (currentProducts.length > 0) {
                 selectProduct(currentProducts[0]);
             }
         }
-        
+
         // === GO BACK ===
         function goBackToCategories() {
             currentCategory = null;
             selectedProduct = null;
-            
+
             categoryView.classList.remove('hidden');
             productView.classList.add('hidden');
             productView.classList.remove('flex');
             detailPanel.classList.add('hidden');
             viewerControls.classList.add('hidden');
-            
+
             defaultPoster.style.display = 'flex';
             document.getElementById('search-input').value = '';
             isDescExpanded = false;
         }
-        
+
         // === TOGGLE CATEGORY DESC ===
         function toggleCategoryDesc() {
             const descEl = document.getElementById('category-desc');
             const toggle = document.getElementById('desc-toggle');
             isDescExpanded = !isDescExpanded;
-            
+
             if (isDescExpanded) {
                 descEl.classList.remove('line-clamp-2');
                 toggle.innerHTML = '<svg class="w-3 h-3 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg><span>Daha az</span>';
@@ -609,21 +828,21 @@
                 toggle.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg><span>Devamını oku</span>';
             }
         }
-        
+
         // === PRODUCT LIST RENDERING ===
         function renderProductList() {
             const searchQuery = document.getElementById('search-input').value.toLowerCase();
-            const filtered = searchQuery 
+            const filtered = searchQuery
                 ? currentProducts.filter(p => p.name?.toLowerCase().includes(searchQuery) || p.description?.toLowerCase().includes(searchQuery))
                 : currentProducts;
-            
+
             productList.innerHTML = '';
-            
+
             if (filtered.length === 0) {
                 productList.innerHTML = '<div class="text-center py-8"><p class="text-sm text-muted-foreground">Ürün bulunamadı</p></div>';
                 return;
             }
-            
+
             filtered.forEach(product => {
                 const item = document.createElement('button');
                 const isActive = selectedProduct?.id === product.id;
@@ -644,29 +863,29 @@
                 productList.appendChild(item);
             });
         }
-        
+
         function filterProducts() {
             renderProductList();
         }
-        
+
         // === SELECT PRODUCT ===
         function selectProduct(product) {
             selectedProduct = product;
-            
+
             // Update product list active state
             renderProductList();
-            
+
             // Show detail panel
             detailPanel.classList.remove('hidden');
             viewerControls.classList.remove('hidden');
-            
+
             // Update detail panel
             document.getElementById('detail-title').textContent = product.name;
             document.getElementById('info-name').textContent = product.name;
             document.getElementById('info-sku').textContent = product.sku || 'N/A';
             document.getElementById('info-price').textContent = `$${product.price || 0}`;
             document.getElementById('info-desc').textContent = product.description || 'Açıklama bulunmuyor.';
-            
+
             const etsyLink = document.getElementById('etsy-link');
             if (product.listingUrl) {
                 etsyLink.href = product.listingUrl;
@@ -674,26 +893,26 @@
             } else {
                 etsyLink.classList.add('hidden');
             }
-            
+
             document.getElementById('ar-desc').textContent = `${product.name} modelini gerçek ortamınızda deneyimleyin.`;
-            
+
             // Setup variations
             setupVariations(product);
-            
+
             // Load model
-            const masterUrl = product.masterModel 
-                ? resolveAssetUrl(product.masterModel) 
+            const masterUrl = product.masterModel
+                ? resolveAssetUrl(product.masterModel)
                 : `/api/engine?sku=${product.sku}`;
             loadMasterModel(masterUrl);
-            
+
             // Switch to info tab
             switchTab('info');
         }
-        
+
         // === TABS ===
         function switchTab(tab) {
             currentTab = tab;
-            
+
             // Update tab buttons
             ['info', 'variation', 'ar'].forEach(t => {
                 const btn = document.getElementById(`tab-${t}`);
@@ -707,20 +926,20 @@
                 }
             });
         }
-        
+
         // === VARIATIONS ===
         function setupVariations(product) {
             const tabsContainer = document.getElementById('variant-tabs');
             const swatchGrid = document.getElementById('swatch-grid');
-            
+
             tabsContainer.innerHTML = '';
             swatchGrid.innerHTML = '';
-            
+
             if (!product.variantGroups || product.variantGroups.length === 0) {
                 document.getElementById('content-variation').innerHTML = '<p class="text-center text-muted-foreground py-8">Bu ürün için varyasyon bulunmuyor.</p>';
                 return;
             }
-            
+
             // Reset variation tab content
             document.getElementById('content-variation').innerHTML = `
                 <div class="flex items-center gap-2">
@@ -741,9 +960,9 @@
                     <div id="swatch-grid" class="grid grid-cols-4 gap-2"></div>
                 </div>
             `;
-            
+
             const newTabsContainer = document.getElementById('variant-tabs');
-            
+
             // Create group tabs
             product.variantGroups.forEach((group, index) => {
                 const tab = document.createElement('button');
@@ -752,15 +971,15 @@
                 tab.onclick = () => selectVariantGroup(index);
                 newTabsContainer.appendChild(tab);
             });
-            
+
             currentVariantGroup = 0;
             renderSwatches(product.variantGroups[0]);
         }
-        
+
         function selectVariantGroup(index) {
             currentVariantGroup = index;
             const product = selectedProduct;
-            
+
             // Update tab styles
             const tabs = document.getElementById('variant-tabs').children;
             Array.from(tabs).forEach((tab, i) => {
@@ -770,71 +989,71 @@
                     tab.className = 'flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 bg-secondary text-secondary-foreground hover:bg-muted';
                 }
             });
-            
+
             renderSwatches(product.variantGroups[index]);
         }
-        
+
         function renderSwatches(group) {
             const grid = document.getElementById('swatch-grid');
             const title = document.getElementById('swatch-title');
             const count = document.getElementById('swatch-count');
-            
+
             title.textContent = `${group.groupName} Renkleri`;
             count.textContent = `${group.items.length} seçenek`;
-            
+
             grid.innerHTML = '';
-            
+
             group.items.forEach((item, index) => {
                 const wrapper = document.createElement('button');
                 wrapper.className = `group flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all ${index === 0 ? 'bg-accent' : 'hover:bg-secondary'}`;
                 wrapper.title = item.name;
-                
+
                 const swatch = document.createElement('div');
                 swatch.className = `swatch ${index === 0 ? 'swatch-active' : ''}`;
-                
+
                 if (item.type === 'color') {
                     swatch.style.backgroundColor = item.value;
                 } else {
                     swatch.style.backgroundImage = `url('${resolveAssetUrl(item.value)}')`;
                 }
-                
+
                 const label = document.createElement('span');
                 label.className = 'text-[10px] font-medium text-muted-foreground group-hover:text-foreground text-center truncate w-full';
                 label.textContent = item.name.split('(')[0].trim();
-                
+
                 wrapper.appendChild(swatch);
                 wrapper.appendChild(label);
-                
+
                 wrapper.onclick = () => {
                     // Update active state
                     grid.querySelectorAll('button').forEach(b => b.classList.remove('bg-accent'));
                     grid.querySelectorAll('.swatch').forEach(s => s.classList.remove('swatch-active'));
                     wrapper.classList.add('bg-accent');
                     swatch.classList.add('swatch-active');
-                    
+
                     // Apply texture
                     if (item.textureConfig) {
                         applyTextureConfig(item.textureConfig);
                     }
                 };
-                
+
                 grid.appendChild(wrapper);
             });
         }
-        
+
         function resetVariations() {
             if (!selectedProduct?.variantGroups) return;
-            
+
             selectedProduct.variantGroups.forEach(group => {
                 if (group.items[0]?.textureConfig) {
                     applyTextureConfig(group.items[0].textureConfig);
                 }
             });
-            
+
             // Re-render swatches with first selected
             selectVariantGroup(0);
         }
-        
+
         // === MODEL LOADING ===
         async function loadMasterModel(url) {
             const resetToDefaults = () => {
@@ -846,7 +1065,7 @@
                     });
                 }
             };
-            
+
             // Cache hit
             if (currentMasterUrl === url) {
                 loader.style.opacity = '0';
@@ -855,12 +1074,12 @@
                 resetToDefaults();
                 return;
             }
-            
+
             // Show loader
             loader.style.display = 'flex';
             loader.style.opacity = '1';
             defaultPoster.style.display = 'none';
-            
+
             try {
                 let finalUrl = url;
                 if (url.includes('/api/engine')) {
@@ -868,23 +1087,23 @@
                     const data = await res.json();
                     if (data.ok) finalUrl = data.url;
                 }
-                
+
                 viewer.src = finalUrl;
                 currentMasterUrl = url;
-                
+
                 viewer.addEventListener('load', () => {
                     loader.style.opacity = '0';
                     setTimeout(() => loader.style.display = 'none', 300);
                     defaultPoster.style.display = 'none';
                     resetToDefaults();
                 }, { once: true });
-                
+
                 viewer.addEventListener('error', () => {
                     loader.style.opacity = '0';
                     loader.style.display = 'none';
                     defaultPoster.style.display = 'flex';
                 }, { once: true });
-                
+
             } catch (e) {
                 console.error('Model yükleme hatası:', e);
                 loader.style.opacity = '0';
@@ -892,16 +1111,16 @@
                 defaultPoster.style.display = 'flex';
             }
         }
-        
+
         // === TEXTURE APPLICATION ===
         async function applyTextureConfig(configs) {
             if (!viewer.model) return;
             const configList = Array.isArray(configs) ? configs : [configs];
-            
+
             for (const cfg of configList) {
                 const material = viewer.model.materials.find(m => m.name === cfg.materialName);
                 if (!material) continue;
-                
+
                 try {
                     if (cfg.baseColor) {
                         const texture = await viewer.createTexture(resolveAssetUrl(cfg.baseColor));
@@ -920,7 +1139,7 @@
                 }
             }
         }
-        
+
         // === AR ===
         function activateAR() {
             if (viewer.canActivateAR) {
@@ -929,22 +1148,22 @@
                 alert('AR bu cihazda desteklenmiyor. WebXR uyumlu bir tarayıcı ve cihaz gereklidir.');
             }
         }
-        
+
         // === VIEWER CONTROLS ===
         function resetView() {
             viewer.cameraOrbit = 'auto auto auto';
             viewer.cameraTarget = 'auto auto auto';
         }
-        
+
         function toggleAutoRotate() {
             isAutoRotating = !isAutoRotating;
             viewer.autoRotate = isAutoRotating;
-            
+
             document.getElementById('pause-icon').classList.toggle('hidden', !isAutoRotating);
             document.getElementById('play-icon').classList.toggle('hidden', isAutoRotating);
             document.getElementById('rotate-text').textContent = isAutoRotating ? 'Durdur' : 'Döndür';
         }
-        
+
         function toggleFullscreen() {
             const viewerArea = document.getElementById('viewer-area');
             if (document.fullscreenElement) {
@@ -953,14 +1172,14 @@
                 viewerArea.requestFullscreen();
             }
         }
-        
+
         // === DETAIL PANEL ===
         function closeDetailPanel() {
             detailPanel.classList.add('hidden');
             selectedProduct = null;
             renderProductList();
         }
-        
+
         // === SHARE ===
         function shareProduct() {
             if (navigator.share) {
@@ -968,7 +1187,7 @@
                     title: selectedProduct?.name || 'PlanSmithCo',
                     text: selectedProduct?.description || '',
                     url: window.location.href
-                }).catch(() => {});
+                }).catch(() => { });
             } else {
                 navigator.clipboard.writeText(window.location.href);
                 alert('Link kopyalandı!');
@@ -976,4 +1195,7 @@
         }
     </script>
 </body>
+
 </html>
+
+
