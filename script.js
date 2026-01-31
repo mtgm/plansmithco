@@ -150,6 +150,13 @@ function selectProduct(product) {
 function setupVariantTabs(product) {
     // NEW: Populate right panel variant section instead of old dock
     if (product.variantGroups && product.variantGroups.length > 0) {
+        // Show variant section
+        const variantSection = document.querySelector('.variant-section');
+        if (variantSection) variantSection.style.display = 'block';
+
+        // Initialize configuration display with variant groups
+        initializeConfigDisplay(product.variantGroups);
+
         // Render part toggles (e.g., Çerçeve, Üst Panel, Kutu Kapakaları)
         renderPartToggles(product.variantGroups);
 
@@ -158,6 +165,20 @@ function setupVariantTabs(product) {
             window.currentVariantGroup = product.variantGroups[0];
             renderVariantsInRightPanel(product.variantGroups[0]);
         }
+    } else {
+        // NO VARIANTS - Hide and clear variant section
+        const variantSection = document.querySelector('.variant-section');
+        if (variantSection) variantSection.style.display = 'none';
+
+        // Clear part toggles and swatches
+        const partTogglesContainer = document.querySelector('.part-toggles');
+        const swatchesContainer = document.querySelector('.color-swatches');
+        if (partTogglesContainer) partTogglesContainer.innerHTML = '';
+        if (swatchesContainer) swatchesContainer.innerHTML = '';
+
+        // Clear configuration display
+        const configList = document.querySelector('.config-list');
+        if (configList) configList.innerHTML = '';
     }
 }
 
@@ -244,7 +265,7 @@ function renderVariantsInRightPanel(group) {
             }
 
             // Update configuration display
-            updateConfigDisplay(group.groupName, item.name);
+            updateConfigItem(group.groupName, item.name);
         };
 
         swatchItem.appendChild(swatch);
@@ -253,18 +274,47 @@ function renderVariantsInRightPanel(group) {
     });
 }
 
-// Update configuration display
-function updateConfigDisplay(partName, variantName) {
+// Initialize configuration display based on variant groups
+function initializeConfigDisplay(variantGroups) {
     const configList = document.querySelector('.config-list');
     if (!configList) return;
 
-    const configItems = configList.querySelectorAll('.config-item');
-    configItems.forEach(item => {
-        const key = item.querySelector('span:first-child').textContent;
-        if (key === partName) {
-            item.querySelector('span:last-child').textContent = variantName.split('(')[0].trim();
+    // Clear existing config items
+    configList.innerHTML = '';
+
+    // Create config item for each variant group
+    if (variantGroups && variantGroups.length > 0) {
+        variantGroups.forEach(group => {
+            const configItem = document.createElement('div');
+            configItem.className = 'config-item';
+            configItem.dataset.groupName = group.groupName;
+
+            const keySpan = document.createElement('span');
+            keySpan.textContent = group.groupName;
+
+            const valueSpan = document.createElement('span');
+            // Set first item as default
+            valueSpan.textContent = group.items[0] ? group.items[0].name.split('(')[0].trim() : '-';
+
+            configItem.appendChild(keySpan);
+            configItem.appendChild(valueSpan);
+            configList.appendChild(configItem);
+        });
+    }
+}
+
+// Update single config item when variant is selected
+function updateConfigItem(partName, variantName) {
+    const configList = document.querySelector('.config-list');
+    if (!configList) return;
+
+    const configItem = configList.querySelector(`[data-group-name="${partName}"]`);
+    if (configItem) {
+        const valueSpan = configItem.querySelector('span:last-child');
+        if (valueSpan) {
+            valueSpan.textContent = variantName.split('(')[0].trim();
         }
-    });
+    }
 }
 
 // --- FİNAL YÜKLEME MOTORU (RESET ÖZELLİKLİ) ---
@@ -421,7 +471,7 @@ function resetVariants() {
                 }
 
                 // Update config display
-                updateConfigDisplay(group.groupName, group.items[0].name);
+                updateConfigItem(group.groupName, group.items[0].name);
             }
         });
 
