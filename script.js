@@ -494,8 +494,17 @@ async function applyTextureConfig(configs) {
 function showDetailPanel() {
     const panel = document.getElementById('detail-panel');
     const mainLayout = document.getElementById('main-layout');
-    if (panel) panel.classList.add('show');
+    const btn = document.getElementById('panel-close-btn');
+
+    if (panel) {
+        panel.classList.add('show');
+        // Remove collapsed state if it exists
+        panel.classList.remove('collapsed');
+    }
     if (mainLayout) mainLayout.classList.add('panel-open');
+
+    // Reset button to collapse (›) state
+    if (btn) btn.innerHTML = '›';
 }
 function closeDetailPanel() {
     const panel = document.getElementById('detail-panel');

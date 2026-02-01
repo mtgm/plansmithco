@@ -956,9 +956,7 @@ model-viewer::part(default-ar-button) {
 #detail-panel.collapsed {
     width: 60px;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    /* Keep same background as normal panel - remove override */
 
 }
 
@@ -1025,6 +1023,14 @@ model-viewer::part(default-ar-button) {
     left: 50%;
     transform: translate(-50%, -50%);
     right: auto;
+    /* Override the parent's hidden state - keep button visible and clickable */
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    /* Make it more visible when collapsed */
+    background: rgba(245, 158, 11, 0.9);
+    border-color: var(--accent-color);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
 
 }
 
