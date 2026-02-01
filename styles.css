@@ -1009,7 +1009,8 @@ model-viewer::part(default-ar-button) {
     color: #e2e8f0;
     cursor: pointer;
     z-index: 10;
-    transition: all 0.2s;
+    /* Only animate background and border, not position - prevents awkward sliding */
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
