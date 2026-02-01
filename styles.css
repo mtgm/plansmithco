@@ -31,6 +31,12 @@ body {
     height: 100%;
     padding: 12px;
     gap: 12px;
+    transition: padding-right 0.3s ease;
+}
+
+#main-layout.panel-open {
+    padding-right: 428px;
+    /* 400px panel width + 16px gap + 12px base padding */
 }
 
 /* --- SOL PANEL --- */
@@ -1022,20 +1028,21 @@ model-viewer::part(default-ar-button) {
 .accordion {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 0;
 }
 
 .accordion-item {
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
+    border: none;
+    border-bottom: 1px solid #e2e8f0;
+    border-radius: 0;
     overflow: hidden;
 }
 
 .accordion-header {
     width: 100%;
-    background: #f8fafc;
+    background: transparent;
     border: none;
-    padding: 16px;
+    padding: 16px 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1047,7 +1054,7 @@ model-viewer::part(default-ar-button) {
 }
 
 .accordion-header:hover {
-    background: #f1f5f9;
+    background: transparent;
 }
 
 .accordion-header svg {
@@ -1069,12 +1076,12 @@ model-viewer::part(default-ar-button) {
 }
 
 .accordion-content p {
-    padding: 16px;
+    padding: 0 0 16px 0;
     margin: 0;
     font-size: 14px;
     line-height: 1.6;
     color: #475569;
-    background: white;
+    background: transparent;
 }
 
 /* ========================================

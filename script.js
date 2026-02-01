@@ -485,11 +485,15 @@ async function applyTextureConfig(configs) {
 // Panel Control
 function showDetailPanel() {
     const panel = document.getElementById('detail-panel');
+    const mainLayout = document.getElementById('main-layout');
     if (panel) panel.classList.add('show');
+    if (mainLayout) mainLayout.classList.add('panel-open');
 }
 function closeDetailPanel() {
     const panel = document.getElementById('detail-panel');
+    const mainLayout = document.getElementById('main-layout');
     if (panel) panel.classList.remove('show');
+    if (mainLayout) mainLayout.classList.remove('panel-open');
 }
 // Tab Switching
 document.addEventListener('DOMContentLoaded', () => {
@@ -607,9 +611,8 @@ function populateDetailPanel(product) {
         console.log('[DEBUG] Toggle button found:', !!toggleBtn);
 
         if (toggleBtn) {
-            const shouldShow = product.description && product.description.length > 150;
+            const shouldShow = (product.description && product.description.length);
             console.log('[DEBUG] Should show button:', shouldShow);
-
             // Inline style kullan (kategori gibi)
             toggleBtn.style.display = shouldShow ? 'inline-block' : 'none';
             toggleBtn.textContent = 'Devamını gör';
