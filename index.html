@@ -23,13 +23,12 @@
                 </div>
             </div>
 
-            <div class="section-divider"></div>
 
             <!-- Tüm Kategoriler Başlığı (Tıklanabilir Geri Dönüş) -->
             <div id="all-categories-header" class="cat-list-title" onclick="goBackToCategories()">
                 <svg id="back-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2">
-                    <path d="m15 19-7-7 7-7" />
+                    <path d="M3 9h13a5 5 0 0 1 0 10H7M3 9l4-4M3 9l4 4" />
                 </svg>
                 <span>TÜM KATEGORİLER</span>
             </div>
@@ -103,12 +102,12 @@
         </main>
         <!-- Right Detail Panel - ADD AFTER stage-wrapper closing tag -->
         <aside id="detail-panel">
-
+            <!-- Collapse/Expand Button -->
+            <button id="panel-close-btn" onclick="togglePanelCollapse()">›</button>
 
             <!-- Sticky Header Container (Product Title + Tabs) -->
             <div id="panel-sticky-header">
-                <!-- Collapse/Expand Button -->
-                <button id="panel-close-btn" onclick="togglePanelCollapse()">›</button>
+
                 <!-- Panel Header with Product Title -->
                 <div id="panel-header">
                     <div class="product-title-row">
