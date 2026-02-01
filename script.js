@@ -217,12 +217,45 @@ function selectProduct(product) {
     defaultPoster.style.display = 'none';
     loader.style.opacity = '1';
 
+    // --- MOBILE LOGIC ---
+    // Activate Mobile Product View (Split Screen)
+    const mainLayout = document.getElementById('main-layout');
+    if (mainLayout) mainLayout.classList.add('mobile-product-active');
+
+    // Ensure Mobile Back Button Exists
+    let mobileBackBtn = document.getElementById('mobile-back-btn');
+    if (!mobileBackBtn) {
+        // Inject into stage wrapper
+        const stageWrapper = document.getElementById('stage-wrapper');
+        if (stageWrapper) {
+            mobileBackBtn = document.createElement('div');
+            mobileBackBtn.id = 'mobile-back-btn';
+            mobileBackBtn.innerHTML = '↩️'; // Left arrow
+            mobileBackBtn.onclick = closeMobileProduct;
+            stageWrapper.appendChild(mobileBackBtn);
+        }
+    }
+    if (mobileBackBtn) mobileBackBtn.style.display = 'flex';
+
     setupVariantTabs(product);
 
     const masterUrl = product.masterModel ? product.masterModel : `/api/engine?sku=${product.sku}`;
     loadMasterModel(masterUrl);
 
     populateDetailPanel(product);
+}
+
+// NEW: Close Mobile Product View (Return to List)
+function closeMobileProduct() {
+    const mainLayout = document.getElementById('main-layout');
+    if (mainLayout) mainLayout.classList.remove('mobile-product-active');
+
+    // Close detail panel
+    closeDetailPanel();
+
+    // On desktop this button is hidden via CSS, but good to be safe
+    const mobileBackBtn = document.getElementById('mobile-back-btn');
+    if (mobileBackBtn) mobileBackBtn.style.display = 'none';
 }
 
 function setupVariantTabs(product) {

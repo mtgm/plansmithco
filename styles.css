@@ -837,161 +837,206 @@ model-viewer::part(default-ar-button) {
     }
 }
 
-@media (max-width: 900px) {
-    #detail-panel {
-        width: 100%;
-        left: 0;
-    }
-
-    #main-layout {
-        padding-right: 20px;
-    }
-}
-
+/* MOBILE LAYOUT (Split Screen: AR Top / Info Bottom) */
 @media (max-width: 900px) {
     #main-layout {
         display: flex;
+        flex-direction: column;
         height: 100vh;
+        height: 100dvh;
+        padding: 0;
         gap: 0;
-        background: var(--bg-color);
-        padding: 20px;
-        padding-right: 420px;
-        /* Make room for detail panel */
+        /* background: var(--bg-color); REMOVED to allow body gradient to show */
+        background: transparent;
+        overflow: hidden;
     }
 
+    /* 1. AR View - Hidden by default, shown when product active */
     #stage-wrapper {
+        display: none;
+        /* Default: Hidden (Full screen lists) */
         order: 1;
         width: 100%;
-        height: 55vh;
-        flex: none;
-        border-radius: 0 0 24px 24px;
-        border-bottom: 1px solid #e2e8f0;
+        /* Flex grow to fill available space */
+        flex: 1;
+        min-height: 0;
+        border-radius: 24px;
+        /* Rounded all corners */
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         z-index: 5;
     }
 
+    /* 2. Sidebar (Lists) - Full Screen by default */
     #sidebar {
         order: 2;
         width: 100%;
-        height: 45vh;
-        flex: 1;
+        height: 100%;
         border-radius: 0;
         border: none;
+        position: absolute;
+        inset: 0;
+        z-index: 20;
     }
 
-    /* Kompakt Liste */
-
-
-
-    .prod-item {
-        padding: 12px;
-        margin-bottom: 6px;
+    /* STATE: Product Active (Split Screen) */
+    #main-layout.mobile-product-active #stage-wrapper {
+        display: flex;
+        /* Show AR */
     }
 
-    .prod-item:hover {
-        background: #f8fafc;
-        border-color: #e2e8f0;
-        transform: translateX(4px);
+    #main-layout.mobile-product-active #sidebar {
+        display: none;
+        /* Hide List */
     }
 
-    .prod-thumb {
-        width: 60px;
-        height: 44px;
-        border-radius: 6px;
-        background: #e2e8f0;
-        object-fit: cover;
-        transition: transform 0.2s;
+    /* 3. Detail Panel - Bottom 50% originally, now Dynamic */
+    #detail-panel {
+        display: none;
+        /* Hidden by default */
+        order: 2;
+        /* Below stage */
+
+        position: relative;
+        /* In flow */
+        bottom: auto;
+        left: auto;
+        right: auto;
+        top: auto;
+
+        width: 100%;
+        height: 50vh;
+        height: 50dvh;
+
+        border-radius: 20px 20px 0 0;
+        /* Remove transform transition, use height transition */
+        transform: none;
+        transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+        /* Match Desktop Glassmorphism */
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(30px) saturate(150%);
+        -webkit-backdrop-filter: blur(30px) saturate(150%);
+
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-bottom: none;
+        z-index: 50;
+        flex-direction: column;
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+        flex-shrink: 0;
+        /* Don't shrink below set height unless collapsed */
     }
 
-    .prod-item:hover .prod-thumb {
-        transform: scale(1.05);
-    }
-
-    #product-detail-area {
-        padding: 16px;
-    }
-
-    /* Accordion Aktif */
-    #desc-toggle-btn {
+    /* Show panel when product is active */
+    #main-layout.mobile-product-active #detail-panel {
         display: flex;
     }
 
-    .desc-collapsed {
-        -webkit-line-clamp: 1;
-        line-clamp: 1;
+    /* Remove the old .show transform logic for mobile */
+    #main-layout.mobile-product-active #detail-panel.show {
+        transform: none;
     }
 
-    #controls-dock {
-        padding-bottom: 10px;
+    /* Mobile specific adjustments inside panel */
+    #panel-product-name {
+        font-size: 16px;
+    }
+
+    .panel-tab {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    /* Mobile Collapsed State: SHRINK HEIGHT, let AR grow */
+    #detail-panel.collapsed {
+        height: 60px !important;
+        transform: none !important;
+        overflow: hidden;
+    }
+
+    /* FIX: Prevent desktop padding when panel opens on mobile */
+    #main-layout.panel-open {
+        padding-right: 0 !important;
+    }
+
+    /* Polish: Rotate 'Right Arrow' to 'Down Arrow' on mobile when expanded */
+    #detail-panel:not(.collapsed) #panel-close-btn {
+        transform: rotate(90deg);
+    }
+
+    /* Mobile Back Button (In AR View) */
+    #mobile-back-btn {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 20;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 }
 
 
 /* ========================================
-   RIGHT DETAIL PANEL
+   RIGHT DETAIL PANEL (Desktop Default)
    ======================================== */
-#detail-panel {
-    position: fixed;
-    right: 16px;
-    top: 16px;
-    width: 400px;
-    height: calc(100vh - 32px);
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(30px) saturate(150%);
-    -webkit-backdrop-filter: blur(30px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: var(--radius-xl);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    z-index: 100;
-    overflow: hidden;
-    /* Remove scroll from panel itself */
-    transform: translateX(calc(100% + 16px));
-    transition: transform 0.3s ease, width 0.3s ease;
-    display: flex;
-    flex-direction: column;
+@media (min-width: 901px) {
+    #detail-panel {
+        position: fixed;
+        right: 16px;
+        top: 16px;
+        width: 400px;
+        height: calc(100vh - 32px);
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(30px) saturate(150%);
+        -webkit-backdrop-filter: blur(30px) saturate(150%);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: var(--radius-xl);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        z-index: 100;
+        overflow: hidden;
+        transform: translateX(calc(100% + 16px));
+        transition: transform 0.3s ease, width 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #detail-panel.show {
+        transform: translateX(0);
+    }
+
+    /* Daraltılmış panel durumu */
+    #detail-panel.collapsed {
+        width: 60px;
+        overflow: hidden;
+    }
+
+    /* Daraltılmış halde içeriği gizle */
+    #detail-panel.collapsed #panel-sticky-header,
+    #detail-panel.collapsed #panel-content-scroll {
+        opacity: 0;
+        pointer-events: none;
+    }
 }
 
-#detail-panel.show {
-    transform: translateX(0);
-}
-
-/* Daraltılmış panel durumu */
-#detail-panel.collapsed {
-    width: 60px;
-    overflow: hidden;
-    /* Keep same background as normal panel - remove override */
-
-
-}
-
-/* Daraltılmış halde içeriği gizle */
-#detail-panel.collapsed #panel-sticky-header,
-#detail-panel.collapsed #panel-content-scroll {
-    opacity: 0;
-    pointer-events: none;
-}
-
+/* OLD Dock styles - cleanup/hide */
 #controls-dock {
     display: none !important;
-    /* OLD VARIANT DOCK - Now using right panel */
-    position: absolute;
-    bottom: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid #e2e8f0;
-    border-radius: var(--radius-xl);
-    padding: 16px 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    max-width: 90%;
-    z-index: 50;
-    transition: opacity 0.3s, transform 0.3s;
 }
 
 .hidden-dock {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateX(-50%) translateY(20px);
+    display: none !important;
 }
 
 #panel-close-btn {
@@ -1046,18 +1091,23 @@ model-viewer::part(default-ar-button) {
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 2px solid #e2e8f0;
     z-index: 100;
+    opacity: 1;
+    border-radius: 20px 20px 0 0;
 }
 
 /* Panel Header - Product Title */
 #panel-header {
     padding: 20px 20px 16px;
     border-bottom: 2px solid #f8fafc;
+
+
 }
 
 #panel-header .product-title-row {
     display: flex;
     align-items: center;
     gap: 8px;
+
 
 }
 
