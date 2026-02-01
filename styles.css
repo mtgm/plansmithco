@@ -1029,6 +1029,12 @@ model-viewer::part(default-ar-button) {
 
 /* Panel Header - Product Title */
 #panel-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     padding: 20px 20px 16px;
     border-bottom: 1px solid #e2e8f0;
 }
@@ -1048,6 +1054,13 @@ model-viewer::part(default-ar-button) {
 
 /* Tab Navigation */
 #panel-tabs {
+    position: sticky;
+    top: 68px;
+    /* Height of panel-header */
+    z-index: 99;
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     display: flex;
     border-bottom: 2px solid #f1f5f9;
     padding: 16px 16px 0;
@@ -1281,10 +1294,10 @@ model-viewer::part(default-ar-button) {
 
 .variant-section-title {
     font-family: 'Inter', sans-serif;
-    font-size: 11px;
+    font-size: 14px;
     font-weight: 700;
-    color: #94a3b8;
-    letter-spacing: 1px;
+    color: #cbd5e1;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     margin: 0 0 12px 0;
 }
