@@ -18,10 +18,8 @@ body {
     height: 100dvh;
     overflow: hidden;
     font-family: 'Inter', sans-serif;
-    color: #0f172a;
-    background-color: var(--bg-color);
-    background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-    background-size: 20px 20px;
+    color: #f1f5f9;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
     display: flex;
 }
 
@@ -41,13 +39,16 @@ body {
 
 /* --- SOL PANEL --- */
 #sidebar {
-    width: 320px;
+    width: 300px;
     min-width: 280px;
-    background: var(--sidebar-bg);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(30px) saturate(150%);
+    -webkit-backdrop-filter: blur(30px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: var(--radius-xl);
     display: flex;
     flex-direction: column;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     z-index: 10;
     overflow: hidden;
 }
@@ -71,23 +72,33 @@ body {
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    border: 1px solid #e2e8f0;
-    background: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     cursor: pointer;
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
+    color: #f1f5f9;
 }
 
 #back-btn:hover {
-    background: #f1f5f9;
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .brand-name {
     font-size: 20px;
     font-weight: 800;
-    color: var(--primary-dark);
+    color: #ffffff;
     margin-bottom: 4px;
+}
+
+.brand-tagline {
+    font-size: 12px;
+    color: #fbbf24;
+    font-weight: 600;
 }
 
 .brand-tag {
@@ -102,29 +113,41 @@ body {
 }
 
 .section-divider {
-    height: 1px;
-    background: #d4a84c;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.15);
     margin: 0 16px;
 }
 
-.section-header {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
+.cat-list-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
     font-weight: 700;
-    color: #64748b;
+    color: #94a3b8 !important;
     padding: 16px 20px 12px;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#back-arrow {
+    display: none;
+    color: #94a3b8;
 }
 
 .logo-box {
     width: 90px;
     height: 90px;
     border-radius: 8px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     margin-left: auto;
 }
 
@@ -148,8 +171,10 @@ body {
 }
 
 .cat-card {
-    background: #f8fafc;
-    border: 1px solid #000000;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -157,14 +182,14 @@ body {
     padding: 12px;
     cursor: pointer;
     text-align: left;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
 }
 
 .cat-card:hover {
     border-color: var(--accent-color);
-    background: #fff;
+    background: rgba(255, 255, 255, 0.12);
     transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
 }
 
 .cat-thumb {
@@ -173,7 +198,7 @@ body {
     border-radius: 8px;
     object-fit: cover;
     flex-shrink: 0;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .cat-info {
@@ -185,13 +210,97 @@ body {
 .cat-title {
     font-size: 14px;
     font-weight: 600;
-    color: var(--primary-dark);
+    color: #f1f5f9;
     margin-bottom: 4px;
 }
 
 .cat-count {
     font-size: 12px;
-    color: #64748b;
+    color: #cbd5e1;
+}
+
+/* Category Info Panel */
+.category-info-panel {
+    display: none;
+    padding: 0 16px;
+    margin-bottom: 16px;
+}
+
+.category-panel-title {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+
+.category-panel-count {
+    margin: 0 0 12px 0;
+    font-size: 12px;
+    color: #fbbf24;
+    font-weight: 600;
+}
+
+/* Category Description Collapsed State - ONLY clamp properties */
+.category-desc-collapsed {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Base styles for category description (both collapsed and expanded) */
+#category-desc {
+    margin: 0;
+    font-size: 13px;
+    color: #cbd5e1;
+    line-height: 1.6;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    text-align: justify;
+
+
+}
+
+.desc-wrapper {
+    position: relative;
+}
+
+.desc-toggle-btn {
+    display: none;
+    margin-top: 8px;
+    background: none;
+    border: none;
+    color: #fbbf24;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.desc-toggle-btn:hover {
+    color: #f59e0b;
+}
+
+/* Search Wrapper */
+.search-wrapper {
+    padding: 8px 16px 16px;
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 28px;
+    top: 24.5px;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #94a3b8;
+}
+
+#search-input {
+    padding-left: 36px;
 }
 
 /* Ürün Detay */
@@ -203,8 +312,8 @@ body {
 
 #product-detail-area {
     padding: 24px;
-    border-bottom: 1px solid #f1f5f9;
-    background: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
 }
 
 #p-title {
@@ -212,6 +321,7 @@ body {
     font-weight: 700;
     margin: 0 0 8px 0;
     line-height: 1.2;
+    color: #ffffff;
 }
 
 /* AÇIKLAMA ALANI (Accordion) */
@@ -223,18 +333,47 @@ body {
 
 #p-desc {
     font-size: 13px;
-    color: #64748b;
-    line-height: 1.5;
+    color: #cbd5e1;
+    line-height: 1.6;
     transition: all 0.3s ease;
+}
+
+/* Panel Product Description Collapsed State - ONLY clamp properties */
+.panel-product-desc-collapsed {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+}
+
+/* Ürün açıklaması wrapper (detail panel) */
+#panel-product-desc-wrapper {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+/* Base styles for panel product description (both collapsed and expanded) */
+#panel-product-description {
+    margin: 0;
+    font-size: 13px;
+    color: #cbd5e1;
+    line-height: 1.6;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    text-align: justify;
 }
 
 .desc-collapsed {
     display: -webkit-box;
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     padding-right: 24px;
+    color: #94a3b8;
     /* Ok için yer */
 }
 
@@ -250,7 +389,7 @@ body {
     display: none;
     align-items: center;
     justify-content: center;
-    color: var(--accent-color);
+    color: #fbbf24;
     transition: transform 0.3s;
 }
 
@@ -263,17 +402,19 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: #f8fafc;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     padding: 12px;
     border-radius: 10px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 #p-price {
     font-family: 'JetBrains Mono', monospace;
     font-size: 18px;
     font-weight: 700;
-    color: var(--primary-dark);
+    color: #ffffff;
 }
 
 .buy-btn {
@@ -290,6 +431,24 @@ body {
     transition: background 0.2s;
 }
 
+#p-learn-more {
+    color: #fbbf24;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+}
+
+#p-learn-more:hover {
+    color: #f59e0b;
+    background: rgba(251, 191, 36, 0.1);
+}
+
 /* Alt Liste (Kompakt) */
 #product-list {
     padding: 10px 16px 20px;
@@ -300,25 +459,27 @@ body {
     align-items: center;
     gap: 12px;
     padding: 10px;
-    background: #fff;
-    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
     margin-bottom: 6px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
 }
 
 .prod-item.active {
-    background: #fff7ed;
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 1px var(--accent-color);
+    background: rgba(251, 191, 36, 0.15);
+    border-color: rgba(251, 191, 36, 0.5);
+    box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.3), 0 4px 12px rgba(251, 191, 36, 0.2);
 }
 
 .prod-thumb {
     width: 60px;
     height: 44px;
     border-radius: 6px;
-    background: #e2e8f0;
+    background: rgba(255, 255, 255, 0.1);
     object-fit: cover;
 }
 
@@ -327,66 +488,18 @@ body {
     min-width: 0;
 }
 
-.prod-info h4 {
+.prod-name {
     margin: 0 0 4px 0;
     font-size: 14px;
     font-weight: 600;
-    color: var(--primary-dark);
+    color: #ffffff;
 }
 
 .prod-price {
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
     font-weight: 700;
-    color: #f59e0b;
-}
-
-/* Kategori açıklaması daraltma */
-.category-desc-collapsed {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    background: rgba(245, 158, 11, 0.05);
-}
-
-/* Ürün açıklaması daraltma (detail panel) */
-.panel-product-desc-collapsed {
-    display: -webkit-box !important;
-    -webkit-line-clamp: 3 !important;
-    line-clamp: 3 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
-}
-
-/* Ürün açıklaması daraltma (detail panel) */
-#panel-product-desc-wrapper {
-    position: relative;
-    margin-bottom: 12px;
-}
-
-#panel-product-description {
-    margin: 0;
-    margin-top: 12px;
-    margin-bottom: 12px;
-    padding: 12px;
-    background: rgba(245, 158, 11, 0.05);
-    border-radius: 8px;
-    font-size: 13px;
-    line-height: 1.6;
-    color: #666;
-    text-align: justify;
-    word-break: normal;
-    white-space: normal;
-}
-
-.panel-product-desc-collapsed {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    color: #fbbf24;
 }
 
 #panel-product-desc-toggle {
@@ -414,37 +527,36 @@ body {
 #stage-wrapper {
     flex: 1;
     position: relative;
-    background: radial-gradient(circle at 50% 50%, #fff 0%, #f1f5f9 100%);
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(30px) saturate(150%);
+    -webkit-backdrop-filter: blur(30px) saturate(150%);
     border-radius: var(--radius-xl);
-    border: 1px solid #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.18);
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 #default-poster {
     position: absolute;
     inset: 0;
-    background: white;
+    background: url('/scene.jpg') center/cover no-repeat;
+    opacity: 0.5;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 2;
     pointer-events: none;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 20%);
+    mask-image: linear-gradient(to right, transparent 0%, black 20%);
 }
 
-#default-poster img {
-    width: 200px;
-    margin-bottom: 20px;
-    opacity: 0.9;
-}
-
+#default-poster img,
 #default-poster span {
-    font-family: 'JetBrains Mono';
-    font-size: 12px;
-    color: #94a3b8;
-    letter-spacing: 1px;
+    display: none;
+    /* Hide logo and text */
 }
 
 model-viewer {
@@ -478,10 +590,18 @@ model-viewer::part(default-ar-button) {
     width: 100%;
     padding: 10px 12px;
     padding-left: 36px;
-    border: 1px solid #e2e8f0;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     font-size: 13px;
+    color: #f1f5f9;
     transition: all 0.2s;
+}
+
+#search-input::placeholder {
+    color: #94a3b8;
 }
 
 #search-input:focus {
@@ -514,7 +634,7 @@ model-viewer::part(default-ar-button) {
 }
 
 .tab-btn.active {
-    color: var(--primary-dark);
+    color: #ffffff;
     border-bottom-color: var(--accent-color);
 }
 
@@ -582,7 +702,7 @@ model-viewer::part(default-ar-button) {
 .v-label {
     font-size: 9px;
     font-weight: 600;
-    color: #64748b;
+    color: #e2e8f0;
     text-align: center;
     max-width: 50px;
     white-space: nowrap;
@@ -631,7 +751,7 @@ model-viewer::part(default-ar-button) {
 .ar-label {
     font-size: 9px;
     font-weight: 800;
-    color: var(--primary-dark);
+    color: #f8fafc;
 }
 
 #loader-overlay {
@@ -664,11 +784,13 @@ model-viewer::part(default-ar-button) {
 .about-content {
     max-width: 500px;
     padding: 48px;
-    background: white;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
     border-radius: 20px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     text-align: center;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
     pointer-events: all;
 }
 
@@ -680,13 +802,13 @@ model-viewer::part(default-ar-button) {
 .about-content h2 {
     font-size: 28px;
     font-weight: 800;
-    color: var(--primary-dark);
+    color: #f8fafc;
     margin: 0 0 8px 0;
 }
 
 .about-content p {
     font-size: 14px;
-    color: #64748b;
+    color: #e2e8f0;
     margin: 0 0 16px 0;
     line-height: 1.6;
 }
@@ -811,19 +933,39 @@ model-viewer::part(default-ar-button) {
     top: 16px;
     width: 400px;
     height: calc(100vh - 32px);
-    background: white;
-    border: 1px solid #e2e8f0;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(30px) saturate(150%);
+    -webkit-backdrop-filter: blur(30px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: var(--radius-xl);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     z-index: 100;
     overflow-y: auto;
     overflow-x: hidden;
     transform: translateX(calc(100% + 16px));
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, width 0.3s ease;
 }
 
 #detail-panel.show {
     transform: translateX(0);
+}
+
+/* Daraltılmış panel durumu */
+#detail-panel.collapsed {
+    width: 60px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+}
+
+/* Daraltılmış halde içeriği gizle */
+#detail-panel.collapsed #panel-header,
+#detail-panel.collapsed #panel-tabs,
+#detail-panel.collapsed .tab-content {
+    opacity: 0;
+    pointer-events: none;
 }
 
 #controls-dock {
@@ -858,17 +1000,31 @@ model-viewer::part(default-ar-button) {
     height: 32px;
     border: 1px solid #e2e8f0;
     border-radius: 50%;
-    background: white;
-    font-size: 24px;
-    color: #64748b;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    font-size: 20px;
+    color: #e2e8f0;
     cursor: pointer;
     z-index: 10;
     transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #panel-close-btn:hover {
     background: #f8fafc;
     border-color: #cbd5e1;
+}
+
+/* Daraltılmış halde buton ortada */
+#detail-panel.collapsed #panel-close-btn {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    right: auto;
+
 }
 
 /* Panel Header - Product Title */
@@ -887,7 +1043,7 @@ model-viewer::part(default-ar-button) {
     font-size: 18px;
     font-weight: 700;
     margin: 0;
-    color: var(--primary-dark);
+    color: #f8fafc;
 }
 
 /* Tab Navigation */
@@ -905,7 +1061,7 @@ model-viewer::part(default-ar-button) {
     background: transparent;
     font-size: 14px;
     font-weight: 600;
-    color: #64748b;
+    color: #cbd5e1;
     cursor: pointer;
     border-bottom: 3px solid transparent;
     transition: all 0.2s;
@@ -913,13 +1069,14 @@ model-viewer::part(default-ar-button) {
 }
 
 .panel-tab:hover {
-    color: var(--primary-dark);
-    background: #f8fafc;
+    color: #ffffff;
+    background: transparent;
     border-radius: 8px 8px 0 0;
 }
 
 .panel-tab.active {
-    color: var(--accent-color);
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
     border-bottom-color: var(--accent-color);
 }
 
@@ -982,7 +1139,9 @@ model-viewer::part(default-ar-button) {
 }
 
 .btn-primary {
-    background: var(--accent-color);
+    background: #d97706;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     color: white;
     border: none;
     padding: 14px 20px;
@@ -1006,6 +1165,8 @@ model-viewer::part(default-ar-button) {
 
 .btn-secondary {
     background: #64748b;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     color: white;
     border: none;
     padding: 14px 20px;
@@ -1048,13 +1209,13 @@ model-viewer::part(default-ar-button) {
     justify-content: space-between;
     font-size: 14px;
     font-weight: 600;
-    color: var(--primary-dark);
+    color: #f1f5f9;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.3s ease;
 }
 
 .accordion-header:hover {
-    background: transparent;
+    color: #ffffff;
 }
 
 .accordion-header svg {
@@ -1066,21 +1227,21 @@ model-viewer::part(default-ar-button) {
 }
 
 .accordion-content {
-    max-height: 0;
+    height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease;
+    transition: height 0.3s ease;
 }
 
 .accordion-item.open .accordion-content {
-    max-height: 300px;
+    /* Height set by JavaScript */
 }
 
 .accordion-content p {
     padding: 0 0 16px 0;
     margin: 0;
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.6;
-    color: #475569;
+    color: #cbd5e1;
     background: transparent;
 }
 
@@ -1096,14 +1257,16 @@ model-viewer::part(default-ar-button) {
 .btn-action {
     flex: 1;
     padding: 10px 16px;
-    border: 1px solid #e2e8f0;
-    background: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     border-radius: 8px;
     font-size: 13px;
     font-weight: 600;
-    color: #64748b;
+    color: #e2e8f0;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
 }
 
 .btn-action:hover {
@@ -1117,11 +1280,12 @@ model-viewer::part(default-ar-button) {
 }
 
 .variant-section-title {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     font-weight: 700;
-    color: #64748b;
-    letter-spacing: 0.5px;
+    color: #94a3b8;
+    letter-spacing: 1px;
+    text-transform: uppercase;
     margin: 0 0 12px 0;
 }
 
@@ -1134,7 +1298,7 @@ model-viewer::part(default-ar-button) {
 
 .option-count {
     font-size: 12px;
-    color: #94a3b8;
+    color: #cbd5e1;
 }
 
 /* Part Toggles */
@@ -1146,14 +1310,16 @@ model-viewer::part(default-ar-button) {
 
 .part-toggle {
     padding: 10px 18px;
-    border: 1px solid #e2e8f0;
-    background: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     border-radius: 20px;
     font-size: 13px;
     font-weight: 600;
-    color: #64748b;
+    color: #e2e8f0;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
 }
 
 .part-toggle:hover {
@@ -1209,15 +1375,32 @@ model-viewer::part(default-ar-button) {
 .swatch-item span {
     font-size: 12px;
     font-weight: 600;
-    color: var(--primary-dark);
+    color: #f1f5f9;
+}
+
+/* Variant Accordion Items - use same smooth animation as info accordions */
+#variant-accordion-container .accordion-content {
+    height: 0;
+    overflow: hidden;
+    transition: height 0.3s ease;
+    padding: 0;
+}
+
+#variant-accordion-container .accordion-item.open .accordion-content {
+    /* Height set by JavaScript */
+    padding-bottom: 16px;
 }
 
 /* Configuration Card */
 .config-card {
-    background: #f1f5f9;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 12px;
     padding: 16px;
     margin-top: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .config-header {
@@ -1232,10 +1415,11 @@ model-viewer::part(default-ar-button) {
 }
 
 .config-header h4 {
-    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
     font-weight: 700;
     margin: 0;
-    color: var(--primary-dark);
+    color: #f1f5f9;
 }
 
 .config-list {
@@ -1252,12 +1436,12 @@ model-viewer::part(default-ar-button) {
 }
 
 .config-item span:first-child {
-    color: #64748b;
+    color: #e2e8f0;
 }
 
 .config-item span:last-child {
     font-weight: 600;
-    color: var(--primary-dark);
+    color: #f8fafc;
 }
 
 /* ========================================
@@ -1280,13 +1464,13 @@ model-viewer::part(default-ar-button) {
     font-size: 18px;
     font-weight: 700;
     margin: 0 0 8px 0;
-    color: var(--primary-dark);
+    color: #78350f;
 }
 
 .ar-intro-card p {
     font-size: 13px;
     line-height: 1.6;
-    color: #78350f;
+    color: #713f12;
     margin: 0;
 }
 
@@ -1319,16 +1503,20 @@ model-viewer::part(default-ar-button) {
 }
 
 .steps-title {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
     font-weight: 700;
-    color: #64748b;
-    letter-spacing: 0.5px;
+    color: #94a3b8;
+    letter-spacing: 1px;
+    text-transform: uppercase;
     margin: 0 0 12px 0;
 }
 
 .step-card {
-    background: #f8fafc;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 12px;
     padding: 16px;
     display: flex;
@@ -1353,19 +1541,21 @@ model-viewer::part(default-ar-button) {
     font-size: 14px;
     font-weight: 700;
     margin: 0 0 4px 0;
-    color: var(--primary-dark);
+    color: #f8fafc;
 }
 
 .step-card p {
     font-size: 12px;
     line-height: 1.5;
-    color: #64748b;
+    color: #e2e8f0;
     margin: 0;
 }
 
 .ar-requirements {
-    background: #fffbeb;
-    border: 1px solid #fef3c7;
+    background: rgba(254, 243, 199, 0.15);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(254, 243, 199, 0.3);
     border-radius: 12px;
     padding: 16px;
     display: flex;
@@ -1380,12 +1570,12 @@ model-viewer::part(default-ar-button) {
     font-size: 13px;
     font-weight: 700;
     margin: 0 0 6px 0;
-    color: #78350f;
+    color: #fef3c7;
 }
 
 .ar-requirements p {
     font-size: 12px;
     line-height: 1.5;
-    color: #92400e;
+    color: #fde68a;
     margin: 0;
 }

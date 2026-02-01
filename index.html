@@ -26,41 +26,37 @@
             <div class="section-divider"></div>
 
             <!-- Tüm Kategoriler Başlığı (Tıklanabilir Geri Dönüş) -->
-            <div id="all-categories-header" class="section-header" onclick="goBackToCategories()"
-                style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                <svg id="back-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b"
-                    stroke-width="2" style="display: none;">
+            <div id="all-categories-header" class="cat-list-title" onclick="goBackToCategories()">
+                <svg id="back-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
                     <path d="m15 19-7-7 7-7" />
                 </svg>
                 <span>TÜM KATEGORİLER</span>
             </div>
 
             <!-- Kategori Başlığı ve Açıklaması -->
-            <div id="category-info" style="display: none; padding: 0 16px; margin-bottom: 16px;">
-                <h3 id="category-title" style="margin: 0 0 4px; font-size: 16px; font-weight: 700; color: #0f172a;">
+            <div id="category-info" class="category-info-panel">
+                <h3 id="category-title" class="category-panel-title">
                 </h3>
-                <div id="category-count" style="margin: 0 0 8px; font-size: 12px; color: #10b981; font-weight: 600;">
+                <div id="category-count" class="category-panel-count">
                 </div>
-                <div id="category-desc-wrapper" style="position: relative;">
-                    <p id="category-desc" class="category-desc-collapsed"
-                        style="margin: 0; font-size: 13px; color: #64748b; line-height: 1.6; text-align: justify; word-break: normal; white-space: normal; hyphens: auto;background: rgba(245, 158, 11, 0.05); word-spacing: normal;">
+                <div id="category-desc-wrapper" class="desc-wrapper">
+                    <p id="category-desc" class="category-desc-collapsed">
                     </p>
-                    <button id="category-desc-toggle" onclick="toggleCategoryDesc()"
-                        style="display: none; margin-top: 4px; background: none; border: none; color: #f59e0b; font-size: 12px; font-weight: 600; cursor: pointer; padding: 0;">
+                    <button id="category-desc-toggle" class="desc-toggle-btn" onclick="toggleCategoryDesc()">
                         Devamını gör
                     </button>
                 </div>
             </div>
 
             <!-- Search Bar -->
-            <div style="padding: 8px 16px 16px; position: relative;">
-                <svg style="position: absolute; left: 28px; top: calc(8px + 16.5px); transform: translateY(-50%); pointer-events: none;"
-                    width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
+            <div class="search-wrapper">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
                     <circle cx="11" cy="11" r="8"></circle>
                     <path d="m21 21-4.35-4.35"></path>
                 </svg>
-                <input type="text" id="search-input" placeholder="Ürün ara..." oninput="filterProducts()"
-                    style="padding-left: 36px;">
+                <input type="text" id="search-input" placeholder="Ürün ara..." oninput="filterProducts()">
             </div>
 
             <div id="content-area">
@@ -82,21 +78,11 @@
                 <span>BİR ÜRÜN SEÇİN</span>
             </div>
 
-            <!-- Hakkımızda Section (visible when browsing categories) -->
-            <div id="about-section">
-                <div class="about-content">
-                    <div class="about-icon">📦</div>
-                    <h2>PlanSmithCo</h2>
-                    <p>Bir ürün seçin</p>
-                    <p class="about-description">
-                        <!-- You will fill this later -->
-                    </p>
-                </div>
-            </div>
+
 
             <model-viewer id="mv" src="" ar ar-scale="fixed" ar-placement="floor" camera-controls disable-zoom
                 interaction-prompt="none" environment-image="/studio.hdr" shadow-intensity="1" exposure="1.5"
-                tone-mapping="neutral" loading="eager" poster="/poster.webp"></model-viewer>
+                tone-mapping="neutral" loading="eager"></model-viewer>
 
             <div id="controls-dock" class="hidden-dock">
                 <div id="tabs-container"></div>
@@ -117,8 +103,8 @@
         </main>
         <!-- Right Detail Panel - ADD AFTER stage-wrapper closing tag -->
         <aside id="detail-panel">
-            <!-- Close Button -->
-            <button id="panel-close-btn" onclick="closeDetailPanel()">×</button>
+            <!-- Collapse/Expand Button -->
+            <button id="panel-close-btn" onclick="togglePanelCollapse()">›</button>
 
             <!-- Panel Header with Product Title -->
             <div id="panel-header">
@@ -138,12 +124,10 @@
 
 
                 <!-- Ürün Açıklaması -->
-                <div id="panel-product-desc-wrapper" style="position: relative;">
-                    <p id="panel-product-description" class="panel-product-desc-collapsed"
-                        style="margin: 0; font-size: 13px; color: #666; line-height: 1.6; text-align: justify; word-break: normal; white-space: normal; hyphens: auto; word-spacing: normal; padding: 12px; background: rgba(245, 158, 11, 0.05); border-radius: 8px;">
+                <div id="panel-product-desc-wrapper" class="desc-wrapper">
+                    <p id="panel-product-description" class="panel-product-desc-collapsed">
                     </p>
-                    <button id="panel-product-desc-toggle" onclick="toggleProductDesc()"
-                        style="display: none; margin-top: 4px; background: none; border: none; color: #f59e0b; font-size: 12px; font-weight: 600; cursor: pointer; padding: 0;">
+                    <button id="panel-product-desc-toggle" class="desc-toggle-btn" onclick="toggleProductDesc()">
                         Devamını gör
                     </button>
                 </div>
@@ -229,42 +213,9 @@
                         🔄 Sıfırla
                     </button>
                 </div>
-                <div class="variant-section">
-                    <h3 class="variant-section-title">Parça</h3>
-                    <div class="part-toggles">
-                        <button class="part-toggle active" data-part="frame">Çerçeve</button>
-                        <button class="part-toggle" data-part="top">Üst Panel</button>
-                        <button class="part-toggle" data-part="lids">Kutu Kapakaları</button>
-                    </div>
-                </div>
-                <div class="variant-section">
-                    <div class="variant-section-header">
-                        <h3 class="variant-section-title">Renk/Desen</h3>
-                        <span class="option-count">4 seçenek</span>
-                    </div>
-                    <div class="color-swatches">
-                        <div class="swatch-item active">
-                            <div class="swatch" style="background: #ffffff; border: 1px solid #ddd;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b"
-                                    stroke-width="3">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                            </div>
-                            <span>Beyaz</span>
-                        </div>
-                        <div class="swatch-item">
-                            <div class="swatch" style="background: #1a1a1a;"></div>
-                            <span>Siyah</span>
-                        </div>
-                        <div class="swatch-item">
-                            <div class="swatch" style="background: #c19a6b;"></div>
-                            <span>Meşe</span>
-                        </div>
-                        <div class="swatch-item">
-                            <div class="swatch" style="background: #654321;"></div>
-                            <span>Ceviz</span>
-                        </div>
-                    </div>
+                <!-- Variant Accordion Container -->
+                <div id="variant-accordion-container">
+                    <!-- JavaScript ile dinamik olarak oluşturulacak -->
                 </div>
                 <div class="config-card">
                     <div class="config-header">

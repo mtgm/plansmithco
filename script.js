@@ -232,14 +232,8 @@ function setupVariantTabs(product) {
         // Initialize configuration display with variant groups
         initializeConfigDisplay(product.variantGroups);
 
-        // Render part toggles (e.g., Çerçeve, Üst Panel, Kutu Kapakaları)
+        // Render variant groups as accordion items (includes all variants)
         renderPartToggles(product.variantGroups);
-
-        // Render first group's variants by default
-        if (product.variantGroups[0]) {
-            window.currentVariantGroup = product.variantGroups[0];
-            renderVariantsInRightPanel(product.variantGroups[0]);
-        }
     } else {
         // NO VARIANTS - Hide and clear variant section
         const variantSection = document.querySelector('.variant-section');
@@ -249,11 +243,9 @@ function setupVariantTabs(product) {
         const configCard = document.querySelector('.config-card');
         if (configCard) configCard.style.display = 'none';
 
-        // Clear part toggles and swatches
-        const partTogglesContainer = document.querySelector('.part-toggles');
-        const swatchesContainer = document.querySelector('.color-swatches');
-        if (partTogglesContainer) partTogglesContainer.innerHTML = '';
-        if (swatchesContainer) swatchesContainer.innerHTML = '';
+        // Clear accordion container
+        const accordionContainer = document.getElementById('variant-accordion-container');
+        if (accordionContainer) accordionContainer.innerHTML = '';
 
         // Clear configuration display
         const configList = document.querySelector('.config-list');
@@ -261,96 +253,105 @@ function setupVariantTabs(product) {
     }
 }
 
-// NEW: Render part toggles (variant groups) in right panel
+// NEW: Render variant groups as accordion items
 function renderPartToggles(variantGroups) {
-    const partTogglesContainer = document.querySelector('.part-toggles');
-    if (!partTogglesContainer) return;
+    const accordionContainer = document.getElementById('variant-accordion-container');
+    if (!accordionContainer) return;
 
-    partTogglesContainer.innerHTML = '';
+    accordionContainer.innerHTML = '';
+
     variantGroups.forEach((group, index) => {
-        const btn = document.createElement('button');
-        btn.className = 'part-toggle';
-        if (index === 0) btn.classList.add('active');
-        btn.dataset.part = group.groupName;
-        btn.textContent = group.groupName;
+        // Create accordion item
+        const accordionItem = document.createElement('div');
+        accordionItem.className = 'accordion-item variant-accordion-item';
+        if (index === 0) accordionItem.classList.add('open'); // First item open by default
 
-        btn.onclick = () => {
-            document.querySelectorAll('.part-toggle').forEach(t => t.classList.remove('active'));
-            btn.classList.add('active');
-            window.currentVariantGroup = group;
-            renderVariantsInRightPanel(group);
-        };
+        // Create accordion header
+        const accordionHeader = document.createElement('button');
+        accordionHeader.className = 'accordion-header';
+        accordionHeader.innerHTML = `
+            <span>${group.groupName}</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        `;
 
-        partTogglesContainer.appendChild(btn);
+        // Create accordion content
+        const accordionContent = document.createElement('div');
+        accordionContent.className = 'accordion-content';
+
+        // Create swatches container for this group
+        const swatchesContainer = document.createElement('div');
+        swatchesContainer.className = 'color-swatches';
+
+        // Populate swatches
+        group.items.forEach((item, itemIndex) => {
+            const swatchItem = document.createElement('div');
+            swatchItem.className = 'swatch-item';
+            if (index === 0 && itemIndex === 0) swatchItem.classList.add('active');
+
+            const swatch = document.createElement('div');
+            swatch.className = 'swatch';
+
+            // Set color or texture
+            if (item.type === 'color') {
+                swatch.style.backgroundColor = item.value;
+            } else {
+                swatch.style.backgroundImage = `url('${item.value}')`;
+                swatch.style.backgroundSize = 'cover';
+            }
+
+            // Add border for white colors
+            if (item.value === '#ffffff' || item.value === '#fff' || item.name.toLowerCase().includes('beyaz')) {
+                swatch.style.border = '1px solid #ddd';
+            }
+
+            // Add checkmark SVG
+            swatch.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            `;
+
+            // Create label
+            const label = document.createElement('span');
+            label.textContent = item.name.split('(')[0].trim();
+
+            // Click handler - apply texture
+            swatchItem.onclick = () => {
+                // Remove active from all swatches in this accordion item
+                accordionContent.querySelectorAll('.swatch-item').forEach(s => s.classList.remove('active'));
+                swatchItem.classList.add('active');
+
+                // Apply texture to model
+                if (item.textureConfig) {
+                    applyTextureConfig(item.textureConfig);
+                }
+
+                // Update configuration display
+                updateConfigItem(group.groupName, item.name);
+            };
+
+            swatchItem.appendChild(swatch);
+            swatchItem.appendChild(label);
+            swatchesContainer.appendChild(swatchItem);
+        });
+
+        accordionContent.appendChild(swatchesContainer);
+
+        accordionItem.appendChild(accordionHeader);
+        accordionItem.appendChild(accordionContent);
+        accordionContainer.appendChild(accordionItem);
     });
 }
 
 // NEW: Render color swatches for selected part group
+// NOTE: This function is now deprecated in favor of accordion-based rendering
+// Kept for backwards compatibility
 function renderVariantsInRightPanel(group) {
-    const swatchesContainer = document.querySelector('.color-swatches');
-    const titleEl = document.querySelector('.variant-section-title');
-    const countEl = document.querySelector('.option-count');
-
-    if (!swatchesContainer) return;
-
-    // Update section title
-    if (titleEl) titleEl.textContent = `${group.groupName.toUpperCase()} RENKLERİ`;
-    if (countEl) countEl.textContent = `${group.items.length} seçenek`;
-
-    swatchesContainer.innerHTML = '';
-    group.items.forEach((item, index) => {
-        // Create swatch item container
-        const swatchItem = document.createElement('div');
-        swatchItem.className = 'swatch-item';
-        if (index === 0) swatchItem.classList.add('active');
-
-        // Create swatch circle
-        const swatch = document.createElement('div');
-        swatch.className = 'swatch';
-
-        // Set color or texture
-        if (item.type === 'color') {
-            swatch.style.backgroundColor = item.value;
-        } else {
-            swatch.style.backgroundImage = `url('${item.value}')`;
-            swatch.style.backgroundSize = 'cover';
-        }
-
-        // Add border for white colors
-        if (item.value === '#ffffff' || item.value === '#fff' || item.name.toLowerCase().includes('beyaz')) {
-            swatch.style.border = '1px solid #ddd';
-        }
-
-        // Add checkmark SVG
-        swatch.innerHTML = `
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3">
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-        `;
-
-        // Create label
-        const label = document.createElement('span');
-        label.textContent = item.name.split('(')[0].trim();
-
-        // Click handler - apply texture
-        swatchItem.onclick = () => {
-            // Remove active from all swatches
-            swatchesContainer.querySelectorAll('.swatch-item').forEach(s => s.classList.remove('active'));
-            swatchItem.classList.add('active');
-
-            // Apply texture to model
-            if (item.textureConfig) {
-                applyTextureConfig(item.textureConfig);
-            }
-
-            // Update configuration display
-            updateConfigItem(group.groupName, item.name);
-        };
-
-        swatchItem.appendChild(swatch);
-        swatchItem.appendChild(label);
-        swatchesContainer.appendChild(swatchItem);
-    });
+    // No longer used - variants are rendered directly in accordion items
+    // This function is kept for backwards compatibility but does nothing
+    return;
 }
 
 // Initialize configuration display based on variant groups
@@ -495,6 +496,27 @@ function closeDetailPanel() {
     if (panel) panel.classList.remove('show');
     if (mainLayout) mainLayout.classList.remove('panel-open');
 }
+
+// Toggle Panel Collapse/Expand
+function togglePanelCollapse() {
+    const panel = document.getElementById('detail-panel');
+    const btn = document.getElementById('panel-close-btn');
+    const mainLayout = document.getElementById('main-layout');
+
+    if (!panel || !btn) return;
+
+    if (panel.classList.contains('collapsed')) {
+        // Genişlet
+        panel.classList.remove('collapsed');
+        btn.innerHTML = '›'; // Sağ ok
+        if (mainLayout) mainLayout.classList.add('panel-open');
+    } else {
+        // Daralt
+        panel.classList.add('collapsed');
+        btn.innerHTML = '‹'; // Sol ok
+        if (mainLayout) mainLayout.classList.remove('panel-open');
+    }
+}
 // Tab Switching
 document.addEventListener('DOMContentLoaded', () => {
     const tabButtons = document.querySelectorAll('.panel-tab');
@@ -510,11 +532,35 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
-// Accordion Toggle
+// Accordion Toggle with smooth scrollHeight animation
 document.addEventListener('click', (e) => {
     if (e.target.closest('.accordion-header')) {
         const item = e.target.closest('.accordion-item');
-        item.classList.toggle('open');
+        const content = item.querySelector('.accordion-content');
+
+        if (item.classList.contains('open')) {
+            // Closing - set exact height first, then animate to 0
+            content.style.height = content.scrollHeight + 'px';
+            // Force reflow
+            content.offsetHeight;
+            content.style.height = '0px';
+            item.classList.remove('open');
+        } else {
+            // Opening - ensure height is 0, then animate to scrollHeight
+            item.classList.add('open'); // Add class first to get correct scrollHeight
+            content.style.height = '0px'; // Start from 0
+            // Force reflow
+            content.offsetHeight;
+            const height = content.scrollHeight;
+            content.style.height = height + 'px';
+
+            // Reset to auto after transition completes
+            setTimeout(() => {
+                if (item.classList.contains('open')) {
+                    content.style.height = 'auto';
+                }
+            }, 300); // Match CSS transition duration
+        }
     }
 });
 // Part Toggle Selection
@@ -546,7 +592,7 @@ function resetVariants() {
 
     // Reset to first variant in each group
     if (selectedProduct && selectedProduct.variantGroups) {
-        selectedProduct.variantGroups.forEach(group => {
+        selectedProduct.variantGroups.forEach((group, groupIndex) => {
             if (group.items[0]) {
                 // Apply first texture
                 if (group.items[0].textureConfig) {
@@ -555,13 +601,24 @@ function resetVariants() {
 
                 // Update config display
                 updateConfigItem(group.groupName, group.items[0].name);
+
+                // Update UI - select first swatch in each accordion
+                const accordionContainer = document.getElementById('variant-accordion-container');
+                if (accordionContainer) {
+                    const accordionItems = accordionContainer.querySelectorAll('.variant-accordion-item');
+                    if (accordionItems[groupIndex]) {
+                        const swatches = accordionItems[groupIndex].querySelectorAll('.swatch-item');
+                        swatches.forEach((s, i) => {
+                            if (i === 0) {
+                                s.classList.add('active');
+                            } else {
+                                s.classList.remove('active');
+                            }
+                        });
+                    }
+                }
             }
         });
-
-        // Reset UI - select first variant in current group
-        if (window.currentVariantGroup) {
-            renderVariantsInRightPanel(window.currentVariantGroup);
-        }
     }
 }
 
@@ -602,8 +659,13 @@ function populateDetailPanel(product) {
     // Update product description in Bilgi tab
     if (descEl) {
         descEl.textContent = product.description || '';
-        descEl.style.display = product.description ? 'block' : 'none';
-        descEl.classList.add('panel-product-desc-collapsed');
+        // Don't set inline display style - it overrides CSS display:-webkit-box!
+        // Just add/remove the collapsed class
+        if (product.description) {
+            descEl.classList.add('panel-product-desc-collapsed');
+        } else {
+            descEl.classList.remove('panel-product-desc-collapsed');
+        }
 
         // Açıklama uzunsa toggle butonu göster
         const toggleBtn = document.getElementById('panel-product-desc-toggle');
@@ -626,6 +688,7 @@ function populateDetailPanel(product) {
 // Export functions for global use
 window.showDetailPanel = showDetailPanel;
 window.closeDetailPanel = closeDetailPanel;
+window.togglePanelCollapse = togglePanelCollapse;
 window.resetVariants = resetVariants;
 window.applyRecommended = applyRecommended;
 window.shareProduct = shareProduct;
