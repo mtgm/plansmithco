@@ -350,6 +350,18 @@ function renderPartToggles(variantGroups) {
         accordionItem.appendChild(accordionContent);
         accordionContainer.appendChild(accordionItem);
     });
+
+    // After rendering, set height for initially open accordions
+    // This ensures the first accordion displays correctly on initial load
+    setTimeout(() => {
+        const openItems = accordionContainer.querySelectorAll('.accordion-item.open');
+        openItems.forEach(item => {
+            const content = item.querySelector('.accordion-content');
+            if (content) {
+                content.style.height = content.scrollHeight + 'px';
+            }
+        });
+    }, 0);
 }
 
 // NEW: Render color swatches for selected part group
@@ -529,7 +541,7 @@ function togglePanelCollapse() {
     } else {
         // Daralt
         panel.classList.add('collapsed');
-        btn.innerHTML = '‹'; // Sol ok
+        btn.innerHTML = '🛠️'; // Sol ok
         if (mainLayout) mainLayout.classList.remove('panel-open');
     }
 }

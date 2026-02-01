@@ -1022,12 +1022,9 @@ model-viewer::part(default-ar-button) {
     border-color: #cbd5e1;
 }
 
-/* Daraltılmış halde buton ortada */
+/* Daraltılmış halde buton - sadece stil değişikliği, pozisyon aynı */
 #detail-panel.collapsed #panel-close-btn {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    right: auto;
+    /* Keep same position - no movement */
     /* Override the parent's hidden state - keep button visible and clickable */
     opacity: 1 !important;
     pointer-events: auto !important;
@@ -1412,7 +1409,7 @@ model-viewer::part(default-ar-button) {
 /* Variant Accordion Items - use same smooth animation as info accordions */
 #variant-accordion-container .accordion-content {
     height: 0;
-    overflow: hidden;
+    overflow: visible;
     transition: height 0.3s ease;
     padding: 0;
 }
