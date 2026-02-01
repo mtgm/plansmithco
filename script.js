@@ -358,7 +358,8 @@ function renderPartToggles(variantGroups) {
         openItems.forEach(item => {
             const content = item.querySelector('.accordion-content');
             if (content) {
-                content.style.height = content.scrollHeight + 'px';
+                // Fix: Set to auto to ensure all content (including shadows/borders) is visible
+                content.style.height = 'auto';
             }
         });
     }, 0);
@@ -574,20 +575,29 @@ document.addEventListener('click', (e) => {
             content.style.height = '0px';
             item.classList.remove('open');
         } else {
-            // Opening - ensure height is 0, then animate to scrollHeight
-            item.classList.add('open'); // Add class first to get correct scrollHeight
-            content.style.height = '0px'; // Start from 0
-            // Force reflow
-            content.offsetHeight;
-            const height = content.scrollHeight;
-            content.style.height = height + 'px';
+            // Opening - ensure proper height calculation to avoid stutter
+            item.classList.add('open');
+
+            // 1. Get the true height by temporarily setting to auto
+            const currentTransition = content.style.transition;
+            content.style.transition = 'none'; // Disable transition for measurement
+            content.style.height = 'auto';
+            const targetHeight = content.scrollHeight;
+
+            // 2. Set start state (0px)
+            content.style.height = '0px';
+            content.offsetHeight; // Force reflow
+
+            // 3. Restore transition and animate to target
+            content.style.transition = currentTransition;
+            content.style.height = targetHeight + 'px';
 
             // Reset to auto after transition completes
             setTimeout(() => {
                 if (item.classList.contains('open')) {
                     content.style.height = 'auto';
                 }
-            }, 300); // Match CSS transition duration
+            }, 305); // Match CSS transition duration + buffer
         }
     }
 });
