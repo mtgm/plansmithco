@@ -940,10 +940,12 @@ model-viewer::part(default-ar-button) {
     border-radius: var(--radius-xl);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     z-index: 100;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
+    /* Remove scroll from panel itself */
     transform: translateX(calc(100% + 16px));
     transition: transform 0.3s ease, width 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 #detail-panel.show {
@@ -961,9 +963,8 @@ model-viewer::part(default-ar-button) {
 }
 
 /* Daraltılmış halde içeriği gizle */
-#detail-panel.collapsed #panel-header,
-#detail-panel.collapsed #panel-tabs,
-#detail-panel.collapsed .tab-content {
+#detail-panel.collapsed #panel-sticky-header,
+#detail-panel.collapsed #panel-content-scroll {
     opacity: 0;
     pointer-events: none;
 }
@@ -1027,16 +1028,19 @@ model-viewer::part(default-ar-button) {
 
 }
 
-/* Panel Header - Product Title */
-#panel-header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
+/* Sticky Header Container */
+#panel-sticky-header {
+    flex-shrink: 0;
     background: rgba(30, 41, 59, 0.95);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    border-bottom: 2px solid #e2e8f0;
+    z-index: 100;
+}
+
+/* Panel Header - Product Title */
+#panel-header {
     padding: 20px 20px 16px;
-    border-bottom: 1px solid #e2e8f0;
 }
 
 #panel-header .product-title-row {
@@ -1054,16 +1058,9 @@ model-viewer::part(default-ar-button) {
 
 /* Tab Navigation */
 #panel-tabs {
-    position: sticky;
-    top: 68px;
-    /* Height of panel-header */
-    z-index: 99;
-    background: rgba(30, 41, 59, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     display: flex;
     border-bottom: 2px solid #f1f5f9;
-    padding: 16px 16px 0;
+    padding: 0 16px;
     gap: 4px;
 }
 
@@ -1091,6 +1088,13 @@ model-viewer::part(default-ar-button) {
     color: #ffffff;
     background: rgba(255, 255, 255, 0.1);
     border-bottom-color: var(--accent-color);
+}
+
+/* Scrollable Content Container */
+#panel-content-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* Tab Content */

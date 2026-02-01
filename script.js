@@ -93,6 +93,7 @@ window.goBackToCategories = function () {
     categoryGrid.style.display = 'flex';
     productView.style.display = 'none';
 
+
     // Geri oku gizle
     const backArrow = document.getElementById('back-arrow');
     if (backArrow) backArrow.style.display = 'none';
@@ -103,6 +104,9 @@ window.goBackToCategories = function () {
 
     // Detail panel'i kapat
     closeDetailPanel();
+
+    // Model-viewer'ı gizle
+    viewer.style.display = 'none';
 
     // Arayüzü gizle, posteri aç (Model arkada kalsın)
     controlsDock.classList.add('hidden-dock');
@@ -205,6 +209,9 @@ function filterProducts() {
 
 function selectProduct(product) {
     selectedProduct = product;
+
+    // Model-viewer'ı göster
+    viewer.style.display = 'block';
 
     // Poster'ı gizle ve loader göster
     defaultPoster.style.display = 'none';
