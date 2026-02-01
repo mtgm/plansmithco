@@ -2,7 +2,7 @@
   {
     "id": "cat_storage",
     "name": "Storage Tote Racks",
-    "description": "1x2 Storage Tote Rack Description 1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description1x2 Storage Tote Rack Description",
+    "description": "Storage Tote Rack, depo, atölye ve garajlarda plastik saklama kutularını düzenli, erişilebilir ve güvenli şekilde istiflemenizi sağlayan modüler bir raf sistemidir. Alanı verimli kullanır, dağınıklığı ortadan kaldırır ve kutulara hızlı erişim sunar. Sağlam yapısı sayesinde ağır yükler için uygundur ve ihtiyaca göre ölçeklenebilir.",
     "thumbnail": "/poster.webp",
     "products": [
       {
@@ -10,7 +10,7 @@
         "name": "Yeni Ürün 1.0",
         "sku": "1X2V3",
         "thumbnail": "/assets-r2/textures/1x2V3/polished_brass_normal.png",
-        "description": "111 description111 description111 description111 description111 description111 description",
+        "description": "Storage Tote Rack, depo, atölye ve garajlarda plastik saklama kutularını düzenli, erişilebilir ve güvenli şekilde istiflemenizi sağlayan modüler bir raf sistemidir. Alanı verimli kullanır, dağınıklığı ortadan kaldırır ve kutulara hızlı erişim sunar. Sağlam yapısı sayesinde ağır yükler için uygundur ve ihtiyaca göre ölçeklenebilir. Storage Tote Rack, depo, atölye ve garajlarda plastik saklama kutularını düzenli, erişilebilir ve güvenli şekilde istiflemenizi sağlayan modüler bir raf sistemidir. Alanı verimli kullanır, dağınıklığı ortadan kaldırır ve kutulara hızlı erişim sunar. Sağlam yapısı sayesinde ağır yükler için uygundur ve ihtiyaca göre ölçeklenebilir. Storage Tote Rack, depo, atölye ve garajlarda plastik saklama kutularını düzenli, erişilebilir ve güvenli şekilde istiflemenizi sağlayan modüler bir raf sistemidir. Alanı verimli kullanır, dağınıklığı ortadan kaldırır ve kutulara hızlı erişim sunar. Sağlam yapısı sayesinde ağır yükler için uygundur ve ihtiyaca göre ölçeklenebilir.",
         "listingUrl": "https://www.etsy.com/shop/PlanSmithCo",
         "masterModel": "/assets-r2/models/1x2V3.glb",
         "price": 1524,

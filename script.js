@@ -47,11 +47,43 @@ function openCategory(category) {
     if (aboutSection) aboutSection.classList.add('hidden');
     categoryGrid.style.display = 'none';
     productView.style.display = 'flex';
-    backBtn.style.display = 'flex';
+
+    // Geri oku göster
+    const backArrow = document.getElementById('back-arrow');
+    if (backArrow) backArrow.style.display = 'block';
+
+    // Kategori bilgilerini göster
+    const categoryInfo = document.getElementById('category-info');
+    const categoryTitle = document.getElementById('category-title');
+    const categoryCount = document.getElementById('category-count');
+    const categoryDesc = document.getElementById('category-desc');
+    const categoryDescToggle = document.getElementById('category-desc-toggle');
+
+    if (categoryInfo) categoryInfo.style.display = 'block';
+    if (categoryTitle) categoryTitle.textContent = category.name;
+    if (categoryCount) categoryCount.textContent = `${category.products?.length || 0} ürün`;
+    if (categoryDesc) {
+        categoryDesc.textContent = category.description || '';
+        categoryDesc.classList.add('category-desc-collapsed');
+
+        // Açıklama uzunsa toggle butonu göster
+        if (categoryDescToggle) {
+            categoryDescToggle.style.display = (category.description && category.description.length > 100) ? 'inline-block' : 'none';
+            categoryDescToggle.textContent = 'Devamını gör';
+        }
+    }
+
     renderProductList(category.products);
 
-    if (category.products.length > 0) selectProduct(category.products[0]);
+    // Detail panel'i kapat (yeni kategoriye geçildiğinde)
+    closeDetailPanel();
+
+    // Kullanıcı ürün seçene kadar poster göster
+    defaultPoster.style.display = 'flex';
+    controlsDock.classList.add('hidden-dock');
+    loader.style.opacity = '0';
 }
+
 
 // --- GERİ DÖNÜŞ ---
 window.goBackToCategories = function () {
@@ -60,15 +92,22 @@ window.goBackToCategories = function () {
 
     categoryGrid.style.display = 'flex';
     productView.style.display = 'none';
-    backBtn.style.display = 'none';
+
+    // Geri oku gizle
+    const backArrow = document.getElementById('back-arrow');
+    if (backArrow) backArrow.style.display = 'none';
+
+    // Kategori bilgilerini gizle
+    const categoryInfo = document.getElementById('category-info');
+    if (categoryInfo) categoryInfo.style.display = 'none';
+
+    // Detail panel'i kapat
+    closeDetailPanel();
 
     // Arayüzü gizle, posteri aç (Model arkada kalsın)
     controlsDock.classList.add('hidden-dock');
     defaultPoster.style.display = 'flex';
     loader.style.opacity = '0';
-
-    pDesc.classList.add('desc-collapsed');
-    descBtn.classList.remove('rotate-180');
 }
 
 window.toggleDesc = function () {
@@ -76,12 +115,51 @@ window.toggleDesc = function () {
     descBtn.classList.toggle('rotate-180');
 }
 
+// Genel açıklama toggle fonksiyonu (kategori ve ürün açıklaması için)
+window.toggleDescription = function (descId, toggleBtnId, collapsedClass) {
+    const desc = document.getElementById(descId);
+    const toggleBtn = document.getElementById(toggleBtnId);
+
+    console.log('[toggleDescription] desc:', descId, 'found:', !!desc);
+    console.log('[toggleDescription] button:', toggleBtnId, 'found:', !!toggleBtn);
+
+    if (desc && toggleBtn) {
+        const isCollapsed = desc.classList.contains(collapsedClass);
+        console.log('[toggleDescription] isCollapsed:', isCollapsed);
+
+        if (isCollapsed) {
+            desc.classList.remove(collapsedClass);
+            toggleBtn.textContent = 'Daha az';
+        } else {
+            desc.classList.add(collapsedClass);
+            toggleBtn.textContent = 'Devamını gör';
+        }
+    }
+}
+
+// Wrapper fonksiyonlar (backward compatibility)
+window.toggleCategoryDesc = function () {
+    toggleDescription('category-desc', 'category-desc-toggle', 'category-desc-collapsed');
+}
+
+window.toggleProductDesc = function () {
+    toggleDescription('panel-product-description', 'panel-product-desc-toggle', 'panel-product-desc-collapsed');
+}
+
+
 function renderProductList(products) {
     productList.innerHTML = '';
     products.forEach(product => {
         const item = document.createElement('div');
         item.className = 'prod-item';
-        item.innerHTML = `<img src="${product.thumbnail}" class="prod-thumb"><div class="prod-info"><h4>${product.name}</h4><span>${product.sku}</span></div>`;
+        // Badge kaldırıldı - sadece thumbnail, başlık ve fiyat
+        item.innerHTML = `
+            <img src="${product.thumbnail}" class="prod-thumb">
+            <div class="prod-info">
+                <h4>${product.name}</h4>
+                <span class="prod-price">$${product.price}</span>
+            </div>
+        `;
         item.onclick = () => {
             document.querySelectorAll('.prod-item').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
@@ -128,16 +206,9 @@ function filterProducts() {
 function selectProduct(product) {
     selectedProduct = product;
 
-    document.getElementById('p-title').textContent = product.name;
-    pDesc.textContent = product.description || "";
-    document.getElementById('p-price').textContent = `$${product.price}`;
-
-    pDesc.classList.add('desc-collapsed');
-    descBtn.classList.remove('rotate-180');
-
-    const buyLink = document.getElementById('buy-link');
-    if (product.listingUrl) { buyLink.href = product.listingUrl; buyLink.style.display = 'flex'; }
-    else { buyLink.style.display = 'none'; }
+    // Poster'ı gizle ve loader göster
+    defaultPoster.style.display = 'none';
+    loader.style.opacity = '1';
 
     setupVariantTabs(product);
 
@@ -154,6 +225,10 @@ function setupVariantTabs(product) {
         const variantSection = document.querySelector('.variant-section');
         if (variantSection) variantSection.style.display = 'block';
 
+        // Show config card
+        const configCard = document.querySelector('.config-card');
+        if (configCard) configCard.style.display = 'block';
+
         // Initialize configuration display with variant groups
         initializeConfigDisplay(product.variantGroups);
 
@@ -169,6 +244,10 @@ function setupVariantTabs(product) {
         // NO VARIANTS - Hide and clear variant section
         const variantSection = document.querySelector('.variant-section');
         if (variantSection) variantSection.style.display = 'none';
+
+        // Hide config card when no variants
+        const configCard = document.querySelector('.config-card');
+        if (configCard) configCard.style.display = 'none';
 
         // Clear part toggles and swatches
         const partTogglesContainer = document.querySelector('.part-toggles');
@@ -508,11 +587,36 @@ function populateDetailPanel(product) {
     const nameEl = document.getElementById('panel-product-name');
     const priceEl = document.getElementById('panel-product-price');
     const buyLink = document.getElementById('panel-buy-link');
+    const descEl = document.getElementById('panel-product-description');
+
     if (nameEl) nameEl.textContent = product.name;
     if (priceEl) priceEl.textContent = `$${product.price}`;
     if (buyLink && product.listingUrl) {
         buyLink.href = product.listingUrl;
     }
+
+    // Update product description in Bilgi tab
+    if (descEl) {
+        descEl.textContent = product.description || '';
+        descEl.style.display = product.description ? 'block' : 'none';
+        descEl.classList.add('panel-product-desc-collapsed');
+
+        // Açıklama uzunsa toggle butonu göster
+        const toggleBtn = document.getElementById('panel-product-desc-toggle');
+        console.log('[DEBUG] Description length:', product.description?.length);
+        console.log('[DEBUG] Toggle button found:', !!toggleBtn);
+
+        if (toggleBtn) {
+            const shouldShow = product.description && product.description.length > 150;
+            console.log('[DEBUG] Should show button:', shouldShow);
+
+            // Inline style kullan (kategori gibi)
+            toggleBtn.style.display = shouldShow ? 'inline-block' : 'none';
+            toggleBtn.textContent = 'Devamını gör';
+            console.log('[DEBUG] Button display:', toggleBtn.style.display);
+        }
+    }
+
     // Show the panel
     showDetailPanel();
 }

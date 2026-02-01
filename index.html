@@ -17,52 +17,56 @@
     <div id="main-layout">
         <aside id="sidebar">
             <div id="brand-header">
-                <button id="back-btn" onclick="goBackToCategories()">←</button>
                 <div class="brand-info">
                     <div class="brand-name">PlanSmithCo</div>
                     <div class="brand-tag">Digital Catalog</div>
-
                 </div>
-
             </div>
 
             <div class="section-divider"></div>
-            <div class="section-header">KATEGORİLER</div>
+
+            <!-- Tüm Kategoriler Başlığı (Tıklanabilir Geri Dönüş) -->
+            <div id="all-categories-header" class="section-header" onclick="goBackToCategories()"
+                style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <svg id="back-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b"
+                    stroke-width="2" style="display: none;">
+                    <path d="m15 19-7-7 7-7" />
+                </svg>
+                <span>TÜM KATEGORİLER</span>
+            </div>
+
+            <!-- Kategori Başlığı ve Açıklaması -->
+            <div id="category-info" style="display: none; padding: 0 16px; margin-bottom: 16px;">
+                <h3 id="category-title" style="margin: 0 0 4px; font-size: 16px; font-weight: 700; color: #0f172a;">
+                </h3>
+                <div id="category-count" style="margin: 0 0 8px; font-size: 12px; color: #10b981; font-weight: 600;">
+                </div>
+                <div id="category-desc-wrapper" style="position: relative;">
+                    <p id="category-desc" class="category-desc-collapsed"
+                        style="margin: 0; font-size: 13px; color: #64748b; line-height: 1.6; text-align: justify; word-break: normal; white-space: normal; hyphens: auto;background: rgba(245, 158, 11, 0.05); word-spacing: normal;">
+                    </p>
+                    <button id="category-desc-toggle" onclick="toggleCategoryDesc()"
+                        style="display: none; margin-top: 4px; background: none; border: none; color: #f59e0b; font-size: 12px; font-weight: 600; cursor: pointer; padding: 0;">
+                        Devamını gör
+                    </button>
+                </div>
+            </div>
+
             <!-- Search Bar -->
-            <div style="padding: 8px 16px 16px;">
-                <input type="text" id="search-input" placeholder="Kategori ara..." oninput="filterProducts()">
+            <div style="padding: 8px 16px 16px; position: relative;">
+                <svg style="position: absolute; left: 28px; top: calc(8px + 16.5px); transform: translateY(-50%); pointer-events: none;"
+                    width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" id="search-input" placeholder="Ürün ara..." oninput="filterProducts()"
+                    style="padding-left: 36px;">
             </div>
 
             <div id="content-area">
                 <div id="category-grid"></div>
 
                 <div id="product-view">
-                    <div id="product-detail-area">
-                        <h1 id="p-title">...</h1>
-
-                        <div id="desc-wrapper">
-                            <div id="p-desc" class="desc-collapsed">...</div>
-                            <button id="desc-toggle-btn" onclick="toggleDesc()">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="3">
-                                    <path d="M6 9l6 6 6-6" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div class="action-row">
-                            <div id="p-price">$0.00</div>
-                            <a href="#" id="buy-link" class="buy-btn" target="_blank">
-                                Etsy'de İncele
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white"
-                                    stroke-width="2">
-                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                    <polyline points="15 3 21 3 21 9"></polyline>
-                                    <line x1="10" y1="14" x2="21" y2="3"></line>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
                     <div id="product-list"></div>
                 </div>
             </div>
@@ -115,6 +119,14 @@
         <aside id="detail-panel">
             <!-- Close Button -->
             <button id="panel-close-btn" onclick="closeDetailPanel()">×</button>
+
+            <!-- Panel Header with Product Title -->
+            <div id="panel-header">
+                <div class="product-title-row">
+                    <h2 id="panel-product-name">Modüler Kutu Sistemi</h2>
+                </div>
+            </div>
+
             <!-- Tab Navigation -->
             <div id="panel-tabs">
                 <button class="panel-tab active" data-tab="bilgi">Bilgi</button>
@@ -123,33 +135,20 @@
             </div>
             <!-- Tab Content: BİLGİ -->
             <div id="tab-bilgi" class="tab-content active">
-                <div class="product-header">
-                    <div class="product-title-row">
-                        <h2 id="panel-product-name">Modüler Kutu Sistemi</h2>
-                        <span class="product-badge">✓2</span>
-                    </div>
-                    <div class="product-price" id="panel-product-price">$249</div>
-                </div>
-                <div class="action-buttons">
-                    <a href="#" id="panel-buy-link" class="btn-primary" target="_blank">
-                        Etsy'de İncele
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                            <polyline points="15 3 21 3 21 9"></polyline>
-                            <line x1="10" y1="14" x2="21" y2="3"></line>
-                        </svg>
-                    </a>
-                    <button class="btn-secondary" onclick="shareProduct()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                            <polyline points="16 6 12 2 8 6"></polyline>
-                            <line x1="12" y1="2" x2="12" y2="15"></line>
-                        </svg>
-                        Paylaş
+
+
+                <!-- Ürün Açıklaması -->
+                <div id="panel-product-desc-wrapper" style="position: relative;">
+                    <p id="panel-product-description" class="panel-product-desc-collapsed"
+                        style="margin: 0; font-size: 13px; color: #666; line-height: 1.6; text-align: justify; word-break: normal; white-space: normal; hyphens: auto; word-spacing: normal; padding: 12px; background: rgba(245, 158, 11, 0.05); border-radius: 8px;">
+                    </p>
+                    <button id="panel-product-desc-toggle" onclick="toggleProductDesc()"
+                        style="display: none; margin-top: 4px; background: none; border: none; color: #f59e0b; font-size: 12px; font-weight: 600; cursor: pointer; padding: 0;">
+                        Devamını gör
                     </button>
                 </div>
+
+
                 <!-- Accordion Sections -->
                 <div class="accordion">
                     <div class="accordion-item">
@@ -201,15 +200,33 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="action-buttons">
+                    <a href="#" id="panel-buy-link" class="btn-primary" target="_blank">
+                        Etsy'de İncele
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </a>
+                    <button class="btn-secondary" onclick="shareProduct()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                            <polyline points="16 6 12 2 8 6"></polyline>
+                            <line x1="12" y1="2" x2="12" y2="15"></line>
+                        </svg>
+                        Paylaş
+                    </button>
+                </div>
             </div>
             <!-- Tab Content: VARYASYON -->
             <div id="tab-varyasyon" class="tab-content">
                 <div class="variant-actions">
                     <button class="btn-action" onclick="resetVariants()">
                         🔄 Sıfırla
-                    </button>
-                    <button class="btn-action" onclick="applyRecommended()">
-                        ✨ Önerilen
                     </button>
                 </div>
                 <div class="variant-section">
