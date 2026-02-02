@@ -884,16 +884,42 @@
         function applyConfig(config) {
             let attempts = 0;
             const tryApply = () => {
-                if (!viewer.model && attempts < 15) { attempts++; setTimeout(tryApply, 300); return; }
+                // Wait for model to load
+                if (!viewer.model && attempts < 20) { attempts++; setTimeout(tryApply, 300); return; }
+
+                // Wait for swatches to be rendered
                 const swatches = document.querySelectorAll('.swatch-item');
-                if (swatches.length === 0 && attempts < 15) { attempts++; setTimeout(tryApply, 300); return; }
+                if (swatches.length === 0 && attempts < 20) { attempts++; setTimeout(tryApply, 300); return; }
+
+                console.log('Applying config:', config);
+
                 Object.keys(config).forEach(groupName => {
                     const variantName = config[groupName];
-                    const targetSwatch = Array.from(swatches).find(s => s.dataset.groupName === groupName && s.dataset.variantName.includes(variantName));
-                    if (targetSwatch && !targetSwatch.classList.contains('active')) targetSwatch.click();
+                    // Find the swatch matching the group and variant name
+                    const targetSwatch = Array.from(swatches).find(s =>
+                        s.dataset.groupName === groupName &&
+                        (s.dataset.variantName === variantName || s.dataset.variantName.includes(variantName))
+                    );
+
+                    if (targetSwatch) {
+                        // Force click even if hidden
+                        targetSwatch.click();
+
+                        // Optional: Switch tab to this group so user sees the change? 
+                        // Let's do it for the last one or all to ensure DOM is active
+                        const contentArea = targetSwatch.closest('.variant-content-area');
+                        if (contentArea && contentArea.style.display === 'none') {
+                            // Find corresponding tab and click it?
+                            // No, just let the click handler do the work on the model. 
+                            // We don't want to rapidly switch tabs visually.
+                        }
+                    } else {
+                        console.warn('Matching swatch not found for:', groupName, variantName);
+                    }
                 });
             };
-            setTimeout(tryApply, 500);
+            // Increased initial delay slightly to ensure DOM is ready
+            setTimeout(tryApply, 800);
         }
 
         function resetVariants() {
