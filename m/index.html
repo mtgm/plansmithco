@@ -760,7 +760,12 @@
                 viewer.src = finalUrl;
                 viewer.addEventListener('load', () => {
                     loader.classList.add('hidden');
-                    if (selectedProduct && selectedProduct.variantGroups) {
+
+                    // Check if we have a config in URL
+                    const { config } = getUrlParams();
+
+                    // Only apply defaults if NO config is present
+                    if (!config && selectedProduct && selectedProduct.variantGroups) {
                         selectedProduct.variantGroups.forEach(g => {
                             if (g.items[0] && g.items[0].textureConfig) applyTextureConfig(g.items[0].textureConfig);
                         });
