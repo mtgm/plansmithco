@@ -592,6 +592,80 @@
             color: #94a3b8;
             margin: 0;
         }
+
+        /* --- TABS & VARIANT STYLES --- */
+        #mobile-variant-tabs {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding: 0 4px 8px 4px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        #mobile-variant-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .mobile-variant-tab {
+            flex: 0 0 auto;
+            padding: 8px 12px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .mobile-variant-tab.active {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .mobile-variant-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -9px;
+            /* Align with container border */
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #f59e0b;
+            border-radius: 3px 3px 0 0;
+            box-shadow: 0 -2px 10px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Hide Accordion Headers (using tabs now) */
+        .variant-accordion-item .accordion-header {
+            display: none !important;
+        }
+
+        /* Styles for variants content management */
+        .variant-accordion-item {
+            display: none;
+            /* Hidden by default */
+            border: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .variant-accordion-item.active-tab-content {
+            display: block;
+            /* Show only active */
+        }
+
+        .variant-accordion-item .accordion-content {
+            height: auto !important;
+            /* Always open */
+            padding: 0;
+            overflow: visible;
+        }
     </style>
 </head>
 
@@ -670,6 +744,8 @@
                 <div id="tab-varyasyon" class="tab-content">
                     <div class="variant-actions"><button class="btn-action" onclick="resetVariants()">🔄
                             Sıfırla</button></div>
+                    <!-- New Tab Container -->
+                    <div id="mobile-variant-tabs"></div>
                     <div id="variant-accordion-container"></div>
                     <div id="config-card" class="config-card">
                         <div class="config-header"><span>🛠️</span>
@@ -801,53 +877,89 @@
 
         function setupVariants(product) {
             const accordionContainer = document.getElementById('variant-accordion-container');
+            const tabsContainer = document.getElementById('mobile-variant-tabs');
             const configCard = document.getElementById('config-card');
             const configList = document.getElementById('config-list');
+
             if (!product.variantGroups || product.variantGroups.length === 0) {
                 accordionContainer.innerHTML = '<div class="no-variants-message"><div class="icon">🎨</div><p>Bu ürün için varyasyon seçeneği bulunmuyor.</p></div>';
                 configCard.style.display = 'none';
+                if (tabsContainer) tabsContainer.style.display = 'none';
                 return;
             }
+
+            if (tabsContainer) tabsContainer.style.display = 'flex';
             accordionContainer.innerHTML = '';
+            tabsContainer.innerHTML = '';
             configList.innerHTML = '';
+
             product.variantGroups.forEach((group, index) => {
+                // 1. Create Tab Button
+                const tabBtn = document.createElement('button');
+                tabBtn.className = 'mobile-variant-tab' + (index === 0 ? ' active' : '');
+                tabBtn.textContent = group.groupName;
+                tabBtn.onclick = () => {
+                    // Switch Tabs
+                    document.querySelectorAll('.mobile-variant-tab').forEach(t => t.classList.remove('active'));
+                    tabBtn.classList.add('active');
+
+                    // Switch Content
+                    document.querySelectorAll('.variant-accordion-item').forEach((item, i) => {
+                        if (i === index) item.classList.add('active-tab-content');
+                        else item.classList.remove('active-tab-content');
+                    });
+                };
+                tabsContainer.appendChild(tabBtn);
+
+                // 2. Create Content Item (was Accordion Item)
                 const accordionItem = document.createElement('div');
-                accordionItem.className = 'accordion-item variant-accordion-item' + (index === 0 ? ' open' : '');
-                const accordionHeader = document.createElement('button');
-                accordionHeader.className = 'accordion-header';
-                accordionHeader.innerHTML = `<span>${group.groupName}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+                // Use 'active-tab-content' class for visibility instead of open/accordion logic
+                accordionItem.className = 'accordion-item variant-accordion-item' + (index === 0 ? ' active-tab-content' : '');
+
+                // Keep structure simple - inner content container
                 const accordionContent = document.createElement('div');
                 accordionContent.className = 'accordion-content';
-                if (index === 0) accordionContent.style.height = 'auto';
+
                 const swatchesContainer = document.createElement('div');
                 swatchesContainer.className = 'color-swatches';
+
                 group.items.forEach((item, itemIndex) => {
                     const swatchItem = document.createElement('div');
                     swatchItem.className = 'swatch-item' + (itemIndex === 0 ? ' active' : '');
                     swatchItem.dataset.groupName = group.groupName;
                     swatchItem.dataset.variantName = item.name;
+
                     const swatch = document.createElement('div');
                     swatch.className = 'swatch';
                     if (item.type === 'color') swatch.style.backgroundColor = item.value;
                     else { swatch.style.backgroundImage = `url('${item.value}')`; swatch.style.backgroundSize = 'cover'; }
-                    if (item.value === '#ffffff' || item.value === '#fff' || item.name.toLowerCase().includes('beyaz')) swatch.style.border = '1px solid #ddd';
+
+                    if (item.value === '#ffffff' || item.value === '#fff' || item.name.toLowerCase().includes('beyaz')) {
+                        swatch.style.border = '1px solid #ddd';
+                    }
+
                     swatch.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
                     const label = document.createElement('span');
                     label.textContent = item.name.split('(')[0].trim();
+
                     swatchItem.onclick = () => {
                         accordionContent.querySelectorAll('.swatch-item').forEach(s => s.classList.remove('active'));
                         swatchItem.classList.add('active');
                         updateConfigItem(group.groupName, item.name);
                         if (item.textureConfig) applyTextureConfig(item.textureConfig);
                     };
+
                     swatchItem.appendChild(swatch);
                     swatchItem.appendChild(label);
                     swatchesContainer.appendChild(swatchItem);
                 });
+
                 accordionContent.appendChild(swatchesContainer);
-                accordionItem.appendChild(accordionHeader);
                 accordionItem.appendChild(accordionContent);
                 accordionContainer.appendChild(accordionItem);
+
+                // Config List Item
                 const configItem = document.createElement('div');
                 configItem.className = 'config-item';
                 configItem.dataset.groupName = group.groupName;
@@ -905,6 +1017,9 @@
                     }
                 }
             });
+            // Reset tabs to first one
+            const tabs = document.querySelectorAll('.mobile-variant-tab');
+            if (tabs.length > 0) tabs[0].click();
         }
 
         function togglePanelCollapse() { document.getElementById('detail-panel').classList.toggle('collapsed'); }
