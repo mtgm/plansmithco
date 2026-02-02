@@ -784,7 +784,21 @@
             const { sku, config } = getUrlParams();
             if (!sku) { showError('Ürün bulunamadı', 'URL\'de geçerli bir SKU bulunamadı (parametre eksik). Lütfen QR kodu tekrar oluşturup taratın.'); return; }
             try {
-                const response = await fetch('/products.json');
+                // Veriyi çekmeye çalış (Göreceli yol kullanımı daha güvenli)
+                let response;
+                try {
+                    response = await fetch('../products.json');
+                    if (!response.ok) throw new Error('Root fetch failed');
+                } catch (err) {
+                    // Fallback: Absolute path
+                    console.log('Relative fetch failed, trying absolute...');
+                    response = await fetch('/products.json');
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP hatası! Durum: ${response.status}`);
+                }
+
                 allData = await response.json();
                 let foundProduct = null;
                 for (const cat of allData) {
@@ -800,7 +814,10 @@
                         setTimeout(() => applyConfig(configObj), 800);
                     } catch (e) { console.error('Config parse error:', e); }
                 }
-            } catch (e) { console.error('Init error:', e); showError('Yükleme hatası', 'Ürün verileri yüklenemedi.'); }
+            } catch (e) {
+                console.error('Init error:', e);
+                showError('Yükleme hatası', `Ürün verileri yüklenemedi.<br><small>${e.message}</small>`);
+            }
         }
 
         function loadProduct(product) {
