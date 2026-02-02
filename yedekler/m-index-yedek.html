@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PlanSmithCo - Ürün Kartı</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* --- TASARIM SİSTEMİ --- */
+        :root {
+            --bg-color: #f0f2f5;
+            --sidebar-bg: #ffffff;
+            --primary-dark: #0f172a;
+            --accent-color: #f59e0b;
+            --radius-xl: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            min-height: 100dvh;
+            font-family: 'Inter', sans-serif;
+            color: #f1f5f9;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Loading Overlay */
+        #loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+
+        #loader-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+
+        /* Model Viewer Section */
+        .model-section {
+            position: relative;
+            height: 45vh;
+            min-height: 300px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            --poster-color: transparent;
+        }
+
+        /* Back Button */
+        .back-btn {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: #f1f5f9;
+            font-size: 20px;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Info Panel */
+        .info-panel {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px) saturate(150%);
+            -webkit-backdrop-filter: blur(30px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 24px 24px 0 0;
+            margin-top: -24px;
+            position: relative;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Panel Header */
+        .panel-header {
+            padding: 20px 20px 0;
+        }
+
+        .product-name {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            color: #ffffff;
+        }
+
+        .product-price {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 16px;
+        }
+
+        /* Tab Navigation */
+        .panel-tabs {
+            display: flex;
+            padding: 0 20px;
+            gap: 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-tab {
+            flex: 1;
+            padding: 12px 8px;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 600;
+            color: #cbd5e1;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .panel-tab:hover {
+            color: #ffffff;
+        }
+
+        .panel-tab.active {
+            color: #ffffff;
+            border-bottom-color: var(--accent-color);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Description */
+        .product-description {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #cbd5e1;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .desc-collapsed {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .desc-toggle-btn {
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            margin-top: 8px;
+        }
+
+        /* Accordion */
+        .accordion {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .accordion-header {
+            width: 100%;
+            background: transparent;
+            border: none;
+            padding: 16px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 600;
+            color: #f1f5f9;
+            cursor: pointer;
+        }
+
+        .accordion-header svg {
+            transition: transform 0.3s;
+        }
+
+        .accordion-item.open .accordion-header svg {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            height: 0;
+            overflow: hidden;
+            transition: height 0.3s ease;
+        }
+
+        .accordion-content p {
+            padding: 0 0 16px;
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            background: #d97706;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #b45309;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Variant Section */
+        .variant-section {
+            margin-bottom: 20px;
+        }
+
+        .variant-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        /* Color Swatches */
+        .color-swatches {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .swatch-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .swatch {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .swatch-item:hover .swatch {
+            transform: scale(1.05);
+        }
+
+        .swatch svg {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .swatch-item.active .swatch svg {
+            opacity: 1;
+        }
+
+        .swatch-item span {
+            font-size: 11px;
+            font-weight: 600;
+            color: #f1f5f9;
+            text-align: center;
+        }
+
+        /* Config Card */
+        .config-card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .config-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .config-header h4 {
+            font-size: 13px;
+            font-weight: 700;
+            margin: 0;
+            color: #f1f5f9;
+        }
+
+        .config-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 6px 0;
+        }
+
+        .config-item span:first-child {
+            color: #e2e8f0;
+        }
+
+        .config-item span:last-child {
+            font-weight: 600;
+            color: #f8fafc;
+        }
+
+        /* AR Section */
+        .ar-intro-card {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .ar-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .ar-intro-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            color: #78350f;
+        }
+
+        .ar-intro-card p {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #713f12;
+            margin: 0;
+        }
+
+        .btn-ar {
+            width: 100%;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 18px 20px;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 24px;
+            transition: all 0.2s;
+        }
+
+        .btn-ar:hover {
+            background: #d97706;
+        }
+
+        .ar-steps {
+            margin-bottom: 20px;
+        }
+
+        .steps-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin: 0 0 12px;
+        }
+
+        .step-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .step-card h5 {
+            font-size: 13px;
+            font-weight: 700;
+            margin: 0 0 4px;
+            color: #f8fafc;
+        }
+
+        .step-card p {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #e2e8f0;
+            margin: 0;
+        }
+
+        .ar-requirements {
+            background: rgba(254, 243, 199, 0.15);
+            border: 1px solid rgba(254, 243, 199, 0.3);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .req-icon {
+            font-size: 20px;
+        }
+
+        .ar-requirements h5 {
+            font-size: 13px;
+            font-weight: 700;
+            margin: 0 0 6px;
+            color: #fef3c7;
+        }
+
+        .ar-requirements p {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #fde68a;
+            margin: 0;
+        }
+
+        /* Variant Accordion */
+        #variant-accordion-container .accordion-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #variant-accordion-container .accordion-content {
+            padding: 0;
+        }
+
+        #variant-accordion-container .accordion-item.open .accordion-content {
+            padding-bottom: 16px;
+        }
+
+        /* Error State */
+        .error-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .error-state .error-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .error-state h2 {
+            font-size: 20px;
+            margin: 0 0 12px;
+            color: #f8fafc;
+        }
+
+        .error-state p {
+            font-size: 14px;
+            color: #94a3b8;
+            margin: 0 0 24px;
+        }
+
+        /* No Variants Message */
+        .no-variants-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #94a3b8;
+        }
+
+        .no-variants-message .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .no-variants-message p {
+            font-size: 14px;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Loading Overlay -->
+    <div id="loader-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="main-container">
+        <!-- Model Viewer Section -->
+        <div class="model-section">
+            <a href="/" class="back-btn">←</a>
+            <model-viewer id="mv" src="" ar ar-scale="fixed" ar-placement="floor" camera-controls
+                interaction-prompt="none" environment-image="/studio.hdr" shadow-intensity="1" exposure="1.5"
+                tone-mapping="neutral" loading="eager"></model-viewer>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="info-panel">
+            <!-- Panel Header -->
+            <div class="panel-header">
+                <h1 id="product-name" class="product-name">Yükleniyor...</h1>
+                <div id="product-price" class="product-price">$0</div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="panel-tabs">
+                <button class="panel-tab active" data-tab="bilgi">Bilgi</button>
+                <button class="panel-tab" data-tab="varyasyon">Varyasyon</button>
+                <button class="panel-tab" data-tab="ar">AR</button>
+            </div>
+
+            <!-- Tab: Bilgi -->
+            <div id="tab-bilgi" class="tab-content active">
+                <div class="desc-wrapper">
+                    <p id="product-description" class="product-description desc-collapsed"></p>
+                    <button id="desc-toggle-btn" class="desc-toggle-btn" onclick="toggleDescription()">Devamını
+                        gör</button>
+                </div>
+
+                <!-- Accordion Sections -->
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <button class="accordion-header">
+                            <span>📏 Boyutlar</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div class="accordion-content">
+                            <p>Genişlik: 100cm<br>Yükseklik: 200cm<br>Derinlik: 40cm</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header">
+                            <span>🧱 Malzemeler</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div class="accordion-content">
+                            <p>18mm ahşap kontrplak, su bazlı vernik kaplama</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header">
+                            <span>🔧 Montaj</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div class="accordion-content">
+                            <p>Kolay montaj, tüm bağlantı parçaları dahildir.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <a href="#" id="buy-link" class="btn-primary" target="_blank">
+                        Etsy'de İncele
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </a>
+                    <button class="btn-secondary" onclick="shareProduct()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                            <polyline points="16 6 12 2 8 6"></polyline>
+                            <line x1="12" y1="2" x2="12" y2="15"></line>
+                        </svg>
+                        Paylaş
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab: Varyasyon -->
+            <div id="tab-varyasyon" class="tab-content">
+                <div class="variant-actions">
+                    <button class="btn-action" onclick="resetVariants()">🔄 Sıfırla</button>
+                </div>
+
+                <!-- Variant Accordion Container -->
+                <div id="variant-accordion-container">
+                    <!-- JavaScript ile dinamik oluşturulacak -->
+                </div>
+
+                <div id="config-card" class="config-card">
+                    <div class="config-header">
+                        <span>🛠️</span>
+                        <h4>Mevcut Konfigürasyon</h4>
+                    </div>
+                    <div id="config-list" class="config-list">
+                        <!-- JavaScript ile dinamik oluşturulacak -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: AR -->
+            <div id="tab-ar" class="tab-content">
+                <div class="ar-intro-card">
+                    <div class="ar-icon">📱</div>
+                    <h3>AR ile Görüntüle</h3>
+                    <p id="ar-product-name">Bu modeli gerçek ortamınızda deneyimleyin. Ürünü evinize veya ofisinize
+                        yerleştirin.</p>
+                </div>
+
+                <button class="btn-ar" onclick="activateAR()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
+                        </path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                    AR Modunu Başlat
+                </button>
+
+                <div class="ar-steps">
+                    <h4 class="steps-title">NASIL KULLANILIR</h4>
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <div>
+                            <h5>Kamerayı Açın</h5>
+                            <p>AR modunu başlatmak için kamera izni verin</p>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <div>
+                            <h5>Yüzeyi Tarayın</h5>
+                            <p>Kameranızı masa veya zemin gibi düz bir yüzeye doğrultun</p>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <div>
+                            <h5>Yerleştirin</h5>
+                            <p>Ekrana dokunarak modeli yerleştirin ve boyutlandırın</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ar-requirements">
+                    <div class="req-icon">ℹ️</div>
+                    <div>
+                        <h5>Gereksinimler</h5>
+                        <p>WebXR destekli tarayıcı ve ARCore/ARKit uyumlu cihaz gereklidir. iOS Safari veya Android
+                            Chrome önerilir.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+
+    <script>
+        // Global Variables
+        const viewer = document.getElementById('mv');
+        const loader = document.getElementById('loader-overlay');
+        let selectedProduct = null;
+        let allData = [];
+
+        // Get URL Parameters
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            let sku = params.get('sku');
+            
+            // Eğer query string'de SKU yoksa, path'den almayı dene
+            // Örnek: /m/1X2V3 formatı
+            if (!sku) {
+                const pathParts = window.location.pathname.split('/');
+                const mIndex = pathParts.indexOf('m');
+                if (mIndex !== -1 && pathParts[mIndex + 1]) {
+                    sku = pathParts[mIndex + 1];
+                }
+            }
+            
+            return {
+                sku: sku,
+                config: params.get('config')
+            };
+        }
+
+        // Initialize
+        async function init() {
+            const { sku, config } = getUrlParams();
+
+            if (!sku) {
+                showError('Ürün bulunamadı', 'URL\'de geçerli bir SKU parametresi yok.');
+                return;
+            }
+
+            try {
+                // Fetch products data
+                const response = await fetch('/products.json');
+                allData = await response.json();
+
+                // Find product by SKU
+                let foundProduct = null;
+                for (const cat of allData) {
+                    const p = cat.products.find(x => x && x.sku && x.sku.toString() === sku.toString());
+                    if (p) {
+                        foundProduct = p;
+                        break;
+                    }
+                }
+
+                if (!foundProduct) {
+                    showError('Ürün bulunamadı', `"${sku}" SKU'lu ürün mevcut değil.`);
+                    return;
+                }
+
+                selectedProduct = foundProduct;
+
+                // Load product data
+                loadProduct(foundProduct);
+
+                // Apply config from URL if exists
+                if (config) {
+                    try {
+                        const configObj = JSON.parse(config);
+                        setTimeout(() => applyConfig(configObj), 500);
+                    } catch (e) {
+                        console.error('Config parse error:', e);
+                    }
+                }
+
+            } catch (e) {
+                console.error('Init error:', e);
+                showError('Yükleme hatası', 'Ürün verileri yüklenemedi.');
+            }
+        }
+
+        // Load Product
+        function loadProduct(product) {
+            // Update UI
+            document.getElementById('product-name').textContent = product.name;
+            document.getElementById('product-price').textContent = `$${product.price}`;
+            document.getElementById('product-description').textContent = product.description || '';
+            document.getElementById('ar-product-name').textContent =
+                `${product.name} modelini gerçek ortamınızda deneyimleyin. Ürünü evinize veya ofisinize yerleştirin.`;
+
+            // Update buy link
+            const buyLink = document.getElementById('buy-link');
+            if (buyLink && product.listingUrl) {
+                buyLink.href = product.listingUrl;
+            }
+
+            // Load 3D model
+            const masterUrl = product.masterModel ? product.masterModel : `/api/engine?sku=${product.sku}`;
+            loadModel(masterUrl);
+
+            // Setup variants
+            setupVariants(product);
+
+            // Hide description toggle if no description
+            const descToggle = document.getElementById('desc-toggle-btn');
+            if (descToggle) {
+                descToggle.style.display = product.description && product.description.length > 100 ? 'block' : 'none';
+            }
+        }
+
+        // Load 3D Model
+        async function loadModel(url) {
+            try {
+                let finalUrl = url;
+                if (url.includes('/api/engine')) {
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    if (data.ok) finalUrl = data.url;
+                }
+
+                viewer.src = finalUrl;
+
+                viewer.addEventListener('load', () => {
+                    loader.classList.add('hidden');
+
+                    // Apply default textures
+                    if (selectedProduct && selectedProduct.variantGroups) {
+                        selectedProduct.variantGroups.forEach(g => {
+                            if (g.items[0] && g.items[0].textureConfig) {
+                                applyTextureConfig(g.items[0].textureConfig);
+                            }
+                        });
+                    }
+                }, { once: true });
+
+            } catch (e) {
+                console.error('Model load error:', e);
+                loader.classList.add('hidden');
+            }
+        }
+
+        // Setup Variants
+        function setupVariants(product) {
+            const accordionContainer = document.getElementById('variant-accordion-container');
+            const configCard = document.getElementById('config-card');
+            const configList = document.getElementById('config-list');
+
+            if (!product.variantGroups || product.variantGroups.length === 0) {
+                // No variants
+                accordionContainer.innerHTML = `
+                    <div class="no-variants-message">
+                        <div class="icon">🎨</div>
+                        <p>Bu ürün için varyasyon seçeneği bulunmuyor.</p>
+                    </div>
+                `;
+                configCard.style.display = 'none';
+                return;
+            }
+
+            accordionContainer.innerHTML = '';
+            configList.innerHTML = '';
+
+            product.variantGroups.forEach((group, index) => {
+                // Create accordion item
+                const accordionItem = document.createElement('div');
+                accordionItem.className = 'accordion-item' + (index === 0 ? ' open' : '');
+
+                const accordionHeader = document.createElement('button');
+                accordionHeader.className = 'accordion-header';
+                accordionHeader.innerHTML = `
+                    <span>${group.groupName}</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                `;
+
+                const accordionContent = document.createElement('div');
+                accordionContent.className = 'accordion-content';
+                if (index === 0) accordionContent.style.height = 'auto';
+
+                const swatchesContainer = document.createElement('div');
+                swatchesContainer.className = 'color-swatches';
+
+                group.items.forEach((item, itemIndex) => {
+                    const swatchItem = document.createElement('div');
+                    swatchItem.className = 'swatch-item' + (itemIndex === 0 ? ' active' : '');
+                    swatchItem.dataset.groupName = group.groupName;
+                    swatchItem.dataset.variantName = item.name;
+
+                    const swatch = document.createElement('div');
+                    swatch.className = 'swatch';
+
+                    if (item.type === 'color') {
+                        swatch.style.backgroundColor = item.value;
+                    } else {
+                        swatch.style.backgroundImage = `url('${item.value}')`;
+                        swatch.style.backgroundSize = 'cover';
+                    }
+
+                    if (item.value === '#ffffff' || item.value === '#fff' || item.name.toLowerCase().includes('beyaz')) {
+                        swatch.style.border = '1px solid #ddd';
+                    }
+
+                    swatch.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    `;
+
+                    const label = document.createElement('span');
+                    label.textContent = item.name.split('(')[0].trim();
+
+                    swatchItem.onclick = () => {
+                        // Remove active from siblings
+                        accordionContent.querySelectorAll('.swatch-item').forEach(s => s.classList.remove('active'));
+                        swatchItem.classList.add('active');
+
+                        // Update config display
+                        updateConfigItem(group.groupName, item.name);
+
+                        // Apply texture
+                        if (item.textureConfig) {
+                            applyTextureConfig(item.textureConfig);
+                        }
+                    };
+
+                    swatchItem.appendChild(swatch);
+                    swatchItem.appendChild(label);
+                    swatchesContainer.appendChild(swatchItem);
+                });
+
+                accordionContent.appendChild(swatchesContainer);
+                accordionItem.appendChild(accordionHeader);
+                accordionItem.appendChild(accordionContent);
+                accordionContainer.appendChild(accordionItem);
+
+                // Add to config list
+                const configItem = document.createElement('div');
+                configItem.className = 'config-item';
+                configItem.dataset.groupName = group.groupName;
+                configItem.innerHTML = `
+                    <span>${group.groupName}</span>
+                    <span>${group.items[0] ? group.items[0].name.split('(')[0].trim() : '-'}</span>
+                `;
+                configList.appendChild(configItem);
+            });
+        }
+
+        // Update Config Item
+        function updateConfigItem(groupName, variantName) {
+            const configItem = document.querySelector(`.config-item[data-group-name="${groupName}"]`);
+            if (configItem) {
+                const valueSpan = configItem.querySelector('span:last-child');
+                if (valueSpan) {
+                    valueSpan.textContent = variantName.split('(')[0].trim();
+                }
+            }
+        }
+
+        // Apply Texture Config
+        async function applyTextureConfig(configs) {
+            if (!viewer.model) return;
+            const configList = Array.isArray(configs) ? configs : [configs];
+
+            for (const cfg of configList) {
+                const material = viewer.model.materials.find(m => m.name === cfg.materialName);
+                if (!material) continue;
+
+                if (cfg.baseColor) {
+                    const texture = await viewer.createTexture(cfg.baseColor);
+                    material.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
+                }
+                if (cfg.normal) {
+                    const texture = await viewer.createTexture(cfg.normal);
+                    material.normalTexture.setTexture(texture);
+                }
+                if (cfg.orm) {
+                    const texture = await viewer.createTexture(cfg.orm);
+                    material.pbrMetallicRoughness.metallicRoughnessTexture.setTexture(texture);
+                }
+            }
+        }
+
+        // Apply Config from URL
+        function applyConfig(config) {
+            let attempts = 0;
+            const maxAttempts = 10;
+
+            const tryApply = () => {
+                const swatches = document.querySelectorAll('.swatch-item');
+
+                if (swatches.length === 0 && attempts < maxAttempts) {
+                    attempts++;
+                    setTimeout(tryApply, 300);
+                    return;
+                }
+
+                Object.keys(config).forEach(groupName => {
+                    const variantName = config[groupName];
+
+                    // Find swatch with matching group and variant
+                    const targetSwatch = Array.from(swatches).find(s => {
+                        return s.dataset.groupName === groupName &&
+                            s.dataset.variantName.includes(variantName);
+                    });
+
+                    if (targetSwatch && !targetSwatch.classList.contains('active')) {
+                        targetSwatch.click();
+                    }
+                });
+            };
+
+            setTimeout(tryApply, 500);
+        }
+
+        // Reset Variants
+        function resetVariants() {
+            if (!selectedProduct || !selectedProduct.variantGroups) return;
+
+            selectedProduct.variantGroups.forEach((group, groupIndex) => {
+                if (group.items[0]) {
+                    // Apply first texture
+                    if (group.items[0].textureConfig) {
+                        applyTextureConfig(group.items[0].textureConfig);
+                    }
+
+                    // Update config display
+                    updateConfigItem(group.groupName, group.items[0].name);
+
+                    // Update UI
+                    const accordionContainer = document.getElementById('variant-accordion-container');
+                    const accordionItems = accordionContainer.querySelectorAll('.accordion-item');
+                    if (accordionItems[groupIndex]) {
+                        const swatches = accordionItems[groupIndex].querySelectorAll('.swatch-item');
+                        swatches.forEach((s, i) => {
+                            s.classList.toggle('active', i === 0);
+                        });
+                    }
+                }
+            });
+        }
+
+        // Activate AR
+        function activateAR() {
+            if (viewer.canActivateAR) {
+                viewer.activateAR();
+            } else {
+                alert('AR bu cihazda desteklenmiyor. Lütfen ARCore/ARKit uyumlu bir cihaz kullanın.');
+            }
+        }
+
+        // Toggle Description
+        function toggleDescription() {
+            const desc = document.getElementById('product-description');
+            const btn = document.getElementById('desc-toggle-btn');
+
+            if (desc.classList.contains('desc-collapsed')) {
+                desc.classList.remove('desc-collapsed');
+                btn.textContent = 'Daha az';
+            } else {
+                desc.classList.add('desc-collapsed');
+                btn.textContent = 'Devamını gör';
+            }
+        }
+
+        // Share Product
+        function shareProduct() {
+            const shareUrl = window.location.href;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: document.getElementById('product-name').textContent,
+                    text: 'Bu ürüne göz atın!',
+                    url: shareUrl
+                }).catch(err => console.log('Share failed:', err));
+            } else {
+                navigator.clipboard.writeText(shareUrl)
+                    .then(() => alert('Link panoya kopyalandı!'))
+                    .catch(err => console.log('Copy failed:', err));
+            }
+        }
+
+        // Show Error
+        function showError(title, message) {
+            loader.classList.add('hidden');
+            document.querySelector('.info-panel').innerHTML = `
+                <div class="error-state">
+                    <div class="error-icon">⚠️</div>
+                    <h2>${title}</h2>
+                    <p>${message}</p>
+                    <a href="/" class="btn-primary">Ana Sayfaya Dön</a>
+                </div>
+            `;
+        }
+
+        // Tab Switching
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabButtons = document.querySelectorAll('.panel-tab');
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabName = btn.dataset.tab;
+                    document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById(`tab-${tabName}`).classList.add('active');
+                });
+            });
+
+            // Initialize
+            init();
+        });
+
+        // Accordion Toggle
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.accordion-header')) {
+                const item = e.target.closest('.accordion-item');
+                const content = item.querySelector('.accordion-content');
+
+                if (item.classList.contains('open')) {
+                    content.style.height = content.scrollHeight + 'px';
+                    content.offsetHeight;
+                    content.style.height = '0px';
+                    item.classList.remove('open');
+                } else {
+                    item.classList.add('open');
+                    const currentTransition = content.style.transition;
+                    content.style.transition = 'none';
+                    content.style.height = 'auto';
+                    const targetHeight = content.scrollHeight;
+                    content.style.height = '0px';
+                    content.offsetHeight;
+                    content.style.transition = currentTransition;
+                    content.style.height = targetHeight + 'px';
+
+                    setTimeout(() => {
+                        if (item.classList.contains('open')) {
+                            content.style.height = 'auto';
+                        }
+                    }, 305);
+                }
+            }
+        });
+
+        // Global functions
+        window.toggleDescription = toggleDescription;
+        window.shareProduct = shareProduct;
+        window.resetVariants = resetVariants;
+        window.activateAR = activateAR;
+    </script>
+</body>
+
+</html>
