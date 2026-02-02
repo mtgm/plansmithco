@@ -905,6 +905,34 @@ function handleDeepLink() {
                     console.error('[DeepLink] Error parsing config JSON:', e);
                 }
             }
+
+            // 4. Mobile & QR Optimization: Switch to AR Tab & Auto-Launch
+            setTimeout(() => {
+                // Switch to AR Tab
+                const arTabBtn = document.querySelector('.panel-tab[data-tab="ar"]');
+                if (arTabBtn) {
+                    console.log('[DeepLink] Switching to AR tab...');
+                    arTabBtn.click();
+                }
+
+                // Attempt to auto-activate AR (Browser might block this without user gesture)
+                // However, switching the tab puts the "Start AR" button right under their thumb
+                // If this is a PWA or specific browser context, it might work.
+                try {
+                    if (window.innerWidth <= 900) { // Only on mobile
+                        console.log('[DeepLink] Attempting auto-AR...');
+
+                        // Method 1: Direct Call
+                        activateAR();
+
+                        // Method 2: Simulate Button Click (Backup)
+                        const arBtn = document.querySelector('.btn-ar');
+                        if (arBtn) arBtn.click();
+                    }
+                } catch (e) {
+                    console.warn('[DeepLink] Auto-AR failed:', e);
+                }
+            }, 800); // Wait for panel to open and textures to apply
         } else {
             console.warn('[DeepLink] SKU not found in product list:', sku);
         }
