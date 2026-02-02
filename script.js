@@ -246,7 +246,7 @@ function selectProduct(product) {
     populateDetailPanel(product);
 
     // Generate initial QR
-    setTimeout(updateARQRCode, 500);
+    setTimeout(updateQRCode, 500);
 }
 
 // NEW: Close Mobile Product View (Return to List)
@@ -408,7 +408,7 @@ function renderPartToggles(variantGroups) {
                 updateConfigItem(group.groupName, item.name);
 
                 // Update QR Code with new config
-                updateARQRCode();
+                updateQRCode();
             };
 
             swatchItem.appendChild(swatch);
@@ -801,7 +801,8 @@ function populateDetailPanel(product) {
 
 let qrCodeObj = null;
 
-function updateARQRCode() {
+// Renamed to match user request
+function updateQRCode() {
     const qrContainer = document.getElementById('qrcode');
     if (!qrContainer || !selectedProduct) return;
 
@@ -830,7 +831,7 @@ function updateARQRCode() {
 
     // Add timestamp to force uniqueness if needed
     const finalUrl = `${baseUrl}?${params.toString()}`;
-    console.log('QR Generated for:', finalUrl);
+    // console.log('QR Generated for:', finalUrl);
 
     // 3. Render QR
     qrContainer.innerHTML = ''; // Clear previous
@@ -906,7 +907,7 @@ function applyDeepLinkConfig(config) {
     // Wait a bit for DOM to be ready inside panel
     // Retry mechanism to ensure accordions are rendered
     let attempts = 0;
-    const maxAttempts = 5;
+    const maxAttempts = 10; // Increased attempts
 
     const tryApply = () => {
         let allFound = true;
@@ -914,7 +915,7 @@ function applyDeepLinkConfig(config) {
 
         if (headers.length === 0 && attempts < maxAttempts) {
             attempts++;
-            setTimeout(tryApply, 500);
+            setTimeout(tryApply, 300); // Check every 300ms
             return;
         }
 
@@ -937,8 +938,10 @@ function applyDeepLinkConfig(config) {
 
                     if (targetSwatch) {
                         console.log('[DeepLink] Clicking swatch:', variantName);
-                        // Don't just click (it toggles), force select
-                        targetSwatch.click();
+                        // Check if already active to avoid redundant clicks
+                        if (!targetSwatch.classList.contains('active')) {
+                            targetSwatch.click();
+                        }
                     } else {
                         console.warn('[DeepLink] Swatch not found:', variantName);
                         allFound = false;
@@ -951,7 +954,7 @@ function applyDeepLinkConfig(config) {
         });
     };
 
-    setTimeout(tryApply, 800);
+    setTimeout(tryApply, 500);
 }
 
 // Export functions for global use
@@ -962,3 +965,4 @@ window.resetVariants = resetVariants;
 window.applyRecommended = applyRecommended;
 window.shareProduct = shareProduct;
 window.populateDetailPanel = populateDetailPanel;
+window.updateQRCode = updateQRCode; // Export new function
