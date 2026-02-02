@@ -736,6 +736,11 @@ function resetVariants() {
                 }
             }
         });
+
+        // QR Kodu güncelle (Reset sonrası varsayılan hale dönsün)
+        setTimeout(() => {
+            updateARandQR(null);
+        }, 100);
     }
 }
 
@@ -838,7 +843,7 @@ async function updateARandQR(configs) {
     });
 
     // Build URL - Yönlendirme /m/ sayfasına yapılıyor (Bilgi Kartı Sayfası)
-    const baseUrl = window.location.origin + '/m/';
+    const baseUrl = window.location.origin + '/m/index.html';
     const params = new URLSearchParams();
     if (state.sku) params.set('sku', state.sku);
     if (Object.keys(state.variants).length > 0) {
@@ -1008,4 +1013,5 @@ window.resetVariants = resetVariants;
 window.applyRecommended = applyRecommended;
 window.shareProduct = shareProduct;
 window.populateDetailPanel = populateDetailPanel;
-window.updateQRCode = updateQRCode; // Export new function
+window.updateQRCode = updateARandQR; // Export new function (Aliased for backward compatibility)
+window.updateARandQR = updateARandQR;

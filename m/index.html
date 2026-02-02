@@ -769,14 +769,20 @@
             if (!sku) {
                 const pathParts = window.location.pathname.split('/');
                 const mIndex = pathParts.indexOf('m');
-                if (mIndex !== -1 && pathParts[mIndex + 1]) sku = pathParts[mIndex + 1];
+                // index.html kontrolü: dosya adı SKU olarak algılanmamalı
+                if (mIndex !== -1 && pathParts[mIndex + 1]) {
+                    const val = pathParts[mIndex + 1];
+                    if (val && val.toLowerCase() !== 'index.html') {
+                        sku = val;
+                    }
+                }
             }
             return { sku, config: params.get('config') };
         }
 
         async function init() {
             const { sku, config } = getUrlParams();
-            if (!sku) { showError('Ürün bulunamadı', 'URL\'de geçerli bir SKU yok.'); return; }
+            if (!sku) { showError('Ürün bulunamadı', 'URL\'de geçerli bir SKU bulunamadı (parametre eksik). Lütfen QR kodu tekrar oluşturup taratın.'); return; }
             try {
                 const response = await fetch('/products.json');
                 allData = await response.json();
@@ -785,7 +791,7 @@
                     const p = cat.products.find(x => x && x.sku && x.sku.toString() === sku.toString());
                     if (p) { foundProduct = p; break; }
                 }
-                if (!foundProduct) { showError('Ürün bulunamadı', `"${sku}" SKU'lu ürün mevcut değil.`); return; }
+                if (!foundProduct) { showError('Ürün bulunamadı', `"${sku}" SKU kodlu ürün veritabanında bulunamadı.`); return; }
                 selectedProduct = foundProduct;
                 loadProduct(foundProduct);
                 if (config) {
