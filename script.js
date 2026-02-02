@@ -236,7 +236,9 @@ function selectProduct(product) {
             stageWrapper.appendChild(mobileBackBtn);
         }
     }
-    if (mobileBackBtn) mobileBackBtn.style.display = 'flex';
+    if (mobileBackBtn) {
+        mobileBackBtn.style.display = window.innerWidth <= 900 ? 'flex' : 'none';
+    }
 
     setupVariantTabs(product);
 
