@@ -51,7 +51,6 @@ body {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     z-index: 10;
     overflow: hidden;
-    transform: translateZ(0); /* Fix for ghosting/repaint issues */
 }
 
 #brand-header {
@@ -831,10 +830,6 @@ model-viewer::part(default-ar-button) {
 @media (min-width: 901px) {
     #ar-area {
         display: none;
-    }
-
-    #mobile-back-btn {
-        display: none !important;
     }
 
     #desc-toggle-btn {
