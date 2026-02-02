@@ -784,16 +784,8 @@
             const { sku, config } = getUrlParams();
             if (!sku) { showError('Ürün bulunamadı', 'URL\'de geçerli bir SKU bulunamadı (parametre eksik). Lütfen QR kodu tekrar oluşturup taratın.'); return; }
             try {
-                // Veriyi çekmeye çalış (Göreceli yol kullanımı daha güvenli)
-                let response;
-                try {
-                    response = await fetch('../products.json');
-                    if (!response.ok) throw new Error('Root fetch failed');
-                } catch (err) {
-                    // Fallback: Absolute path
-                    console.log('Relative fetch failed, trying absolute...');
-                    response = await fetch('/products.json');
-                }
+                // Veriyi çek (Yedek dosyadaki orijinal yöntem)
+                const response = await fetch('/products.json');
 
                 if (!response.ok) {
                     throw new Error(`HTTP hatası! Durum: ${response.status}`);
@@ -822,7 +814,9 @@
 
         function loadProduct(product) {
             document.getElementById('panel-product-name').textContent = product.name;
-            document.getElementById('panel-product-description').textContent = product.description || '';
+            document.getElementById('panel-product-name').textContent = product.name;
+            const descEl = document.getElementById('panel-product-description');
+            if (descEl) descEl.textContent = product.description || '';
             document.getElementById('ar-product-name').textContent = `${product.name} modelini gerçek ortamınızda deneyimleyin.`;
             const buyLink = document.getElementById('panel-buy-link');
             if (buyLink && product.listingUrl) buyLink.href = product.listingUrl;
