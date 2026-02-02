@@ -107,10 +107,6 @@
             z-index: 50;
         }
 
-        model-viewer::part(default-ar-button) {
-            display: none;
-        }
-
         #detail-panel.collapsed {
             height: 60px !important;
             overflow: hidden;
@@ -152,6 +148,7 @@
             border-color: var(--accent-color);
             color: #ffffff;
             box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+            transform: rotate(-90deg);
         }
 
         #panel-sticky-header {
@@ -236,34 +233,16 @@
             overflow: hidden;
         }
 
-        /* Tab style for variants */
-        #mobile-variant-tabs {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            scrollbar-width: none;
-            padding: 0 4px 12px 4px;
-            margin-bottom: 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .mobile-variant-tab {
-            padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: #94a3b8;
-            font-size: 13px;
+        .desc-toggle-btn {
+            display: none;
+            margin-top: 8px;
+            background: none;
+            border: none;
+            color: #fbbf24;
+            font-size: 12px;
             font-weight: 600;
-            white-space: nowrap;
             cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .mobile-variant-tab.active {
-            background: var(--accent-color);
-            color: white;
-            border-color: var(--accent-color);
+            padding: 0;
         }
 
         .accordion {
@@ -633,18 +612,64 @@
                     <h2 id="panel-product-name">Yükleniyor...</h2>
                 </div>
                 <div id="panel-tabs">
-                    <button class="panel-tab active" data-tab="varyasyon">Varyasyon</button>
+                    <button class="panel-tab active" data-tab="bilgi">Bilgi</button>
+                    <button class="panel-tab" data-tab="varyasyon">Varyasyon</button>
                     <button class="panel-tab" data-tab="ar">AR</button>
                 </div>
             </div>
             <div id="panel-content-scroll">
-                <div id="tab-varyasyon" class="tab-content active">
-                    <div class="variant-actions"><button class="btn-action" onclick="resetVariants()">�
+                <div id="tab-bilgi" class="tab-content active">
+                    <p id="panel-product-description" class="panel-product-desc-collapsed"></p>
+                    <button id="panel-product-desc-toggle" class="desc-toggle-btn"
+                        onclick="toggleProductDesc()">Devamını gör</button>
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <button class="accordion-header"><span>📏 Boyutlar</span><svg width="12" height="12"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg></button>
+                            <div class="accordion-content">
+                                <p>Genişlik: 100cm<br>Yükseklik: 200cm<br>Derinlik: 40cm</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header"><span>🧱 Malzemeler</span><svg width="12" height="12"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg></button>
+                            <div class="accordion-content">
+                                <p>18mm ahşap kontrplak, su bazlı vernik kaplama</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header"><span>🔧 Montaj</span><svg width="12" height="12"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg></button>
+                            <div class="accordion-content">
+                                <p>Kolay montaj, tüm bağlantı parçaları dahildir.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="#" id="panel-buy-link" class="btn-primary" target="_blank">Etsy'de İncele <svg
+                                width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg></a>
+                        <button class="btn-secondary" onclick="shareProduct()"><svg width="16" height="16"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                                <polyline points="16 6 12 2 8 6"></polyline>
+                                <line x1="12" y1="2" x2="12" y2="15"></line>
+                            </svg> Paylaş</button>
+                    </div>
+                </div>
+                <div id="tab-varyasyon" class="tab-content">
+                    <div class="variant-actions"><button class="btn-action" onclick="resetVariants()">🔄
                             Sıfırla</button></div>
-
-                    <!-- Yeni Yatay Tab Yapısı -->
-                    <div id="mobile-variant-tabs"></div>
-
                     <div id="variant-accordion-container"></div>
                     <div id="config-card" class="config-card">
                         <div class="config-header"><span>🛠️</span>
@@ -743,7 +768,12 @@
 
         function loadProduct(product) {
             document.getElementById('panel-product-name').textContent = product.name;
+            document.getElementById('panel-product-description').textContent = product.description || '';
             document.getElementById('ar-product-name').textContent = `${product.name} modelini gerçek ortamınızda deneyimleyin.`;
+            const buyLink = document.getElementById('panel-buy-link');
+            if (buyLink && product.listingUrl) buyLink.href = product.listingUrl;
+            const descToggle = document.getElementById('panel-product-desc-toggle');
+            if (descToggle) descToggle.style.display = product.description && product.description.length > 100 ? 'inline-block' : 'none';
             const masterUrl = product.masterModel ? product.masterModel : `/api/engine?sku=${product.sku}`;
             loadModel(masterUrl);
             setupVariants(product);
@@ -760,12 +790,7 @@
                 viewer.src = finalUrl;
                 viewer.addEventListener('load', () => {
                     loader.classList.add('hidden');
-
-                    // Check if we have a config in URL
-                    const { config } = getUrlParams();
-
-                    // Only apply defaults if NO config is present
-                    if (!config && selectedProduct && selectedProduct.variantGroups) {
+                    if (selectedProduct && selectedProduct.variantGroups) {
                         selectedProduct.variantGroups.forEach(g => {
                             if (g.items[0] && g.items[0].textureConfig) applyTextureConfig(g.items[0].textureConfig);
                         });
@@ -775,87 +800,54 @@
         }
 
         function setupVariants(product) {
-            const tabsContainer = document.getElementById('mobile-variant-tabs');
             const accordionContainer = document.getElementById('variant-accordion-container');
             const configCard = document.getElementById('config-card');
             const configList = document.getElementById('config-list');
-
             if (!product.variantGroups || product.variantGroups.length === 0) {
                 accordionContainer.innerHTML = '<div class="no-variants-message"><div class="icon">🎨</div><p>Bu ürün için varyasyon seçeneği bulunmuyor.</p></div>';
                 configCard.style.display = 'none';
-                if (tabsContainer) tabsContainer.style.display = 'none';
                 return;
             }
-
-            if (tabsContainer) tabsContainer.style.display = 'flex';
-            tabsContainer.innerHTML = '';
             accordionContainer.innerHTML = '';
             configList.innerHTML = '';
-
             product.variantGroups.forEach((group, index) => {
-                // 1. Create Tab Button
-                const tabBtn = document.createElement('button');
-                tabBtn.className = 'mobile-variant-tab' + (index === 0 ? ' active' : '');
-                tabBtn.textContent = group.groupName;
-                tabBtn.onclick = () => {
-                    // Switch Tab Active State
-                    document.querySelectorAll('.mobile-variant-tab').forEach(t => t.classList.remove('active'));
-                    tabBtn.classList.add('active');
-
-                    // Show Corresponding Content Area
-                    document.querySelectorAll('.variant-content-area').forEach((area, i) => {
-                        if (i === index) area.style.display = 'block';
-                        else area.style.display = 'none';
-                    });
-                };
-                tabsContainer.appendChild(tabBtn);
-
-                // 2. Create Content Area (formerly accordion item content)
-                const contentArea = document.createElement('div');
-                contentArea.className = 'variant-content-area';
-                contentArea.style.display = index === 0 ? 'block' : 'none';
-
+                const accordionItem = document.createElement('div');
+                accordionItem.className = 'accordion-item variant-accordion-item' + (index === 0 ? ' open' : '');
+                const accordionHeader = document.createElement('button');
+                accordionHeader.className = 'accordion-header';
+                accordionHeader.innerHTML = `<span>${group.groupName}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+                const accordionContent = document.createElement('div');
+                accordionContent.className = 'accordion-content';
+                if (index === 0) accordionContent.style.height = 'auto';
                 const swatchesContainer = document.createElement('div');
                 swatchesContainer.className = 'color-swatches';
-
                 group.items.forEach((item, itemIndex) => {
                     const swatchItem = document.createElement('div');
                     swatchItem.className = 'swatch-item' + (itemIndex === 0 ? ' active' : '');
                     swatchItem.dataset.groupName = group.groupName;
                     swatchItem.dataset.variantName = item.name;
-
                     const swatch = document.createElement('div');
                     swatch.className = 'swatch';
                     if (item.type === 'color') swatch.style.backgroundColor = item.value;
                     else { swatch.style.backgroundImage = `url('${item.value}')`; swatch.style.backgroundSize = 'cover'; }
-
-                    if (item.value === '#ffffff' || item.value === '#fff' || item.name.toLowerCase().includes('beyaz')) {
-                        swatch.style.border = '1px solid #ddd';
-                    }
-
+                    if (item.value === '#ffffff' || item.value === '#fff' || item.name.toLowerCase().includes('beyaz')) swatch.style.border = '1px solid #ddd';
                     swatch.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-
                     const label = document.createElement('span');
                     label.textContent = item.name.split('(')[0].trim();
-
                     swatchItem.onclick = () => {
-                        // Remove active from content area's swatches
-                        contentArea.querySelectorAll('.swatch-item').forEach(s => s.classList.remove('active'));
+                        accordionContent.querySelectorAll('.swatch-item').forEach(s => s.classList.remove('active'));
                         swatchItem.classList.add('active');
-
                         updateConfigItem(group.groupName, item.name);
                         if (item.textureConfig) applyTextureConfig(item.textureConfig);
                     };
-
                     swatchItem.appendChild(swatch);
                     swatchItem.appendChild(label);
                     swatchesContainer.appendChild(swatchItem);
                 });
-
-                contentArea.appendChild(swatchesContainer);
-                accordionContainer.appendChild(contentArea);
-
-                // Config Item Init
+                accordionContent.appendChild(swatchesContainer);
+                accordionItem.appendChild(accordionHeader);
+                accordionItem.appendChild(accordionContent);
+                accordionContainer.appendChild(accordionItem);
                 const configItem = document.createElement('div');
                 configItem.className = 'config-item';
                 configItem.dataset.groupName = group.groupName;
@@ -889,42 +881,16 @@
         function applyConfig(config) {
             let attempts = 0;
             const tryApply = () => {
-                // Wait for model to load
-                if (!viewer.model && attempts < 20) { attempts++; setTimeout(tryApply, 300); return; }
-
-                // Wait for swatches to be rendered
+                if (!viewer.model && attempts < 15) { attempts++; setTimeout(tryApply, 300); return; }
                 const swatches = document.querySelectorAll('.swatch-item');
-                if (swatches.length === 0 && attempts < 20) { attempts++; setTimeout(tryApply, 300); return; }
-
-                console.log('Applying config:', config);
-
+                if (swatches.length === 0 && attempts < 15) { attempts++; setTimeout(tryApply, 300); return; }
                 Object.keys(config).forEach(groupName => {
                     const variantName = config[groupName];
-                    // Find the swatch matching the group and variant name
-                    const targetSwatch = Array.from(swatches).find(s =>
-                        s.dataset.groupName === groupName &&
-                        (s.dataset.variantName === variantName || s.dataset.variantName.includes(variantName))
-                    );
-
-                    if (targetSwatch) {
-                        // Force click even if hidden
-                        targetSwatch.click();
-
-                        // Optional: Switch tab to this group so user sees the change? 
-                        // Let's do it for the last one or all to ensure DOM is active
-                        const contentArea = targetSwatch.closest('.variant-content-area');
-                        if (contentArea && contentArea.style.display === 'none') {
-                            // Find corresponding tab and click it?
-                            // No, just let the click handler do the work on the model. 
-                            // We don't want to rapidly switch tabs visually.
-                        }
-                    } else {
-                        console.warn('Matching swatch not found for:', groupName, variantName);
-                    }
+                    const targetSwatch = Array.from(swatches).find(s => s.dataset.groupName === groupName && s.dataset.variantName.includes(variantName));
+                    if (targetSwatch && !targetSwatch.classList.contains('active')) targetSwatch.click();
                 });
             };
-            // Increased initial delay slightly to ensure DOM is ready
-            setTimeout(tryApply, 800);
+            setTimeout(tryApply, 500);
         }
 
         function resetVariants() {
@@ -933,35 +899,20 @@
                 if (group.items[0]) {
                     if (group.items[0].textureConfig) applyTextureConfig(group.items[0].textureConfig);
                     updateConfigItem(group.groupName, group.items[0].name);
-
-                    // Update Active Swatches
-                    const contentAreas = document.querySelectorAll('.variant-content-area');
-                    if (contentAreas[groupIndex]) {
-                        contentAreas[groupIndex].querySelectorAll('.swatch-item').forEach((s, i) => s.classList.toggle('active', i === 0));
+                    const accordionItems = document.querySelectorAll('#variant-accordion-container .accordion-item');
+                    if (accordionItems[groupIndex]) {
+                        accordionItems[groupIndex].querySelectorAll('.swatch-item').forEach((s, i) => s.classList.toggle('active', i === 0));
                     }
                 }
             });
-
-            // Reset Tabs to first one
-            const tabs = document.querySelectorAll('.mobile-variant-tab');
-            if (tabs.length > 0) {
-                tabs.forEach(t => t.classList.remove('active'));
-                tabs[0].classList.add('active');
-                document.querySelectorAll('.variant-content-area').forEach((a, i) => a.style.display = i === 0 ? 'block' : 'none');
-            }
         }
 
-        function togglePanelCollapse() {
-            const panel = document.getElementById('detail-panel');
-            const btn = document.getElementById('panel-close-btn');
-
-            if (panel.classList.contains('collapsed')) {
-                panel.classList.remove('collapsed');
-                btn.innerHTML = '›';
-            } else {
-                panel.classList.add('collapsed');
-                btn.innerHTML = '🛠️';
-            }
+        function togglePanelCollapse() { document.getElementById('detail-panel').classList.toggle('collapsed'); }
+        function toggleProductDesc() {
+            const desc = document.getElementById('panel-product-description');
+            const btn = document.getElementById('panel-product-desc-toggle');
+            if (desc.classList.contains('panel-product-desc-collapsed')) { desc.classList.remove('panel-product-desc-collapsed'); btn.textContent = 'Daha az'; }
+            else { desc.classList.add('panel-product-desc-collapsed'); btn.textContent = 'Devamını gör'; }
         }
         function activateAR() { if (viewer.canActivateAR) viewer.activateAR(); else alert('AR bu cihazda desteklenmiyor.'); }
         function shareProduct() {
@@ -1003,6 +954,7 @@
         });
 
         window.togglePanelCollapse = togglePanelCollapse;
+        window.toggleProductDesc = toggleProductDesc;
         window.shareProduct = shareProduct;
         window.resetVariants = resetVariants;
         window.activateAR = activateAR;
