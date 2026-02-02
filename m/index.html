@@ -691,62 +691,12 @@
                     <h2 id="panel-product-name">Yükleniyor...</h2>
                 </div>
                 <div id="panel-tabs">
-                    <button class="panel-tab active" data-tab="bilgi">Bilgi</button>
-                    <button class="panel-tab" data-tab="varyasyon">Varyasyon</button>
+                    <button class="panel-tab active" data-tab="varyasyon">Varyasyon</button>
                     <button class="panel-tab" data-tab="ar">AR</button>
                 </div>
             </div>
             <div id="panel-content-scroll">
-                <div id="tab-bilgi" class="tab-content active">
-                    <p id="panel-product-description" class="panel-product-desc-collapsed"></p>
-                    <button id="panel-product-desc-toggle" class="desc-toggle-btn"
-                        onclick="toggleProductDesc()">Devamını gör</button>
-                    <div class="accordion">
-                        <div class="accordion-item">
-                            <button class="accordion-header"><span>📏 Boyutlar</span><svg width="12" height="12"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="6 9 12 15 18 9"></polyline>
-                                </svg></button>
-                            <div class="accordion-content">
-                                <p>Genişlik: 100cm<br>Yükseklik: 200cm<br>Derinlik: 40cm</p>
-                            </div>
-                        </div>
-                        <div class="accordion-item">
-                            <button class="accordion-header"><span>🧱 Malzemeler</span><svg width="12" height="12"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="6 9 12 15 18 9"></polyline>
-                                </svg></button>
-                            <div class="accordion-content">
-                                <p>18mm ahşap kontrplak, su bazlı vernik kaplama</p>
-                            </div>
-                        </div>
-                        <div class="accordion-item">
-                            <button class="accordion-header"><span>🔧 Montaj</span><svg width="12" height="12"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="6 9 12 15 18 9"></polyline>
-                                </svg></button>
-                            <div class="accordion-content">
-                                <p>Kolay montaj, tüm bağlantı parçaları dahildir.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="action-buttons">
-                        <a href="#" id="panel-buy-link" class="btn-primary" target="_blank">Etsy'de İncele <svg
-                                width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                <polyline points="15 3 21 3 21 9"></polyline>
-                                <line x1="10" y1="14" x2="21" y2="3"></line>
-                            </svg></a>
-                        <button class="btn-secondary" onclick="shareProduct()"><svg width="16" height="16"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                                <polyline points="16 6 12 2 8 6"></polyline>
-                                <line x1="12" y1="2" x2="12" y2="15"></line>
-                            </svg> Paylaş</button>
-                    </div>
-                </div>
-                <div id="tab-varyasyon" class="tab-content">
+                <div id="tab-varyasyon" class="tab-content active">
                     <div class="variant-actions"><button class="btn-action" onclick="resetVariants()">🔄
                             Sıfırla</button></div>
                     <!-- New Tab Container -->
@@ -888,17 +838,24 @@
             const configCard = document.getElementById('config-card');
             const configList = document.getElementById('config-list');
 
+            // 1. Strict Cleanup - Always clear everything first
+            accordionContainer.innerHTML = '';
+            configList.innerHTML = '';
+            if (tabsContainer) {
+                tabsContainer.innerHTML = '';
+                tabsContainer.style.display = 'none';
+            }
+            if (configCard) configCard.style.display = 'none';
+
+            // 2. No Variants Check
             if (!product.variantGroups || product.variantGroups.length === 0) {
                 accordionContainer.innerHTML = '<div class="no-variants-message"><div class="icon">🎨</div><p>Bu ürün için varyasyon seçeneği bulunmuyor.</p></div>';
-                configCard.style.display = 'none';
-                if (tabsContainer) tabsContainer.style.display = 'none';
                 return;
             }
 
+            // 3. Setup for Variants
             if (tabsContainer) tabsContainer.style.display = 'flex';
-            accordionContainer.innerHTML = '';
-            tabsContainer.innerHTML = '';
-            configList.innerHTML = '';
+            if (configCard) configCard.style.display = 'block';
 
             product.variantGroups.forEach((group, index) => {
                 // 1. Create Tab Button
