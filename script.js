@@ -904,14 +904,25 @@ function handleDeepLink() {
 function applyDeepLinkConfig(config) {
     console.log('[DeepLink] Applying config...', config);
     // Wait a bit for DOM to be ready inside panel
-    // Increased timeout slightly to ensure accordions are rendered
-    setTimeout(() => {
+    // Retry mechanism to ensure accordions are rendered
+    let attempts = 0;
+    const maxAttempts = 5;
+
+    const tryApply = () => {
+        let allFound = true;
+        const headers = Array.from(document.querySelectorAll('.accordion-header span'));
+
+        if (headers.length === 0 && attempts < maxAttempts) {
+            attempts++;
+            setTimeout(tryApply, 500);
+            return;
+        }
+
         Object.keys(config).forEach(groupName => {
             const variantName = config[groupName];
 
             // Find accordion item for this group
             // Use contains matching to be safer against whitespace
-            const headers = Array.from(document.querySelectorAll('.accordion-header span'));
             const header = headers.find(h => h.textContent.includes(groupName));
 
             if (header) {
@@ -930,13 +941,17 @@ function applyDeepLinkConfig(config) {
                         targetSwatch.click();
                     } else {
                         console.warn('[DeepLink] Swatch not found:', variantName);
+                        allFound = false;
                     }
                 }
             } else {
                 console.warn('[DeepLink] Group header not found:', groupName);
+                allFound = false;
             }
         });
-    }, 800);
+    };
+
+    setTimeout(tryApply, 800);
 }
 
 // Export functions for global use
