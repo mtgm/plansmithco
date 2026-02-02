@@ -292,6 +292,10 @@ function setupVariantTabs(product) {
         const accordionContainer = document.getElementById('variant-accordion-container');
         if (accordionContainer) accordionContainer.innerHTML = '';
 
+        // Clear mobile tabs container (Fix for ghost tabs)
+        const mobileTabsContainer = document.getElementById('mobile-variant-tabs');
+        if (mobileTabsContainer) mobileTabsContainer.innerHTML = '';
+
         // Clear configuration display
         const configList = document.querySelector('.config-list');
         if (configList) configList.innerHTML = '';
