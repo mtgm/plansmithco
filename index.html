@@ -256,6 +256,12 @@
                         <p>Modüler Kutu Sistemi modelini gerçek ortamınızda deneyimleyin. Ürünü evinize veya ofisinize
                             yerleştirin.
                         </p>
+
+                        <!-- Desktop QR Code Area -->
+                        <div id="ar-qr-container">
+                            <div id="qrcode"></div>
+                            <span class="qr-hint">Mobilde açmak için tarayın</span>
+                        </div>
                     </div>
                     <button class="btn-ar" onclick="activateAR()">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
@@ -304,6 +310,8 @@
     </div>
 
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 
     <script src="script.js"></script>
 </body>

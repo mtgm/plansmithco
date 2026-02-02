@@ -22,6 +22,7 @@ fetch('products.json')
         allData = data;
         renderCategories(allData);
         loader.style.opacity = '0';
+        handleDeepLink(); // Check for URL params
     });
 
 function renderCategories(categories) {
@@ -243,6 +244,9 @@ function selectProduct(product) {
     loadMasterModel(masterUrl);
 
     populateDetailPanel(product);
+
+    // Generate initial QR
+    setTimeout(updateARQRCode, 500);
 }
 
 // NEW: Close Mobile Product View (Return to List)
@@ -402,6 +406,9 @@ function renderPartToggles(variantGroups) {
 
                 // Update configuration display
                 updateConfigItem(group.groupName, item.name);
+
+                // Update QR Code with new config
+                updateARQRCode();
             };
 
             swatchItem.appendChild(swatch);
@@ -788,6 +795,116 @@ function populateDetailPanel(product) {
     // Show the panel
     showDetailPanel();
 }
+// ========================================
+// QR CODE & DEEP LINKING SYSTEM
+// ========================================
+
+let qrCodeObj = null;
+
+function updateARQRCode() {
+    const qrContainer = document.getElementById('qrcode');
+    if (!qrContainer || !selectedProduct) return;
+
+    // 1. Capture Current State
+    const state = {
+        sku: selectedProduct.sku,
+        variants: {}
+    };
+
+    // Iterate through active swatches to find selected variants
+    document.querySelectorAll('.variant-accordion-item').forEach(item => {
+        const groupName = item.querySelector('.accordion-header span')?.textContent;
+        const activeSwatch = item.querySelector('.swatch-item.active span');
+        if (groupName && activeSwatch) {
+            state.variants[groupName.trim()] = activeSwatch.textContent.trim();
+        }
+    });
+
+    // 2. Build URL
+    const baseUrl = window.location.origin + window.location.pathname;
+    const params = new URLSearchParams();
+    if (state.sku) params.set('sku', state.sku);
+    if (Object.keys(state.variants).length > 0) {
+        params.set('config', JSON.stringify(state.variants));
+    }
+
+    // Add timestamp to force uniqueness if needed
+    const finalUrl = `${baseUrl}?${params.toString()}`;
+    console.log('QR Generated for:', finalUrl);
+
+    // 3. Render QR
+    qrContainer.innerHTML = ''; // Clear previous
+    qrCodeObj = new QRCode(qrContainer, {
+        text: finalUrl,
+        width: 160,
+        height: 160,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+    });
+}
+
+// Deep Linking Handler (Call this on window load)
+function handleDeepLink() {
+    const params = new URLSearchParams(window.location.search);
+    const sku = params.get('sku');
+    const configStr = params.get('config');
+
+    if (sku && allData.length > 0) {
+        // Find product across all categories
+        let foundProduct = null;
+        for (const cat of allData) {
+            const p = cat.products.find(x => x.sku === sku);
+            if (p) {
+                foundProduct = p;
+                renderCategories(allData); // Ensure data is ready 
+                openCategory(cat);
+                break;
+            }
+        }
+
+        if (foundProduct) {
+            selectProduct(foundProduct);
+
+            // Apply Variants if config exists
+            if (configStr) {
+                try {
+                    const config = JSON.parse(configStr);
+                    applyDeepLinkConfig(config);
+                } catch (e) {
+                    console.error('Error parsing config:', e);
+                }
+            }
+        }
+    }
+}
+
+function applyDeepLinkConfig(config) {
+    // Wait a bit for DOM to be ready inside panel
+    setTimeout(() => {
+        Object.keys(config).forEach(groupName => {
+            const variantName = config[groupName];
+
+            // Find accordion item for this group
+            const headers = Array.from(document.querySelectorAll('.accordion-header span'));
+            const header = headers.find(h => h.textContent.trim() === groupName);
+
+            if (header) {
+                const accordionItem = header.closest('.accordion-item');
+                if (accordionItem) {
+                    // Find swatch with this name
+                    const swatches = Array.from(accordionItem.querySelectorAll('.swatch-item'));
+                    const targetSwatch = swatches.find(s => s.querySelector('span').textContent.trim() === variantName);
+
+                    if (targetSwatch) {
+                        targetSwatch.click();
+                    }
+                }
+            }
+        });
+    }, 500);
+}
+
 // Export functions for global use
 window.showDetailPanel = showDetailPanel;
 window.closeDetailPanel = closeDetailPanel;
