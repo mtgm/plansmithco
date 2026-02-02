@@ -1065,6 +1065,17 @@ model-viewer::part(default-ar-button) {
     #variant-accordion-container .accordion-content {
         padding-top: 4px;
     }
+
+    /* Sticky Header Container */
+    #panel-sticky-header {
+        flex-shrink: 0;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 2px solid #e2e8f0;
+        z-index: 100;
+        border-radius: 16px 16px 0 0;
+    }
 }
 
 
@@ -1172,7 +1183,6 @@ model-viewer::part(default-ar-button) {
     border-bottom: 2px solid #e2e8f0;
     z-index: 100;
     opacity: 1;
-    border-radius: 20px 20px 0 0;
 }
 
 /* Panel Header - Product Title */
