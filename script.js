@@ -296,12 +296,44 @@ function setupVariantTabs(product) {
 // NEW: Render variant groups as accordion items
 function renderPartToggles(variantGroups) {
     const accordionContainer = document.getElementById('variant-accordion-container');
+    const mobileTabsContainer = document.getElementById('mobile-variant-tabs');
+
     if (!accordionContainer) return;
 
     accordionContainer.innerHTML = '';
+    if (mobileTabsContainer) mobileTabsContainer.innerHTML = '';
 
     variantGroups.forEach((group, index) => {
-        // Create accordion item
+        // --- 1. Create Mobile Tab ---
+        if (mobileTabsContainer) {
+            const tabBtn = document.createElement('button');
+            tabBtn.className = 'mobile-variant-tab';
+            if (index === 0) tabBtn.classList.add('active');
+            tabBtn.textContent = group.groupName;
+
+            tabBtn.onclick = () => {
+                // Initial Switch Logic
+                // 1. Update Tab Active State
+                mobileTabsContainer.querySelectorAll('.mobile-variant-tab').forEach(t => t.classList.remove('active'));
+                tabBtn.classList.add('active');
+
+                // 2. Open Corresponding Accordion Item (and close others for Tab UX)
+                const allItems = accordionContainer.querySelectorAll('.accordion-item');
+                allItems.forEach((item, i) => {
+                    const content = item.querySelector('.accordion-content');
+                    if (i === index) {
+                        item.classList.add('open');
+                        if (content) content.style.height = 'auto'; // Force visible on mobile
+                    } else {
+                        item.classList.remove('open');
+                        if (content) content.style.height = '0px';
+                    }
+                });
+            };
+            mobileTabsContainer.appendChild(tabBtn);
+        }
+
+        // --- 2. Create Accordion Item ---
         const accordionItem = document.createElement('div');
         accordionItem.className = 'accordion-item variant-accordion-item';
         if (index === 0) accordionItem.classList.add('open'); // First item open by default
