@@ -246,7 +246,8 @@ function selectProduct(product) {
     populateDetailPanel(product);
 
     // Generate initial QR
-    setTimeout(updateQRCode, 500);
+    // Generate initial QR
+    setTimeout(() => updateARandQR(null), 500);
 }
 
 // NEW: Close Mobile Product View (Return to List)
@@ -400,15 +401,17 @@ function renderPartToggles(variantGroups) {
                 swatchItem.classList.add('active');
 
                 // Apply texture to model
-                if (item.textureConfig) {
-                    applyTextureConfig(item.textureConfig);
-                }
-
                 // Update configuration display
                 updateConfigItem(group.groupName, item.name);
 
-                // Update QR Code with new config
-                updateQRCode();
+                // Wrapper: Apply Texture & Update QR
+                // This replaces the direct calls to applyTextureConfig and updateQRCode
+                if (item.textureConfig) {
+                    updateARandQR(item.textureConfig);
+                } else {
+                    // Even if no texture config (e.g. just color), update QR
+                    updateARandQR(null);
+                }
             };
 
             swatchItem.appendChild(swatch);
@@ -799,20 +802,29 @@ function populateDetailPanel(product) {
 // QR CODE & DEEP LINKING SYSTEM
 // ========================================
 
+// ========================================
+// QR CODE & DEEP LINKING SYSTEM
+// ========================================
+
 let qrCodeObj = null;
 
-// Renamed to match user request
-function updateQRCode() {
-    const qrContainer = document.getElementById('qrcode');
+// Wrapper Function (User Request)
+async function updateARandQR(configs) {
+    // 1. Call Original Function (if configs exist)
+    if (configs) {
+        await applyTextureConfig(configs);
+    }
+
+    // 2. Generate QR Code Logic
+    const qrContainer = document.getElementById('ar-qr-code'); // ID updated per request
     if (!qrContainer || !selectedProduct) return;
 
-    // 1. Capture Current State
+    // Capture Full State (More robust than just passing 'configs')
     const state = {
         sku: selectedProduct.sku,
         variants: {}
     };
 
-    // Iterate through active swatches to find selected variants
     document.querySelectorAll('.variant-accordion-item').forEach(item => {
         const groupName = item.querySelector('.accordion-header span')?.textContent;
         const activeSwatch = item.querySelector('.swatch-item.active span');
@@ -821,7 +833,7 @@ function updateQRCode() {
         }
     });
 
-    // 2. Build URL
+    // Build URL
     const baseUrl = window.location.origin + window.location.pathname;
     const params = new URLSearchParams();
     if (state.sku) params.set('sku', state.sku);
@@ -829,12 +841,10 @@ function updateQRCode() {
         params.set('config', JSON.stringify(state.variants));
     }
 
-    // Add timestamp to force uniqueness if needed
     const finalUrl = `${baseUrl}?${params.toString()}`;
-    // console.log('QR Generated for:', finalUrl);
 
-    // 3. Render QR
-    qrContainer.innerHTML = ''; // Clear previous
+    // Render QR
+    qrContainer.innerHTML = '';
     qrCodeObj = new QRCode(qrContainer, {
         text: finalUrl,
         width: 160,
@@ -844,6 +854,7 @@ function updateQRCode() {
         correctLevel: QRCode.CorrectLevel.M
     });
 }
+
 
 // Deep Linking Handler (Call this on window load)
 function handleDeepLink() {
