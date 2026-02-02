@@ -236,7 +236,7 @@ function selectProduct(product) {
             stageWrapper.appendChild(mobileBackBtn);
         }
     }
-    if (mobileBackBtn) mobileBackBtn.style.display = 'flex';
+    // if (mobileBackBtn) mobileBackBtn.style.display = 'flex'; // Removed to allow CSS control
 
     setupVariantTabs(product);
 
