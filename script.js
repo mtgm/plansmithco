@@ -846,63 +846,97 @@ function updateARQRCode() {
 
 // Deep Linking Handler (Call this on window load)
 function handleDeepLink() {
+    console.log('[DeepLink] Checking for params...');
     const params = new URLSearchParams(window.location.search);
     const sku = params.get('sku');
     const configStr = params.get('config');
 
-    if (sku && allData.length > 0) {
+    if (!sku) {
+        console.log('[DeepLink] No SKU found in URL.');
+        return;
+    }
+
+    console.log('[DeepLink] SKU found:', sku);
+
+    if (allData.length > 0) {
         // Find product across all categories
         let foundProduct = null;
+        let foundCategory = null;
+
         for (const cat of allData) {
-            const p = cat.products.find(x => x.sku === sku);
+            // Loose comparison for SKU to be safe
+            const p = cat.products.find(x => x && x.sku && x.sku.toString() === sku.toString());
             if (p) {
                 foundProduct = p;
-                renderCategories(allData); // Ensure data is ready 
-                openCategory(cat);
+                foundCategory = cat;
                 break;
             }
         }
 
         if (foundProduct) {
+            console.log('[DeepLink] Product found:', foundProduct.name);
+
+            // 1. Ensure UI is ready (Category View)
+            renderCategories(allData);
+            openCategory(foundCategory);
+
+            // 2. Select Product (Opens Model View)
             selectProduct(foundProduct);
 
-            // Apply Variants if config exists
+            // 3. Apply Variants if config exists
             if (configStr) {
+                console.log('[DeepLink] Config found:', configStr);
                 try {
                     const config = JSON.parse(configStr);
                     applyDeepLinkConfig(config);
                 } catch (e) {
-                    console.error('Error parsing config:', e);
+                    console.error('[DeepLink] Error parsing config JSON:', e);
                 }
             }
+        } else {
+            console.warn('[DeepLink] SKU not found in product list:', sku);
         }
+    } else {
+        console.warn('[DeepLink] keys allData is empty?');
     }
 }
 
 function applyDeepLinkConfig(config) {
+    console.log('[DeepLink] Applying config...', config);
     // Wait a bit for DOM to be ready inside panel
+    // Increased timeout slightly to ensure accordions are rendered
     setTimeout(() => {
         Object.keys(config).forEach(groupName => {
             const variantName = config[groupName];
 
             // Find accordion item for this group
+            // Use contains matching to be safer against whitespace
             const headers = Array.from(document.querySelectorAll('.accordion-header span'));
-            const header = headers.find(h => h.textContent.trim() === groupName);
+            const header = headers.find(h => h.textContent.includes(groupName));
 
             if (header) {
                 const accordionItem = header.closest('.accordion-item');
                 if (accordionItem) {
                     // Find swatch with this name
                     const swatches = Array.from(accordionItem.querySelectorAll('.swatch-item'));
-                    const targetSwatch = swatches.find(s => s.querySelector('span').textContent.trim() === variantName);
+                    const targetSwatch = swatches.find(s => {
+                        const label = s.querySelector('span');
+                        return label && label.textContent.includes(variantName);
+                    });
 
                     if (targetSwatch) {
+                        console.log('[DeepLink] Clicking swatch:', variantName);
+                        // Don't just click (it toggles), force select
                         targetSwatch.click();
+                    } else {
+                        console.warn('[DeepLink] Swatch not found:', variantName);
                     }
                 }
+            } else {
+                console.warn('[DeepLink] Group header not found:', groupName);
             }
         });
-    }, 500);
+    }, 800);
 }
 
 // Export functions for global use
