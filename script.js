@@ -833,8 +833,8 @@ async function updateARandQR(configs) {
         }
     });
 
-    // Build URL
-    const baseUrl = window.location.origin + window.location.pathname;
+    // Build URL - Yönlendirme /m/ sayfasına yapılıyor (Bilgi Kartı Sayfası)
+    const baseUrl = window.location.origin + '/m/';
     const params = new URLSearchParams();
     if (state.sku) params.set('sku', state.sku);
     if (Object.keys(state.variants).length > 0) {
