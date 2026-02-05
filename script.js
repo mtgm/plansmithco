@@ -323,7 +323,7 @@ function renderPartToggles(variantGroups) {
             tabBtn.onclick = () => {
                 // Initial Switch Logic
                 // 1. Update Tab Active State
-                mobileTabsContainer.querySelectorAll('.mobile-variant-tab').forEach(t => t.classList.remove('active'));
+                if (mobileTabsContainer) mobileTabsContainer.querySelectorAll('.mobile-variant-tab').forEach(t => t.classList.remove('active'));
                 tabBtn.classList.add('active');
 
                 // 2. Open Corresponding Accordion Item (and close others for Tab UX)
@@ -332,15 +332,20 @@ function renderPartToggles(variantGroups) {
                     const content = item.querySelector('.accordion-content');
                     if (i === index) {
                         item.classList.add('open');
+                        item.classList.add('active-tab-content'); // For mobile logic if separate class used
                         if (content) content.style.height = 'auto'; // Force visible on mobile
                     } else {
                         item.classList.remove('open');
+                        item.classList.remove('active-tab-content');
                         if (content) content.style.height = '0px';
                     }
                 });
             };
             mobileTabsContainer.appendChild(tabBtn);
         }
+
+        // Check arrows after rendering (and slight delay for layout)
+        setTimeout(checkScrollArrows, 100);
 
         // --- 2. Create Accordion Item ---
         const accordionItem = document.createElement('div');
@@ -518,7 +523,10 @@ async function loadMasterModel(url) {
         defaultPoster.style.display = 'none';
 
         // ==> KRİTİK EKLEME: Model değişmese bile dokuları sıfırla!
-        resetToDefaults();
+        // 100ms gecikme ekle - Mobil versiyondaki gibi race condition önlemek için
+        setTimeout(() => {
+            resetToDefaults();
+        }, 100);
 
         return;
     }
@@ -807,16 +815,75 @@ function populateDetailPanel(product) {
 
         // Show toggle button if description is long
         const toggleBtn = document.getElementById('panel-product-desc-toggle');
-        console.log('[DEBUG] Description length:', product.description?.length);
-        console.log('[DEBUG] Toggle button found:', !!toggleBtn);
 
         if (toggleBtn) {
-            const shouldShow = (product.description && product.description.length > 0);
-            console.log('[DEBUG] Should show button:', shouldShow);
+            const shouldShow = (product.description && product.description.length > 200); // 100 -> 200 karakter
             // Inline style kullan (kategori gibi)
             toggleBtn.style.display = shouldShow ? 'inline-block' : 'none';
-            toggleBtn.textContent = 'Read more'; // English translation
-            console.log('[DEBUG] Button display:', toggleBtn.style.display);
+            toggleBtn.textContent = 'Devamını gör';
+        }
+    }
+
+    // --- NEW: Render Custom Attributes (Accordions) ---
+    // Remove existing static accordions if we generated them previously, or just append to container
+    // We assume there's a container or we create one.
+    // Let's create a dedicated container in the HTML or clear/recreate sections.
+
+    // First, find the container or create it if missing (after description)
+    // In index.html, we have <div class="accordion"> with static items via HTML. 
+    // We should clear that and render new ones.
+
+    const accordionContainer = document.querySelector('#tab-bilgi .accordion');
+    if (accordionContainer) {
+        accordionContainer.innerHTML = ''; // Clear static items
+
+        if (product.customAttributes && product.customAttributes.length > 0) {
+            product.customAttributes.forEach((attr, index) => {
+                // Header Value
+                // If value is empty, maybe skip? Or show empty? user said "custom attributes added... should be visible"
+
+                const item = document.createElement('div');
+                item.className = 'custom-attr-item'; // New class for styling
+
+                // State handling
+                let isOpen = false;
+
+                // Create Header
+                const header = document.createElement('button');
+                header.className = 'custom-attr-header';
+                header.onclick = () => {
+                    isOpen = !isOpen;
+                    item.classList.toggle('open', isOpen);
+                    content.style.height = isOpen ? content.scrollHeight + 'px' : '0px';
+                };
+
+                header.innerHTML = `
+                    <div class="custom-attr-header-left">
+                        <span class="custom-attr-icon">${attr.icon || '🔹'}</span>
+                        <span>${attr.label}</span>
+                    </div>
+                    <svg class="custom-attr-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                `;
+
+                // Create Content
+                const content = document.createElement('div');
+                content.className = 'custom-attr-content';
+
+                const inner = document.createElement('div');
+                inner.className = 'custom-attr-content-inner';
+                inner.innerHTML = attr.value.replace(/\n/g, '<br>'); // Handle multiline
+
+                content.appendChild(inner);
+                item.appendChild(header);
+                item.appendChild(content);
+                accordionContainer.appendChild(item);
+
+                // If it's the first one, maybe open it? Or keep all closed. 
+                // User didn't specify, standard accordion behavior usually closed or first open.
+                // Keeping closed to mimic 'Dimensions' etc in screenshot which seem collapsed.
+            });
         }
     }
 
@@ -1038,3 +1105,47 @@ window.shareProduct = shareProduct;
 window.populateDetailPanel = populateDetailPanel;
 window.updateQRCode = updateARandQR; // Export new function (Aliased for backward compatibility)
 window.updateARandQR = updateARandQR;
+
+// --- MOBILE TABS SCROLL LOGIC ---
+window.scrollTabs = function (direction) {
+    const container = document.getElementById('mobile-variant-tabs');
+    if (!container) return;
+    constscrollAmount = 150; // Adjust as needed
+    if (direction === 'left') {
+        container.scrollBy({ left: -150, behavior: 'smooth' });
+    } else {
+        container.scrollBy({ left: 150, behavior: 'smooth' });
+    }
+}
+
+function checkScrollArrows() {
+    const container = document.getElementById('mobile-variant-tabs');
+    const leftArrow = document.getElementById('tab-arrow-left');
+    const rightArrow = document.getElementById('tab-arrow-right');
+
+    if (!container || !leftArrow || !rightArrow) return;
+
+    // Show/Hide Left Arrow
+    if (container.scrollLeft > 10) {
+        leftArrow.style.display = 'flex';
+    } else {
+        leftArrow.style.display = 'none';
+    }
+
+    // Show/Hide Right Arrow
+    // tolerance of 5px
+    if (container.scrollWidth - container.scrollLeft - container.clientWidth > 5) {
+        rightArrow.style.display = 'flex';
+    } else {
+        rightArrow.style.display = 'none';
+    }
+}
+
+// Attach scroll listener when tabs are created or page loaded
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('mobile-variant-tabs');
+    if (container) {
+        container.addEventListener('scroll', checkScrollArrows);
+        window.addEventListener('resize', checkScrollArrows);
+    }
+});

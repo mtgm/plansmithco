@@ -109,7 +109,7 @@
                 <div id="panel-header">
                     <div class="product-title-row">
                         <h2 id="panel-product-name">Modüler Kutu Sistemi</h2>
-                        <div id="panel-product-price"
+                        <div id=""
                             style="display:none; font-size:24px; font-weight:700; color:#f59e0b; margin-top:8px;"></div>
                     </div>
                 </div>
@@ -219,7 +219,23 @@
                         </button>
                     </div>
                     <!-- Mobile Variant Tabs (Horizontal Scroll) -->
-                    <div id="mobile-variant-tabs"></div>
+                    <div class="mobile-tabs-container">
+                        <button id="tab-arrow-left" class="tab-arrow left" style="display:none;"
+                            onclick="scrollTabs('left')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="3">
+                                <polyline points="15 18 9 12 15 6"></polyline>
+                            </svg>
+                        </button>
+                        <div id="mobile-variant-tabs"></div>
+                        <button id="tab-arrow-right" class="tab-arrow right" style="display:none;"
+                            onclick="scrollTabs('right')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="3">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                        </button>
+                    </div>
 
                     <!-- Variant Accordion Container -->
                     <div id="variant-accordion-container">

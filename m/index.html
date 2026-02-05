@@ -985,6 +985,9 @@
                 configItem.innerHTML = `<span>${group.groupName}</span><span>${group.items[0] ? group.items[0].name.split('(')[0].trim() : '-'}</span>`;
                 configList.appendChild(configItem);
             });
+
+            // Check arrows after rendering
+            setTimeout(checkScrollArrows, 100);
         }
 
         function updateConfigItem(groupName, variantName) {
@@ -1101,6 +1104,55 @@
         window.shareProduct = shareProduct;
         window.resetVariants = resetVariants;
         window.activateAR = activateAR;
+        window.resetVariants = resetVariants;
+        window.activateAR = activateAR;
+
+        // --- MOBILE TABS SCROLL LOGIC ---
+        function scrollTabs(direction) {
+            const container = document.getElementById('mobile-variant-tabs');
+            if (!container) return;
+            const scrollAmount = 150; // Adjust as needed
+            if (direction === 'left') {
+                container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            } else {
+                container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
+        }
+
+        function checkScrollArrows() {
+            const container = document.getElementById('mobile-variant-tabs');
+            const leftArrow = document.getElementById('tab-arrow-left');
+            const rightArrow = document.getElementById('tab-arrow-right');
+
+            if (!container || !leftArrow || !rightArrow) return;
+
+            // Show/Hide Left Arrow
+            if (container.scrollLeft > 10) {
+                leftArrow.style.display = 'flex';
+            } else {
+                leftArrow.style.display = 'none';
+            }
+
+            // Show/Hide Right Arrow
+            // tolerance of 5px for float precision
+            if (container.scrollWidth - container.scrollLeft - container.clientWidth > 5) {
+                rightArrow.style.display = 'flex';
+            } else {
+                rightArrow.style.display = 'none';
+            }
+        }
+
+        // Attach scroll listener
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('mobile-variant-tabs');
+            if (container) {
+                container.addEventListener('scroll', checkScrollArrows);
+                window.addEventListener('resize', checkScrollArrows);
+            }
+        });
+
+        // Export for onclick
+        window.scrollTabs = scrollTabs;
     </script>
 </body>
 

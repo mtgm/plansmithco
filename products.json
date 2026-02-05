@@ -10,7 +10,7 @@
         "name": "1x2 Storage Tote Rack",
         "sku": "1X2V3",
         "thumbnail": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
-        "description": "",
+        "description": "Storage Tote Rack is a modular shelving system that allows you to stack plastic storage bins in an organized, accessible, and secure manner in warehouses, workshops, and garages. It uses space efficiently, eliminates clutter, and provides quick access to bins. Its sturdy construction is suitable for heavy loads and can be scaled as needed.",
         "listingUrl": "https://www.etsy.com/shop/PlanSmithCoDIY",
         "masterModel": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/1x2V3.glb",
         "price": 0,
@@ -80,6 +80,32 @@
             "value": "ddd"
           }
         ]
+      },
+      {
+        "id": "prod_1770322657073",
+        "name": "Yeni Ürün",
+        "sku": "1X2V3",
+        "thumbnail": "/textures/1x2V3/texture_baseColor.png",
+        "description": "Storage Tote Rack is a modular shelving system that allows you to stack plastic storage bins in an organized, accessible, and secure manner in warehouses, workshops, and garages. It uses space efficiently, eliminates clutter, and provides quick access to bins. Its sturdy construction is suitable for heavy loads and can be scaled as needed.",
+        "listingUrl": "https://www.etsy.com/shop/PlanSmithCoDIY",
+        "masterModel": "/assets-r2/models/1x2V3.glb",
+        "price": 66,
+        "variantGroups": [
+          {
+            "groupName": "Yeni",
+            "items": [
+              {
+                "name": "Yeni",
+                "value": "polished brass.001_baseColor.png",
+                "textureConfig": {
+                  "materialName": "texture.001",
+                  "baseColor": "polished brass.001_baseColor.png"
+                }
+              }
+            ]
+          }
+        ],
+        "customAttributes": []
       }
     ]
   }
