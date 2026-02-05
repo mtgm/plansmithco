@@ -7,46 +7,24 @@
     "products": [
       {
         "id": "prod_1x2_v3",
-        "name": "1x2 Storage Tote Rack",
-        "sku": "1X2V3",
+        "name": "27-Gallon Tote Rack (Single Column)-2 Bin Vertical",
+        "sku": "1X2_STR",
         "thumbnail": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
-        "description": "Storage Tote Rack is a modular shelving system that allows you to stack plastic storage bins in an organized, accessible, and secure manner in warehouses, workshops, and garages. It uses space efficiently, eliminates clutter, and provides quick access to bins. Its sturdy construction is suitable for heavy loads and can be scaled as needed.",
+        "description": "Does it fit your space? 🛠️\nThis is a DIY Build Plan. Get the precise PDF blueprints, cut lists, and assembly guide to build this exact rack this weekend.\n\nVerified Fit for Major Brands:\nHome Depot HDX 27-Gallon Tough Tote\nLowe’s Commander 27-Gallon Tote\nHusky 27-Gallon Tough Tote\nSterilite Industrial 27-Gallon Tote\nLifeStory Classic 27-Gallon Tote\n\nTap the link to download instantly from Etsy.",
         "listingUrl": "https://www.etsy.com/shop/PlanSmithCoDIY",
-        "masterModel": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/1x2V3.glb",
-        "price": 55,
-        "variantGroups": [
-          {
-            "groupName": "Seperators",
-            "items": [
-              {
-                "name": "Color 1",
-                "value": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
-                "textureConfig": {
-                  "materialName": "texture-1.001",
-                  "baseColor": "/assets-r2/textures/1x2V3/texture-1_baseColor.png"
-                }
-              },
-              {
-                "name": "Color 2",
-                "value": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
-                "textureConfig": {
-                  "materialName": "texture-1.001",
-                  "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
-                }
-              }
-            ]
-          }
-        ],
+        "masterModel": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/1x2STR.glb",
+        "price": 0,
+        "variantGroups": [],
         "customAttributes": [
           {
-            "icon": "📋",
+            "icon": "📏",
             "label": "Dimensions",
-            "value": "w33xl55xh89"
+            "value": "30\"L x 23.5\"W x 36.97\"H"
           },
           {
             "icon": "📋",
             "label": "Materials",
-            "value": "Lumbers,Screw"
+            "value": "Standard 2x4 Lumber, Plywood, Screw"
           }
         ]
       }
