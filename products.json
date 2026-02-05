@@ -30,7 +30,7 @@
                 "name": "Color 2",
                 "value": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
                 "textureConfig": {
-                  "materialName": "texture.001",
+                  "materialName": "texture-1.001",
                   "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
                 }
               }
