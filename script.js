@@ -161,8 +161,8 @@ function renderProductList(products) {
         item.innerHTML = `
             <img src="${product.thumbnail}" class="prod-thumb">
             <div class="prod-info">
-                <h4>${product.name}</h4>
-                <span class="prod-price">$${product.price}</span>
+                <h4 class="prod-name">${product.name}</h4>
+                ${product.price && product.price > 0 ? `<span class="prod-price">$${product.price}</span>` : ''}
             </div>
         `;
         item.onclick = () => {
@@ -771,14 +771,25 @@ function populateDetailPanel(product) {
     const priceEl = document.getElementById('panel-product-price');
     const buyLink = document.getElementById('panel-buy-link');
     const descEl = document.getElementById('panel-product-description');
+    const descWrapper = document.getElementById('panel-product-desc-wrapper');
 
     if (nameEl) nameEl.textContent = product.name;
-    if (priceEl) priceEl.textContent = `$${product.price}`;
+
+    // CONDITIONAL: Show price only if it exists and > 0
+    if (priceEl) {
+        if (product.price && product.price > 0) {
+            priceEl.textContent = `$${product.price}`;
+            priceEl.style.display = 'block';
+        } else {
+            priceEl.style.display = 'none';
+        }
+    }
+
     if (buyLink && product.listingUrl) {
         buyLink.href = product.listingUrl;
     }
 
-    // Update product description in Bilgi tab
+    // CONDITIONAL: Update product description in Info tab
     if (descEl) {
         descEl.textContent = product.description || '';
         // Don't set inline display style - it overrides CSS display:-webkit-box!
@@ -789,19 +800,31 @@ function populateDetailPanel(product) {
             descEl.classList.remove('panel-product-desc-collapsed');
         }
 
-        // Açıklama uzunsa toggle butonu göster
+        // Show/hide entire description wrapper
+        if (descWrapper) {
+            descWrapper.style.display = (product.description && product.description.length > 0) ? 'block' : 'none';
+        }
+
+        // Show toggle button if description is long
         const toggleBtn = document.getElementById('panel-product-desc-toggle');
         console.log('[DEBUG] Description length:', product.description?.length);
         console.log('[DEBUG] Toggle button found:', !!toggleBtn);
 
         if (toggleBtn) {
-            const shouldShow = (product.description && product.description.length);
+            const shouldShow = (product.description && product.description.length > 0);
             console.log('[DEBUG] Should show button:', shouldShow);
             // Inline style kullan (kategori gibi)
             toggleBtn.style.display = shouldShow ? 'inline-block' : 'none';
-            toggleBtn.textContent = 'Devamını gör';
+            toggleBtn.textContent = 'Read more'; // English translation
             console.log('[DEBUG] Button display:', toggleBtn.style.display);
         }
+    }
+
+    // CONDITIONAL: Show/hide Variations tab based on product data
+    const variationsTab = document.querySelector('.panel-tab[data-tab="varyasyon"]');
+    if (variationsTab) {
+        const hasVariations = product.variantGroups && product.variantGroups.length > 0;
+        variationsTab.style.display = hasVariations ? 'inline-block' : 'none';
     }
 
     // Show the panel

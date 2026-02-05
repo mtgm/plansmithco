@@ -260,7 +260,7 @@ body {
     padding: 12px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
-    text-align: justify;
+    text-align: left;
 
 
 }
@@ -365,7 +365,7 @@ body {
     padding: 12px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
-    text-align: justify;
+    text-align: left;
 }
 
 .desc-collapsed {

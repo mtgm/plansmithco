@@ -1753,6 +1753,28 @@
                                                 title="Bilgisayardan Yükle">💻</button>
                                         </div>
                                     </div>
+
+                                    <!-- Custom Attributes Section -->
+                                    <div class="full"
+                                        style="margin-top:20px; padding-top:20px; border-top:2px solid #e2e8f0;">
+                                        <label
+                                            style="font-size:15px; font-weight:700; color:var(--secondary); margin-bottom:10px; display:block;">
+                                            📋 Custom Attributes (Dimensions, Materials, etc.)
+                                        </label>
+                                        <div id="custom-attributes-container"
+                                            style="display:flex; flex-direction:column; gap:10px; margin-bottom:10px;">
+                                            <!-- Custom attributes will be rendered here -->
+                                        </div>
+                                        <button type="button" class="btn btn-ghost" onclick="addCustomAttribute()"
+                                            style="width:100%; border-style:dashed;">
+                                            + Add Custom Attribute
+                                        </button>
+                                        <small
+                                            style="display:block; margin-top:8px; color:var(--text-muted); font-size:11px;">
+                                            Add product-specific properties like dimensions, materials, assembly
+                                            instructions, etc.
+                                        </small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -3962,6 +3984,78 @@
                 }
             });
         }
+
+        // ===== CUSTOM ATTRIBUTES MANAGEMENT =====
+        let customAttributesData = [];
+
+        function addCustomAttribute() {
+            const container = document.getElementById('custom-attributes-container');
+            const attrId = 'attr_' + Date.now();
+
+            const attrDiv = document.createElement('div');
+            attrDiv.id = attrId;
+            attrDiv.style.cssText = 'display:grid; grid-template-columns:60px 1fr 2fr 40px; gap:8px; align-items:center; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px; border:1px solid #e2e8f0;';
+
+            attrDiv.innerHTML = `
+                <input type="text" placeholder="📏" maxlength="2" style="width:100%; text-align:center; font-size:20px; padding:8px; border:1px solid #e2e8f0; border-radius:6px;">
+                <input type="text" placeholder="Label (e.g., Dimensions)" style="width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:6px;">
+                <input type="text" placeholder="Value (e.g., Width: 100cm, Height: 200cm)" style="width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:6px;">
+                <button type="button" onclick="removeCustomAttribute('${attrId}')" style="width:32px; height:32px; border:none; background:#ef4444; color:white; border-radius:6px; cursor:pointer; font-size:16px;">×</button>
+            `;
+
+            container.appendChild(attrDiv);
+        }
+
+        function removeCustomAttribute(attrId) {
+            const elem = document.getElementById(attrId);
+            if (elem) elem.remove();
+        }
+
+        function collectCustomAttributes() {
+            const container = document.getElementById('custom-attributes-container');
+            const attrs = [];
+
+            container.querySelectorAll('[id^="attr_"]').forEach(attrDiv => {
+                const inputs = attrDiv.querySelectorAll('input');
+                const icon = inputs[0].value.trim();
+                const label = inputs[1].value.trim();
+                const value = inputs[2].value.trim();
+
+                if (label && value) {
+                    attrs.push({ icon: icon || '📋', label, value });
+                }
+            });
+
+            return attrs;
+        }
+
+        function renderCustomAttributes(attributes) {
+            const container = document.getElementById('custom-attributes-container');
+            container.innerHTML = '';
+
+            if (!attributes || attributes.length === 0) return;
+
+            attributes.forEach(attr => {
+                const attrId = 'attr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+                const attrDiv = document.createElement('div');
+                attrDiv.id = attrId;
+                attrDiv.style.cssText = 'display:grid; grid-template-columns:60px 1fr 2fr 40px; gap:8px; align-items:center; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px; border:1px solid #e2e8f0;';
+
+                attrDiv.innerHTML = `
+                    <input type="text" value="${attr.icon || '📋'}" maxlength="2" style="width:100%; text-align:center; font-size:20px; padding:8px; border:1px solid #e2e8f0; border-radius:6px;">
+                    <input type="text" value="${attr.label}" placeholder="Label" style="width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:6px;">
+                    <input type="text" value="${attr.value}" placeholder="Value" style="width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:6px;">
+                    <button type="button" onclick="removeCustomAttribute('${attrId}')" style="width:32px; height:32px; border:none; background:#ef4444; color:white; border-radius:6px; cursor:pointer; font-size:16px;">×</button>
+                `;
+
+                container.appendChild(attrDiv);
+            });
+        }
+
+        // Note: Custom attributes will be saved with product data
+        // When saving product, call: product.customAttributes = collectCustomAttributes();
+        // When loading product, call: renderCustomAttributes(product.customAttributes);
     </script>
 </body>
 
