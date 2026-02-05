@@ -16,7 +16,7 @@ let selectedProduct = null;
 let currentMasterUrl = null;
 
 // 1. Verileri Çek
-fetch('products.json')
+fetch('/js/products.json')
     .then(res => res.json())
     .then(data => {
         allData = data;
@@ -240,7 +240,7 @@ function selectProduct(product) {
 
     setupVariantTabs(product);
 
-    const masterUrl = product.masterModel ? product.masterModel : `/api/engine?sku=${product.sku}`;
+    const masterUrl = product.masterModel ? product.masterModel : `/js/engine?sku=${product.sku}`;
     loadMasterModel(masterUrl);
 
     populateDetailPanel(product);
@@ -529,7 +529,7 @@ async function loadMasterModel(url) {
 
     try {
         let finalUrl = url;
-        if (url.includes('/api/engine')) {
+        if (url.includes('/js/engine')) {
             const res = await fetch(url);
             const data = await res.json();
             if (data.ok) finalUrl = data.url;
