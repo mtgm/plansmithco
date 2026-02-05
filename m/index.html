@@ -822,7 +822,7 @@
             if (buyLink && product.listingUrl) buyLink.href = product.listingUrl;
             const descToggle = document.getElementById('panel-product-desc-toggle');
             if (descToggle) descToggle.style.display = product.description && product.description.length > 100 ? 'inline-block' : 'none';
-            const masterUrl = product.masterModel ? product.masterModel : `/api/engine?sku=${product.sku}`;
+            const masterUrl = product.masterModel ? product.masterModel : `/js/engine?sku=${product.sku}`;
             loadModel(masterUrl);
             setupVariants(product);
         }
@@ -830,7 +830,7 @@
         async function loadModel(url) {
             try {
                 let finalUrl = url;
-                if (url.includes('/api/engine')) {
+                if (url.includes('/js/engine')) {
                     const res = await fetch(url);
                     const data = await res.json();
                     if (data.ok) finalUrl = data.url;
