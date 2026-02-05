@@ -240,7 +240,7 @@ function selectProduct(product) {
 
     setupVariantTabs(product);
 
-    const masterUrl = product.masterModel ? product.masterModel : `/js/engine?sku=${product.sku}`;
+    const masterUrl = product.masterModel ? product.masterModel : `/api/engine?sku=${product.sku}`;
     loadMasterModel(masterUrl);
 
     populateDetailPanel(product);
