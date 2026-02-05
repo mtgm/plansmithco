@@ -840,6 +840,11 @@ model-viewer::part(default-ar-button) {
         -webkit-line-clamp: unset !important;
         line-clamp: unset !important;
     }
+
+    /* Hide mobile back button on desktop */
+    #mobile-back-btn {
+        display: none !important;
+    }
 }
 
 /* MOBILE LAYOUT (Split Screen: AR Top / Info Bottom) */

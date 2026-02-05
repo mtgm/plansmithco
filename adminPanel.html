@@ -3005,6 +3005,9 @@
             document.getElementById('p-price').value = p.price || 0;
             document.getElementById('p-cat').value = i;
 
+            // Load custom attributes
+            renderCustomAttributes(p.customAttributes || []);
+
             renderVars(p.variantGroups || []);
             updateGlbPreview();
         }
@@ -3295,6 +3298,9 @@
             p.listingUrl = document.getElementById('p-link').value;   // link -> listingUrl
             p.masterModel = document.getElementById('p-model').value; // model -> masterModel
             p.price = parseFloat(document.getElementById('p-price').value) || 0;
+
+            // Save custom attributes
+            p.customAttributes = collectCustomAttributes();
         }
         // editCat artık inline düzenleme ile değiştirildi
         window.delCat = (e, i) => {
