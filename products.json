@@ -67,6 +67,18 @@
               }
             ]
           }
+        ],
+        "customAttributes": [
+          {
+            "icon": "📋",
+            "label": "aaa",
+            "value": "bbb"
+          },
+          {
+            "icon": "📋",
+            "label": "ccc",
+            "value": "ddd"
+          }
         ]
       }
     ]
