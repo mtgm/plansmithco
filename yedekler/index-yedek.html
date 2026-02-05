@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PlanSmithCo Configurator</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <div id="main-layout">
+        <aside id="sidebar">
+            <div id="brand-header">
+                <div class="brand-info">
+                    <div class="brand-name">PlanSmithCo</div>
+                    <div class="brand-tag">Digital Catalog</div>
+                </div>
+            </div>
+
+
+            <!-- Tüm Kategoriler Başlığı (Tıklanabilir Geri Dönüş) -->
+            <div id="all-categories-header" class="cat-list-title" onclick="goBackToCategories()">
+
+                <span>↩️ PRODUCT CATEGORIES</span>
+            </div>
+
+            <!-- Kategori Başlığı ve Açıklaması -->
+            <div id="category-info" class="category-info-panel">
+                <h3 id="category-title" class="category-panel-title">
+                </h3>
+                <div id="category-count" class="category-panel-count">
+                </div>
+                <div id="category-desc-wrapper" class="desc-wrapper">
+                    <p id="category-desc" class="category-desc-collapsed">
+                    </p>
+                    <button id="category-desc-toggle" class="desc-toggle-btn" onclick="toggleCategoryDesc()">
+                        Devamını gör
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-wrapper">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" id="search-input" placeholder="Ürün ara..." oninput="filterProducts()">
+            </div>
+
+            <div id="content-area">
+                <div id="category-grid"></div>
+
+                <div id="product-view">
+                    <div id="product-list"></div>
+                </div>
+            </div>
+        </aside>
+
+        <main id="stage-wrapper">
+            <div id="loader-overlay">
+                <div class="spinner"></div>
+            </div>
+
+            <div id="default-poster">
+                <img src="/poster.webp" alt="Logo">
+                <span>BİR ÜRÜN SEÇİN</span>
+            </div>
+
+
+
+            <model-viewer id="mv" src="" ar ar-scale="fixed" ar-placement="floor" camera-controls disable-zoom
+                interaction-prompt="none" environment-image="/studio.hdr" shadow-intensity="1" exposure="1.5"
+                tone-mapping="neutral" loading="eager"></model-viewer>
+
+            <div id="controls-dock" class="hidden-dock">
+                <div id="tabs-container"></div>
+
+                <div id="dock-content">
+                    <div id="active-variants-container"></div>
+
+                    <div id="ar-area">
+                        <button id="dock-ar-btn" onclick="activateAR()">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                            </svg>
+                        </button>
+                        <span class="ar-label">AR GÖR</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- Right Detail Panel - ADD AFTER stage-wrapper closing tag -->
+        <aside id="detail-panel">
+            <!-- Collapse/Expand Button -->
+            <button id="panel-close-btn" onclick="togglePanelCollapse()">›</button>
+
+            <!-- Sticky Header Container (Product Title + Tabs) -->
+            <div id="panel-sticky-header">
+
+                <!-- Panel Header with Product Title -->
+                <div id="panel-header">
+                    <div class="product-title-row">
+                        <h2 id="panel-product-name">Modüler Kutu Sistemi</h2>
+                    </div>
+                </div>
+
+                <!-- Tab Navigation -->
+                <div id="panel-tabs">
+                    <button class="panel-tab active" data-tab="bilgi">Bilgi</button>
+                    <button class="panel-tab" data-tab="varyasyon">Varyasyon</button>
+                    <button class="panel-tab" data-tab="ar">AR</button>
+                </div>
+            </div>
+
+            <!-- Scrollable Content Container -->
+            <div id="panel-content-scroll">
+                <!-- Tab Content: BİLGİ -->
+                <div id="tab-bilgi" class="tab-content active">
+
+
+                    <!-- Ürün Açıklaması -->
+                    <div id="panel-product-desc-wrapper" class="desc-wrapper">
+                        <p id="panel-product-description" class="panel-product-desc-collapsed">
+                        </p>
+                        <button id="panel-product-desc-toggle" class="desc-toggle-btn" onclick="toggleProductDesc()">
+                            Devamını gör
+                        </button>
+                    </div>
+
+
+                    <!-- Accordion Sections -->
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <span>📏 Boyutlar</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                            <div class="accordion-content">
+                                <p>Genişlik: 100cm<br>Yükseklik: 200cm<br>Derinlik: 40cm</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <span>🧱 Malzemeler</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                            <div class="accordion-content">
+                                <p>18mm ahşap kontrplak, su bazlı vernik kaplama</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <span>🔧 Montaj</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                            <div class="accordion-content">
+                                <p>Kolay montaj, tüm bağlantı parçaları dahildir.</p>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <button class="accordion-header">
+                                <span>📁 Dosya Formatları</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                            <div class="accordion-content">
+                                <p>.glb, .usdz (AR uyumlu)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <a href="#" id="panel-buy-link" class="btn-primary" target="_blank">
+                            Etsy'de İncele
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                        </a>
+                        <button class="btn-secondary" onclick="shareProduct()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                                <polyline points="16 6 12 2 8 6"></polyline>
+                                <line x1="12" y1="2" x2="12" y2="15"></line>
+                            </svg>
+                            Paylaş
+                        </button>
+                    </div>
+                </div>
+                <!-- Tab Content: VARYASYON -->
+                <div id="tab-varyasyon" class="tab-content">
+                    <div class="variant-actions">
+                        <button class="btn-action" onclick="resetVariants()">
+                            🔄 Sıfırla
+                        </button>
+                    </div>
+                    <!-- Mobile Variant Tabs (Horizontal Scroll) -->
+                    <div id="mobile-variant-tabs"></div>
+
+                    <!-- Variant Accordion Container -->
+                    <div id="variant-accordion-container">
+                        <!-- JavaScript ile dinamik olarak oluşturulacak -->
+                    </div>
+                    <div class="config-card">
+                        <div class="config-header">
+                            <span>🛠️</span>
+                            <h4>Mevcut Konfigürasyon</h4>
+                        </div>
+                        <div class="config-list">
+                            <div class="config-item">
+                                <span>Çerçeve</span>
+                                <span>Beyaz</span>
+                            </div>
+                            <div class="config-item">
+                                <span>Üst Panel</span>
+                                <span>Beyaz</span>
+                            </div>
+                            <div class="config-item">
+                                <span>Kutu Kapakaları</span>
+                                <span>Şeffaf</span>
+                            </div>
+                            <div class="config-item">
+                                <span>Kutu Gövdeleri</span>
+                                <span>Beyaz</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Tab Content: AR -->
+                <div id="tab-ar" class="tab-content">
+                    <div class="ar-intro-card">
+                        <div class="ar-icon">📱</div>
+                        <h3>AR ile Görüntüle</h3>
+                        <p>Modüler Kutu Sistemi modelini gerçek ortamınızda deneyimleyin. Ürünü evinize veya ofisinize
+                            yerleştirin.
+                        </p>
+
+                        <!-- Desktop QR Code Area -->
+                        <div id="ar-qr-container">
+                            <div id="ar-qr-code"></div>
+                            <span class="qr-hint">Mobilde açmak için tarayın</span>
+                        </div>
+                    </div>
+                    <button class="btn-ar" onclick="activateAR()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
+                            </path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                        AR Modunu Başlat
+                    </button>
+                    <div class="ar-steps">
+                        <h4 class="steps-title">NASIL KULLANILIR</h4>
+                        <div class="step-card">
+                            <div class="step-number">1</div>
+                            <div>
+                                <h5>Kamerayı Açın</h5>
+                                <p>AR modunu başlatmak için kamera izni verin</p>
+                            </div>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">2</div>
+                            <div>
+                                <h5>Yüzeyi Tarayın</h5>
+                                <p>Kameranızı masa veya zemin gibi düz bir yüzeye doğrultun</p>
+                            </div>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">3</div>
+                            <div>
+                                <h5>Yerleştirin</h5>
+                                <p>Ekrana dokunarak modeli yerleştirin ve boyutlandırın</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ar-requirements">
+                        <div class="req-icon">ℹ️</div>
+                        <div>
+                            <h5>Gereksinimler</h5>
+                            <p>WebXR destekli tarayıcı ve ARCore/ARKit uyumlu cihaz gereklidir. iOS Safari veya Android
+                                Chrome
+                                önerilir.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+
+    <script src="script.js"></script>
+</body>
+
+</html>

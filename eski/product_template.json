@@ -1,0 +1,54 @@
+[
+  {
+    "id": "cat_storage",
+    "name": "Storage Systems",
+    "thumbnail": "/assets-r2/categories/storage_cat_thumb.jpg",
+    "products": [
+      {
+        "id": "prod_1x2_v3",
+        "name": "1x2 Storage Tote Rack V3",
+        "sku": "STR-1x2-V3",
+        "price": 15,
+        "thumbnail": "/assets-r2/images/storage-rack-thumb.jpg",
+        "description": "Kendin yap (DIY) depolama rafı sistemi. 2 kutulu dikey tasarım.",
+        "listingUrl": "https://www.etsy.com/listing/ornek-link",
+        "masterModel": "/assets-r2/models/storage_rack_v3.glb",
+        "variantGroups": [
+          {
+            "groupName": "Gövde Malzemesi",
+            "items": [
+              {
+                "name": "Doğal Çam",
+                "value": "/assets-r2/textures/pine_wood_thumb.png",
+                "textureConfig": {
+                  "materialName": "Wood_Pine",
+                  "baseColor": "/assets-r2/textures/pine_baseColor.png"
+                }
+              },
+              {
+                "name": "Antrasit Boyalı",
+                "value": "#374151",
+                "textureConfig": {
+                  "materialName": "Wood_Pine",
+                  "baseColor": "/assets-r2/textures/painted_anthracite.png"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cat_wardrobes",
+    "name": "Gardıroplar",
+    "thumbnail": "/assets-r2/categories/wardrobe_cat_thumb.jpg",
+    "products": []
+  },
+  {
+    "id": "cat_kitchen",
+    "name": "Mutfak Çözümleri",
+    "thumbnail": "/assets-r2/categories/kitchen_cat_thumb.jpg",
+    "products": []
+  }
+]
