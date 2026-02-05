@@ -1110,7 +1110,7 @@ window.updateARandQR = updateARandQR;
 window.scrollTabs = function (direction) {
     const container = document.getElementById('mobile-variant-tabs');
     if (!container) return;
-    constscrollAmount = 150; // Adjust as needed
+    const scrollAmount = 150; // Adjust as needed
     if (direction === 'left') {
         container.scrollBy({ left: -150, behavior: 'smooth' });
     } else {
