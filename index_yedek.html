@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PlanSmithCo Configurator</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <div id="main-layout">
+        <aside id="sidebar">
+            <div id="brand-header">
+                <button id="back-btn" onclick="goBackToCategories()">←</button>
+                <div class="brand-info">
+                    <div class="brand-name">PlanSmithCo.</div>
+                    <div class="brand-tag">Digital Catalog</div>
+
+                </div>
+                <div class="logo-box"><img src="/poster.webp"></div>
+            </div>
+
+            <div id="content-area">
+                <div id="category-grid"></div>
+
+                <div id="product-view">
+                    <div id="product-detail-area">
+                        <h1 id="p-title">...</h1>
+
+                        <div id="desc-wrapper">
+                            <div id="p-desc" class="desc-collapsed">...</div>
+                            <button id="desc-toggle-btn" onclick="toggleDesc()">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3">
+                                    <path d="M6 9l6 6 6-6" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="action-row">
+                            <div id="p-price">$0.00</div>
+                            <a href="#" id="buy-link" class="buy-btn" target="_blank">
+                                Etsy'de İncele
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white"
+                                    stroke-width="2">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div id="product-list"></div>
+                </div>
+            </div>
+        </aside>
+
+        <main id="stage-wrapper">
+            <div id="loader-overlay">
+                <div style="font-family:'JetBrains Mono'; font-size:12px; color:#666;">YÜKLENİYOR...</div>
+            </div>
+
+            <div id="default-poster">
+                <img src="/poster.webp" alt="Logo">
+                <span>BİR ÜRÜN SEÇİN</span>
+            </div>
+
+            <model-viewer id="mv" src="" ar ar-scale="fixed" ar-placement="floor" camera-controls disable-zoom
+                interaction-prompt="none" environment-image="/studio.hdr" shadow-intensity="1" exposure="1.5"
+                tone-mapping="neutral" loading="eager" poster="/poster.webp"></model-viewer>
+
+            <div id="controls-dock" class="hidden-dock">
+                <div id="tabs-container"></div>
+
+                <div id="dock-content">
+                    <div id="active-variants-container"></div>
+
+                    <div id="ar-area">
+                        <button id="dock-ar-btn" onclick="activateAR()">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                            </svg>
+                        </button>
+                        <span class="ar-label">AR GÖR</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

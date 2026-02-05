@@ -16,7 +16,7 @@ let selectedProduct = null;
 let currentMasterUrl = null;
 
 // 1. Verileri Çek
-fetch('/js/products.json')
+fetch('products.json')
     .then(res => res.json())
     .then(data => {
         allData = data;
@@ -292,10 +292,6 @@ function setupVariantTabs(product) {
         const accordionContainer = document.getElementById('variant-accordion-container');
         if (accordionContainer) accordionContainer.innerHTML = '';
 
-        // Clear mobile tabs container (Fix for ghost tabs)
-        const mobileTabsContainer = document.getElementById('mobile-variant-tabs');
-        if (mobileTabsContainer) mobileTabsContainer.innerHTML = '';
-
         // Clear configuration display
         const configList = document.querySelector('.config-list');
         if (configList) configList.innerHTML = '';
@@ -529,7 +525,7 @@ async function loadMasterModel(url) {
 
     try {
         let finalUrl = url;
-        if (url.includes('/js/engine')) {
+        if (url.includes('/api/engine')) {
             const res = await fetch(url);
             const data = await res.json();
             if (data.ok) finalUrl = data.url;
@@ -736,11 +732,6 @@ function resetVariants() {
                 }
             }
         });
-
-        // QR Kodu güncelle (Reset sonrası varsayılan hale dönsün)
-        setTimeout(() => {
-            updateARandQR(null);
-        }, 100);
     }
 }
 
@@ -1013,5 +1004,4 @@ window.resetVariants = resetVariants;
 window.applyRecommended = applyRecommended;
 window.shareProduct = shareProduct;
 window.populateDetailPanel = populateDetailPanel;
-window.updateQRCode = updateARandQR; // Export new function (Aliased for backward compatibility)
-window.updateARandQR = updateARandQR;
+window.updateQRCode = updateQRCode; // Export new function

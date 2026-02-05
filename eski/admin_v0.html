@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>PlanSmithCo - Yönetim Paneli</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #2563eb; --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; }
+        
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        /* Kartlar */
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        
+        h1, h2 { margin-top: 0; }
+        h1 { font-size: 24px; color: #0f172a; display: flex; align-items: center; gap: 10px; }
+        
+        /* Formlar */
+        label { display: block; font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; margin-bottom: 12px; box-sizing: border-box; }
+        
+        /* Butonlar */
+        .btn { padding: 10px 20px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-success { background: #10b981; color: white; width: 100%; justify-content: center; font-size: 16px; padding: 15px; }
+        .btn-success:hover { background: #059669; }
+        .btn-danger { background: #ef4444; color: white; padding: 6px 12px; font-size: 12px; }
+        
+        /* Tablolar */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); }
+        th { font-size: 11px; text-transform: uppercase; color: #64748b; background: #f1f5f9; }
+        
+        /* Durum Mesajları */
+        #status-bar { position: fixed; bottom: 20px; right: 20px; padding: 12px 24px; background: #333; color: white; border-radius: 8px; display: none; z-index: 100; }
+        .loading { opacity: 0.5; pointer-events: none; }
+
+        /* Login Ekranı */
+        #login-screen { display: flex; }
+        #app-screen { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="login-screen" class="card" style="max-width: 400px; margin: 100px auto;">
+            <div>
+                <h2>🔐 Admin Girişi</h2>
+                <p style="color:#666; font-size:13px; margin-bottom:20px;">Github Token ve Repo bilgilerinizi giriniz.</p>
+                
+                <label>GitHub Personal Access Token</label>
+                <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
+                
+                <label>Kullanıcı Adı (Owner)</label>
+                <input type="text" id="gh-owner" placeholder="PlanSmithCo">
+                
+                <label>Repo Adı</label>
+                <input type="text" id="gh-repo" placeholder="showroom">
+                
+                <button class="btn btn-primary" style="width:100%" onclick="login()">Bağlan</button>
+            </div>
+        </div>
+
+        <div id="app-screen">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h1>🛠️ Ürün Yöneticisi</h1>
+                <button class="btn" onclick="logout()" style="background:#e2e8f0; font-size:12px;">Çıkış Yap</button>
+            </div>
+
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2>📦 Model Veritabanı (SKU & Dosya)</h2>
+                    <button class="btn btn-primary" onclick="addNewModelRow()">+ Yeni Model Ekle</button>
+                </div>
+                <p style="font-size:13px; color:#666;">Burada SKU kodlarını ve R2'deki karşılık gelen dosya adlarını eşleştiriyoruz.</p>
+                
+                <table id="model-table">
+                    <thead>
+                        <tr>
+                            <th>SKU KODU</th>
+                            <th>DOSYA ADI (.glb)</th>
+                            <th style="width:50px">SİL</th>
+                        </tr>
+                    </thead>
+                    <tbody id="model-tbody"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>📝 Products.json Editörü</h2>
+                <p style="font-size:13px; color:#666;">Ürün yapılandırması karmaşık olduğu için şu anlık JSON formatında düzenleme yapıyoruz. Hata yapmamaya dikkat edin.</p>
+                <textarea id="json-editor" style="height: 400px; font-family: 'Monaco', monospace; font-size: 13px; background: #1e293b; color: #a5b4fc;"></textarea>
+                <button class="btn btn-primary" onclick="formatJSON()">Formatla & Kontrol Et</button>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <button class="btn btn-success" onclick="saveToGithub()">💾 KAYDET VE YAYINLA (DEPLOY)</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="status-bar"></div>
+
+    <script>
+        // --- AYARLAR ---
+        const PRODUCTS_PATH = 'public/products.json'; // Eğer public içindeyse
+        // Eğer products.json ana dizindeyse 'products.json' yap.
+        // Senin projede public içinde sanırım. Kontrol et.
+        
+        const MODELS_PATH = 'models.json'; // Bu ana dizinde
+
+        let GITHUB_TOKEN = '';
+        let REPO_OWNER = '';
+        let REPO_NAME = '';
+        
+        let productsSha = '';
+        let modelsSha = '';
+
+        // --- BAŞLANGIÇ ---
+        window.onload = () => {
+            const storedToken = localStorage.getItem('gh_token');
+            if(storedToken) {
+                document.getElementById('gh-token').value = storedToken;
+                document.getElementById('gh-owner').value = localStorage.getItem('gh_owner');
+                document.getElementById('gh-repo').value = localStorage.getItem('gh_repo');
+            }
+        };
+
+        async function login() {
+            GITHUB_TOKEN = document.getElementById('gh-token').value;
+            REPO_OWNER = document.getElementById('gh-owner').value;
+            REPO_NAME = document.getElementById('gh-repo').value;
+
+            if(!GITHUB_TOKEN || !REPO_OWNER || !REPO_NAME) {
+                showToast("Lütfen tüm alanları doldurun.");
+                return;
+            }
+
+            // Kaydet
+            localStorage.setItem('gh_token', GITHUB_TOKEN);
+            localStorage.setItem('gh_owner', REPO_OWNER);
+            localStorage.setItem('gh_repo', REPO_NAME);
+
+            // Verileri Çek
+            showToast("Veriler GitHub'dan çekiliyor...");
+            try {
+                await loadData();
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'block';
+                showToast("Bağlantı Başarılı!");
+            } catch (e) {
+                console.error(e);
+                showToast("Hata: Bilgileri kontrol edin veya dosya yolları yanlış.");
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            location.reload();
+        }
+
+        // --- GITHUB API ---
+        async function fetchFile(path) {
+            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`;
+            const res = await fetch(url, {
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+            });
+            if(!res.ok) throw new Error(`Dosya bulunamadı: ${path}`);
+            const data = await res.json();
+            // Base64 decode (Türkçe karakter sorunu olmaması için decodeURIComponent kullanıyoruz)
+            const content = decodeURIComponent(escape(window.atob(data.content)));
+            return { content, sha: data.sha };
+        }
+
+        async function loadData() {
+            // 1. Models.json (Veritabanı)
+            const modelsData = await fetchFile(MODELS_PATH);
+            modelsSha = modelsData.sha;
+            renderModelTable(JSON.parse(modelsData.content));
+
+            // 2. Products.json (Arayüz)
+            // Önce kök dizini dene, olmazsa public dene (Path hatasını önlemek için)
+            let prodData;
+            try {
+                prodData = await fetchFile('products.json');
+            } catch {
+                prodData = await fetchFile('public/products.json');
+            }
+            productsSha = prodData.sha;
+            document.getElementById('json-editor').value = JSON.stringify(JSON.parse(prodData.content), null, 2);
+        }
+
+        // --- MODEL TABLOSU İŞLEMLERİ ---
+        function renderModelTable(data) {
+            const tbody = document.getElementById('model-tbody');
+            tbody.innerHTML = '';
+            Object.entries(data).forEach(([sku, file]) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="text" class="sku-input" value="${sku}" placeholder="SKU"></td>
+                    <td><input type="text" class="file-input" value="${file}" placeholder="dosya.glb"></td>
+                    <td><button class="btn btn-danger" onclick="this.closest('tr').remove()">X</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function addNewModelRow() {
+            const tbody = document.getElementById('model-tbody');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="sku-input" placeholder="YENİ SKU"></td>
+                <td><input type="text" class="file-input" placeholder="dosya.glb"></td>
+                <td><button class="btn btn-danger" onclick="this.closest('tr').remove()">X</button></td>
+            `;
+            tbody.prepend(tr); // En üste ekle
+        }
+
+        function getModelDataFromTable() {
+            const rows = document.querySelectorAll('#model-tbody tr');
+            const data = {};
+            rows.forEach(row => {
+                const sku = row.querySelector('.sku-input').value.trim().toUpperCase();
+                const file = row.querySelector('.file-input').value.trim();
+                if(sku && file) {
+                    data[sku] = file;
+                }
+            });
+            return data;
+        }
+
+        // --- JSON EDİTÖR ---
+        function formatJSON() {
+            const editor = document.getElementById('json-editor');
+            try {
+                const val = JSON.parse(editor.value);
+                editor.value = JSON.stringify(val, null, 2);
+                showToast("JSON geçerli ✅");
+                return true;
+            } catch (e) {
+                alert("JSON Format Hatası! Lütfen virgülleri ve parantezleri kontrol edin.");
+                return false;
+            }
+        }
+
+        // --- KAYDETME ---
+        async function saveToGithub() {
+            if(!confirm("Bu işlem dosyaları güncelleyecek ve siteyi yeniden yayınlayacak. Emin misiniz?")) return;
+            if(!formatJSON()) return;
+
+            showToast("Kaydediliyor... Lütfen bekleyin.");
+            document.body.classList.add('loading');
+
+            try {
+                // 1. Model Verisini Hazırla
+                const newModels = getModelDataFromTable();
+                const newModelsContent = JSON.stringify(newModels, null, 2);
+
+                // 2. Products Verisini Hazırla
+                const newProductsContent = document.getElementById('json-editor').value;
+
+                // 3. GitHub'a Gönder (Models.json)
+                await updateFile(MODELS_PATH, newModelsContent, modelsSha, "Admin Panel: Model Güncellemesi");
+                
+                // 4. GitHub'a Gönder (Products.json)
+                // Path kontrolü (yukarıdaki loadData mantığına göre doğru yolu bulmamız lazım ama şimdilik hardcode 'products.json' deniyoruz)
+                // Eğer products.json ana dizindeyse:
+                await updateFile('products.json', newProductsContent, productsSha, "Admin Panel: Ürün Güncellemesi");
+                
+                showToast("✅ BAŞARILI! Vercel deploy işlemi başladı.");
+                
+                // SHA'ları güncelle (Tekrar kaydetmek isterse hata almasın)
+                await loadData(); 
+
+            } catch (e) {
+                console.error(e);
+                alert("Hata oluştu: " + e.message);
+            } finally {
+                document.body.classList.remove('loading');
+            }
+        }
+
+        async function updateFile(path, content, sha, message) {
+            const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`;
+            // Base64 Encode (UTF-8 uyumlu)
+            const contentBase64 = window.btoa(unescape(encodeURIComponent(content)));
+
+            const body = {
+                message: message,
+                content: contentBase64,
+                sha: sha
+            };
+
+            const res = await fetch(url, {
+                method: 'PUT',
+                headers: { 
+                    'Authorization': `token ${GITHUB_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+
+            if(!res.ok) {
+                const err = await res.json();
+                throw new Error(err.message);
+            }
+        }
+
+        function showToast(msg) {
+            const el = document.getElementById('status-bar');
+            el.innerText = msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 4000);
+        }
+    </script>
+</body>
+</html>

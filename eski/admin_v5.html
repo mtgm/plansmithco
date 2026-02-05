@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>PlanSmithCo v9.2 (Fixed & Pro UI)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+    <style>
+        /* --- MODERN SAAS TEMASI --- */
+        :root { 
+            --primary: #3b82f6; --primary-dark: #2563eb; 
+            --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; 
+            --text: #1e293b; --text-light: #64748b;
+            --danger: #ef4444; --success: #10b981; --warning: #f59e0b;
+            /* PRO PANEL RENKLERİ */
+            --dark-panel: #0f172a; --dark-surface: #1e293b; --dark-border: #334155; --dark-text: #e2e8f0;
+        }
+        * { box-sizing: border-box; outline: none; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; overflow: hidden; font-size: 13px; }
+
+        /* --- LAYOUT --- */
+        aside { width: 260px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
+        main { flex: 1; display: flex; overflow: hidden; position: relative; }
+        .center-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; max-width: 1000px; margin: 0 auto; width: 100%; }
+        
+        /* --- RIGHT PANEL (PRO DESIGN - GÜNCELLENDİ) --- */
+        .right-panel { width: 340px; background: var(--dark-panel); border-left: 1px solid var(--dark-border); display: flex; flex-direction: column; z-index: 5; color: var(--dark-text); }
+        .rp-header { padding: 15px; border-bottom: 1px solid var(--dark-border); font-weight: 700; background: var(--dark-surface); color: white; display: flex; align-items: center; gap: 8px; letter-spacing: 0.5px; font-size: 14px; }
+        .rp-content { padding: 20px; overflow-y: auto; flex: 1; background: var(--dark-panel); }
+        
+        /* PRO MODEL VIEWER */
+        model-viewer#viewer { width: 100%; height: 240px; background: #1e293b; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--dark-border); }
+        
+        /* PRO MATERYAL LİSTESİ */
+        .mat-list-title { font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .mat-list { background: var(--dark-surface); border: 1px solid var(--dark-border); border-radius: 8px; overflow: hidden; max-height: 300px; overflow-y: auto; }
+        .mat-item { padding: 10px 12px; border-bottom: 1px solid var(--dark-border); cursor: pointer; font-size: 12px; display: flex; justify-content: space-between; color: var(--dark-text); transition: 0.2s; }
+        .mat-item:last-child { border-bottom: none; }
+        .mat-item:hover { background: var(--primary); color: white; }
+        .mat-arrow { opacity: 0.5; font-size: 10px; }
+
+        /* --- SIDEBAR --- */
+        .brand { padding: 20px; font-weight: 800; font-size: 18px; border-bottom: 1px solid var(--border); color: var(--primary-dark); display: flex; align-items: center; gap: 10px; }
+        .tree-view { flex: 1; padding: 10px; overflow-y: auto; }
+        .tree-cat-group { margin-bottom: 15px; }
+        .tree-cat-header { display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; font-weight: 700; font-size: 11px; text-transform: uppercase; color: var(--text-light); letter-spacing: 0.5px; }
+        .cat-actions { opacity: 0; transition: 0.2s; cursor: pointer; }
+        .tree-cat-header:hover .cat-actions { opacity: 1; }
+        .tree-item { padding: 8px 12px; cursor: pointer; font-size: 13px; border-radius: 6px; margin-top: 2px; color: var(--text); font-weight: 500; transition: 0.1s; display: flex; align-items: center; gap: 8px; }
+        .tree-item:hover { background: #f1f5f9; }
+        .tree-item.active { background: #eff6ff; color: var(--primary); font-weight: 600; }
+        .sidebar-footer { padding: 15px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+
+        /* --- TABS & FORM --- */
+        .tabs-header { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 20px; gap: 20px; }
+        .tab-btn { padding: 15px 5px; cursor: pointer; font-weight: 600; color: var(--text-light); border-bottom: 2px solid transparent; transition: 0.2s; font-size: 13px; }
+        .tab-btn:hover { color: var(--primary); }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        
+        .editor-content { flex: 1; overflow-y: auto; padding: 30px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 25px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .full { grid-column: span 2; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 12px; color: var(--text-light); }
+        input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; transition: 0.2s; background: #fff; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        .input-group-btn { display: flex; gap: 8px; }
+
+        /* --- VARYASYONLAR --- */
+        .v-group { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
+        .v-header { background: #f1f5f9; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .v-header input { width: auto; font-weight: 700; background: transparent; border: 1px solid transparent; padding: 5px; }
+        .v-header input:hover { border-color: var(--border); background: white; }
+        .v-body { padding: 15px; }
+        .v-item { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 30px; gap: 10px; align-items: end; background: white; padding: 10px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; }
+        .v-item-label { font-size: 10px; color: #94a3b8; margin-bottom: 4px; }
+
+        /* --- FILE EXPLORER --- */
+        #media-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        .media-window { width: 85%; height: 85%; background: white; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+        .mw-toolbar { padding: 10px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; align-items: center; background: #fff; }
+        .mw-address { padding: 6px 12px; background: #f8fafc; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-size: 12px; }
+        .mw-body { flex: 1; overflow-y: auto; padding: 10px; }
+        
+        .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+        .file-item { position: relative; display: flex; flex-direction: column; align-items: center; border: 1px solid transparent; border-radius: 4px; padding: 8px; cursor: pointer; transition: 0.1s; height: 110px; }
+        .file-item:hover { background: #e0f2fe; border-color: #bae6fd; }
+        .file-item.selected-bg { background: #eff6ff; border-color: var(--primary); }
+        
+        .file-check { position: absolute; top: 5px; left: 5px; z-index: 2; display: none; }
+        .file-item:hover .file-check, .file-item.checked .file-check { display: block; }
+        
+        .file-thumb { width: 100%; height: 60px; object-fit: contain; margin-bottom: 5px; }
+        .file-icon { font-size: 40px; margin-bottom: 5px; color: var(--text-light); }
+        .is-folder .file-icon { color: #f59e0b; }
+        .file-name { font-size: 11px; text-align: center; line-height: 1.2; overflow: hidden; max-height: 28px; width: 100%; word-break: break-word; }
+
+        /* --- BUTTONS --- */
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-ghost { background: transparent; color: var(--text-light); border: 1px solid var(--border); }
+        .btn-ghost:hover { background: #f1f5f9; color: var(--text); }
+        
+        /* UTILS */
+        .hidden { display: none !important; }
+        #loader { position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 2000; display: none; align-items: center; justify-content: center; }
+        .spinner { width: 30px; height: 30px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* LOGIN */
+        #login-overlay { position: fixed; inset: 0; background: #0f172a; z-index: 3000; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; width: 400px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <script>
+        // LİNKLER AYNI KALSIN
+        let WORKER_URL = "https://plansmithco-adminpanel-api.serhatyildirim123.workers.dev"; 
+        let R2_PUBLIC_URL = "https://pub-c09e063308e5459cb4c5727415475d43.r2.dev"; 
+    </script>
+
+    <div id="media-modal">
+        <div class="media-window">
+            <div class="mw-toolbar">
+                <button class="btn btn-primary" onclick="document.getElementById('r2-up').click()">☁️ Yükle</button>
+                <input type="file" id="r2-up" hidden onchange="uploadToR2(this.files[0])">
+                <button class="btn btn-danger" id="btn-delete" style="opacity:0.5; pointer-events:none;" onclick="deleteSelectedFiles()">🗑️ Sil</button>
+                <div style="flex:1"></div>
+                <input type="text" placeholder="Ara..." id="search-in" style="width: 200px;" oninput="renderFiles()">
+                <button class="btn btn-ghost" onclick="closeMedia()">✕</button>
+            </div>
+            <div class="mw-address">
+                <button class="btn btn-ghost" style="padding:2px 6px;" onclick="navUp()">⬆</button>
+                <span id="cur-path">/</span>
+            </div>
+            <div class="mw-body">
+                <div class="file-grid" id="file-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loader"><div class="spinner"></div></div>
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="color:var(--primary); margin-bottom:20px;">PlanSmithCo v9.2</h2>
+            <input type="password" id="gh-token" placeholder="GitHub Token" style="margin-bottom:10px;">
+            <input type="text" id="gh-owner" placeholder="User" value="mtgm" style="margin-bottom:10px;">
+            <input type="text" id="gh-repo" placeholder="Repo" value="plansmithco" style="margin-bottom:10px;">
+            <input type="text" id="gh-branch" placeholder="Branch" value="v2-showroom" style="margin-bottom:10px;">
+            <input type="text" id="gh-path" placeholder="File" value="products.json" style="margin-bottom:20px;">
+            <button class="btn btn-primary" style="width:100%" onclick="startLogin()">Sisteme Gir</button>
+        </div>
+    </div>
+
+    <aside>
+        <div class="brand">🚀 PlanSmithCo.</div>
+        <div class="tree-view" id="tree-root"></div>
+        <div class="sidebar-footer">
+            <button class="btn btn-primary" style="width:100%" onclick="newProd()">+ Yeni Ürün</button>
+            <button class="btn btn-success" style="width:100%" onclick="newCat()">+ Yeni Kategori</button>
+        </div>
+    </aside>
+
+    <main>
+        <div class="center-panel">
+            <div id="editor-area" class="hidden" style="height:100%; display:flex; flex-direction:column;">
+                <div class="tabs-header">
+                    <div class="tab-btn active" onclick="switchTab('genel')">Genel Bilgiler</div>
+                    <div class="tab-btn" onclick="switchTab('varyasyon')">Varyasyonlar & Konfigürasyon</div>
+                </div>
+
+                <div class="editor-content">
+                    <div id="tab-genel" class="tab-content active">
+                        <div class="card">
+                            <div class="form-grid">
+                                <div class="full">
+                                    <label>Kategori</label>
+                                    <select id="p-cat" onchange="moveCat()"></select>
+                                </div>
+                                <div><label>Ürün Adı</label><input id="p-name"></div>
+                                <div><label>SKU (Stok Kodu)</label><input id="p-sku"></div>
+                                <div><label>Fiyat</label><input type="number" id="p-price"></div>
+                                <div>
+                                    <label>Poster Resmi</label>
+                                    <div class="input-group-btn">
+                                        <input id="p-thumb">
+                                        <button class="btn btn-primary" onclick="openMedia('p-thumb','image')">Seç</button>
+                                    </div>
+                                </div>
+                                <div class="full"><label>Açıklama</label><textarea id="p-desc" rows="4"></textarea></div>
+                                <div class="full"><label>Etsy Linki</label><input id="p-link"></div>
+                                <div class="full">
+                                    <label>Model Dosyası (.glb)</label>
+                                    <div class="input-group-btn">
+                                        <input id="p-model" onchange="updateGlbPreview()">
+                                        <button class="btn btn-primary" onclick="openMedia('p-model','model')">Seç</button>
+                                    </div>
+                                    <small style="color:#64748b">Model seçince sağ panelde otomatik açılır.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <button class="btn btn-danger" onclick="delProd()">Ürünü Sil</button>
+                            <button class="btn btn-success" onclick="saveGithub()">Değişiklikleri Kaydet</button>
+                        </div>
+                    </div>
+
+                    <div id="tab-varyasyon" class="tab-content">
+                        <div style="text-align:center; padding:20px; background:#e0f2fe; border-radius:8px; margin-bottom:20px; border:1px dashed #3b82f6;">
+                            <h4 style="margin:0 0 10px 0; color:#1e40af;">Otomatik Varyasyon Oluşturucu</h4>
+                            <p style="font-size:12px; margin-bottom:10px;">GLB dosyasındaki materyalleri okur ve her biri için otomatik grup oluşturur.</p>
+                            <button class="btn btn-primary" onclick="autoFill()">⚡ GLB'den Grupları Oluştur</button>
+                        </div>
+
+                        <div id="v-container"></div>
+                        
+                        <div style="margin-top:20px; text-align:right;">
+                             <button class="btn btn-ghost" onclick="addGrp()">+ Manuel Grup Ekle</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="rp-header">✨ 3D Materyal Dedektifi (Pro)</div>
+            <div class="rp-content">                
+                <model-viewer 
+                id="viewer" 
+                camera-controls 
+                auto-rotate 
+                shadow-intensity="1" 
+                background-color="#1e293b"
+                crossorigin="anonymous">
+                </model-viewer>
+                
+                <div class="mat-list-title">MODEL MATERYALLERİ</div>
+                <div id="mat-list" class="mat-list">
+                    <div style="padding:15px; color:#64748b; text-align:center; font-size:12px;">Model Seçilmedi</div>
+                </div>
+                
+                <div style="margin-top:20px; font-size:11px; color:#64748b; line-height:1.5; border-top:1px solid #334155; padding-top:10px;">
+                    💡 <strong>İpucu:</strong><br>
+                    Listeden bir materyale tıkladığında, ismi otomatik olarak o anki aktif kutucuğa yazılır.
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- GLOBAL VARIABLES ---
+        let DATA=[], CAT=-1, PROD=-1, CRED={}, SHA="", R2_FILES=[], CUR_PATH="";
+        let TARGET_ID="", FILTER_TYPE="all", CHECKED_FILES=new Set(), LAST_INPUT=null;
+
+        window.onload = () => { if(localStorage.getItem('gh_token')) document.getElementById('gh-token').value = localStorage.getItem('gh_token'); }
+
+        // --- CORE: LOGIN & LOAD ---
+        async function startLogin() {
+            // URL Temizliği
+            if(WORKER_URL.endsWith('/list')) WORKER_URL = WORKER_URL.replace('/list', '');
+            if(WORKER_URL.endsWith('/')) WORKER_URL = WORKER_URL.slice(0, -1);
+            if(R2_PUBLIC_URL.endsWith('/')) R2_PUBLIC_URL = R2_PUBLIC_URL.slice(0, -1);
+
+            CRED = {
+                token: document.getElementById('gh-token').value,
+                owner: document.getElementById('gh-owner').value,
+                repo: document.getElementById('gh-repo').value,
+                branch: document.getElementById('gh-branch').value,
+                path: document.getElementById('gh-path').value
+            };
+            if(!CRED.token) return alert("Token eksik!");
+            localStorage.setItem('gh_token', CRED.token);
+            document.getElementById('loader').style.display='flex';
+
+            try {
+                if(WORKER_URL) {
+                    const r = await fetch(WORKER_URL + "/list");
+                    if(r.ok) R2_FILES = await r.json();
+                    else console.warn("R2 Listesi çekilemedi");
+                }
+                const u = `https://api.github.com/repos/${CRED.owner}/${CRED.repo}/contents/${CRED.path}?ref=${CRED.branch}`;
+                const res = await fetch(u, {headers:{'Authorization':`token ${CRED.token}`}});
+                if(!res.ok) throw new Error("GitHub Bağlantı Hatası");
+                const d = await res.json();
+                SHA = d.sha;
+                DATA = JSON.parse(decodeURIComponent(escape(window.atob(d.content))));
+                
+                document.getElementById('login-overlay').style.display='none';
+                renderTree();
+            } catch(e) { alert("Hata: " + e.message); }
+            finally { document.getElementById('loader').style.display='none'; }
+        }
+
+        // --- UI: TREE & TABS ---
+        function renderTree() {
+            const root = document.getElementById('tree-root'); root.innerHTML='';
+            const sel = document.getElementById('p-cat'); sel.innerHTML='';
+            DATA.forEach((c,i) => {
+                sel.innerHTML += `<option value="${i}">${c.name}</option>`;
+                const group = document.createElement('div'); group.className='tree-cat-group';
+                group.innerHTML = `<div class="tree-cat-header">${c.name} <span class="cat-actions" onclick="editCat(${i})" title="Kategori Adını Düzenle">✏️</span></div>`;
+                c.products.forEach((p,j) => {
+                    const item = document.createElement('div'); item.className='tree-item';
+                    item.innerHTML = `📦 ${p.name||'Adsız Ürün'}`;
+                    item.onclick = () => loadProd(i,j, item);
+                    group.appendChild(item);
+                });
+                root.appendChild(group);
+            });
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('tab-'+tab).classList.add('active');
+        }
+
+        function loadProd(i,j, el) {
+            if(PROD>-1) saveMem(); 
+            CAT=i; PROD=j;
+            document.querySelectorAll('.tree-item').forEach(x => x.classList.remove('active'));
+            if(el) el.classList.add('active');
+            document.getElementById('editor-area').classList.remove('hidden');
+            const p = DATA[i].products[j];
+            ['p-name','p-sku','p-thumb','p-desc','p-link','p-model'].forEach(k => document.getElementById(k).value = p[k.split('-')[1]] || '');
+            document.getElementById('p-price').value = p.price || 0;
+            document.getElementById('p-cat').value = i;
+            renderVars(p.variantGroups||[]);
+            updateGlbPreview(); 
+        }
+
+        // --- CORE: VARIATIONS ---
+        function renderVars(grps) {
+            const div = document.getElementById('v-container'); div.innerHTML='';
+            grps.forEach((g,gi) => {
+                const gDiv = document.createElement('div'); gDiv.className='v-group';
+                let html = `
+                    <div class="v-header">
+                        <input value="${g.groupName}" oninput="DATA[CAT].products[PROD].variantGroups[${gi}].groupName=this.value" placeholder="Grup Adı">
+                        <button class="btn btn-danger" onclick="delGrp(${gi})" style="padding:4px 8px; font-size:10px;">Grubu Sil</button>
+                    </div>
+                    <div class="v-body">`;
+                g.items.forEach((it,ii) => {
+                    html += `
+                    <div class="v-item">
+                        <div><div class="v-item-label">Varyasyon Adı</div><input value="${it.name}" oninput="updVar(${gi},${ii},'name',this.value)"></div>
+                        <div><div class="v-item-label">Resim</div><div class="input-group-btn"><input value="${it.value}" id="vi-${gi}-${ii}" oninput="updVar(${gi},${ii},'value',this.value)"><button class="btn btn-primary" style="padding:2px 6px;" onclick="openMedia('vi-${gi}-${ii}','image')">..</button></div></div>
+                        <div><div class="v-item-label">GLB Mat ID</div><input value="${it.textureConfig?.materialName||''}" onfocus="registerFocus(this)" oninput="updConf(${gi},${ii},'materialName',this.value)"></div>
+                        <div><div class="v-item-label">Doku Dosyası</div><div class="input-group-btn"><input value="${it.textureConfig?.baseColor||''}" id="vt-${gi}-${ii}" oninput="updConf(${gi},${ii},'baseColor',this.value)"><button class="btn btn-primary" style="padding:2px 6px;" onclick="openMedia('vt-${gi}-${ii}','image')">..</button></div></div>
+                        <button class="btn btn-danger" style="padding:2px;" onclick="delItem(${gi},${ii})" title="Sil">x</button>
+                    </div>`;
+                });
+                html += `<button class="btn btn-ghost" style="width:100%; font-size:11px;" onclick="addItem(${gi})">+ Varyasyon Ekle</button></div>`;
+                gDiv.innerHTML = html;
+                div.appendChild(gDiv);
+            });
+        }
+
+        // --- GLB & DETECTIVE LOGIC (GÜÇLENDİRİLMİŞ) ---
+        function updateGlbPreview() {
+            const path = document.getElementById('p-model').value;
+            const viewer = document.getElementById('viewer');
+            const list = document.getElementById('mat-list');
+            
+            if(!path) { 
+                viewer.src=""; 
+                list.innerHTML="<div style='padding:20px; color:#64748b; text-align:center;'>Model Seçilmedi</div>"; 
+                return; 
+            }
+            
+            // LINK DÜZELTME VE CACHE BUSTING (TIMESTAMP)
+            const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+            const timestamp = new Date().getTime(); // Cache'i kırmak için
+            const proxyUrl = WORKER_URL + "/get/" + cleanPath + "?t=" + timestamp;
+            
+            console.log("Model Yükleniyor:", proxyUrl);
+            viewer.src = proxyUrl;
+
+            viewer.addEventListener('load', () => {
+                list.innerHTML = ''; window.MATS = [];
+                if(viewer.model && viewer.model.materials) {
+                    viewer.model.materials.forEach(m => {
+                        window.MATS.push(m.name);
+                        const item = document.createElement('div'); item.className='mat-item';
+                        item.innerHTML = `<span>${m.name}</span> <span class="mat-arrow">➤</span>`;
+                        item.onclick = () => {
+                            const orig = m.pbrMetallicRoughness.baseColorFactor.slice();
+                            m.pbrMetallicRoughness.setBaseColorFactor([1, 0, 0, 1]); 
+                            setTimeout(() => m.pbrMetallicRoughness.setBaseColorFactor(orig), 400);
+                            if(LAST_INPUT) { 
+                                LAST_INPUT.value = m.name; 
+                                LAST_INPUT.dispatchEvent(new Event('input'));
+                                LAST_INPUT.style.backgroundColor = '#dcfce7';
+                                setTimeout(() => LAST_INPUT.style.backgroundColor = '', 500);
+                            }
+                        };
+                        list.appendChild(item);
+                    });
+                }
+            }, {once:true});
+
+            viewer.addEventListener('error', (e) => {
+                console.error("Model Hatası:", e);
+                list.innerHTML = `<div style='padding:15px; color:#ef4444; text-align:center;'>⚠️ Model Açılamadı<br><small>Dosya yolunu kontrol et</small></div>`;
+            });
+        }
+
+        function autoFill() {
+            if(!window.MATS || window.MATS.length === 0) return alert("Önce geçerli bir GLB modeli yükleyin!");
+            if(!confirm("Gruplar oluşturulsun mu?")) return;
+            const newGroups = [];
+            window.MATS.forEach(matName => {
+                newGroups.push({
+                    groupName: matName,
+                    items: [{
+                        name: "Orijinal",
+                        value: "",
+                        textureConfig: { materialName: matName, baseColor: "" }
+                    }]
+                });
+            });
+            DATA[CAT].products[PROD].variantGroups = [...DATA[CAT].products[PROD].variantGroups, ...newGroups];
+            renderVars(DATA[CAT].products[PROD].variantGroups);
+        }
+
+        // --- FILE EXPLORER ---
+        function openMedia(id, type) {
+            TARGET_ID = id; FILTER_TYPE = type; CUR_PATH = ""; CHECKED_FILES.clear();
+            document.getElementById('media-modal').style.display = 'flex';
+            renderFiles();
+            updateDeleteButton();
+        }
+
+        function renderFiles() {
+            const grid = document.getElementById('file-grid'); grid.innerHTML = '';
+            const search = document.getElementById('search-in').value.toLowerCase();
+            document.getElementById('cur-path').innerText = search ? "Arama..." : (CUR_PATH || "/");
+
+            let items = [];
+            const source = search ? R2_FILES : R2_FILES.filter(f => f.key.startsWith(CUR_PATH));
+
+            source.forEach(f => {
+                const relative = f.key.slice(CUR_PATH.length);
+                const parts = relative.split('/');
+                if(search) {
+                    if(f.key.toLowerCase().includes(search)) items.push({type:'file', key:f.key, name:f.key});
+                } else {
+                    if(parts.length > 1 && parts[0]) {
+                        if(!items.find(i=>i.name===parts[0] && i.type==='folder')) items.push({type:'folder', name:parts[0]});
+                    } else if (parts.length === 1 && parts[0]!=='') {
+                        items.push({type:'file', key:f.key, name:parts[0]});
+                    }
+                }
+            });
+
+            items.sort((a,b) => (a.type==='folder'?-1:1));
+            if(items.length===0) grid.innerHTML = "<div style='padding:20px; color:#999'>Boş</div>";
+
+            items.forEach(item => {
+                const el = document.createElement('div'); el.className = 'file-item';
+                if(item.type === 'file') {
+                    const check = document.createElement('input'); 
+                    check.type='checkbox'; check.className='file-check';
+                    check.onclick = (e) => {
+                        e.stopPropagation();
+                        if(check.checked) { CHECKED_FILES.add(item.key); el.classList.add('checked'); }
+                        else { CHECKED_FILES.delete(item.key); el.classList.remove('checked'); }
+                        updateDeleteButton();
+                    };
+                    el.appendChild(check);
+                } else { el.classList.add('is-folder'); }
+
+                let icon = item.type === 'folder' ? `<div class="file-icon">📂</div>` : 
+                           (item.name.match(/\.(jpg|png|webp)$/i) ? `<img src="${WORKER_URL}/get/${item.key}" class="file-thumb">` : `<div class="file-icon">📄</div>`);
+                
+                el.innerHTML += icon + `<div class="file-name">${item.name}</div>`;
+                el.onclick = () => {
+                    if(item.type === 'folder') { CUR_PATH += item.name + "/"; document.getElementById('search-in').value=""; renderFiles(); }
+                    else {
+                        const finalKey = item.key || (CUR_PATH+item.name);
+                        document.getElementById(TARGET_ID).value = "/" + finalKey;
+                        closeMedia();
+                        if(TARGET_ID === 'p-model') updateGlbPreview();
+                        else document.getElementById(TARGET_ID).dispatchEvent(new Event('input'));
+                    }
+                };
+                grid.appendChild(el);
+            });
+        }
+
+        function updateDeleteButton() {
+            const btn = document.getElementById('btn-delete');
+            if(CHECKED_FILES.size > 0) { btn.innerText = `🗑️ Sil (${CHECKED_FILES.size})`; btn.style.opacity = 1; btn.style.pointerEvents = 'auto'; } 
+            else { btn.innerText = `🗑️ Sil`; btn.style.opacity = 0.5; btn.style.pointerEvents = 'none'; }
+        }
+
+        async function deleteSelectedFiles() {
+            if(!confirm("Seçili dosyalar kalıcı olarak silinecek?")) return;
+            for (const key of CHECKED_FILES) { try { await fetch(WORKER_URL + "/delete/" + key, { method: "DELETE" }); } catch(e) {} }
+            const lr = await fetch(WORKER_URL+"/list"); R2_FILES = await lr.json();
+            CHECKED_FILES.clear(); renderFiles(); updateDeleteButton();
+        }
+
+        async function uploadToR2(file) {
+            if(!file || !WORKER_URL) return;
+            const key = CUR_PATH + file.name;
+            if(!confirm(`Yüklensin mi: ${file.name}`)) return;
+            try {
+                await fetch(WORKER_URL + "/upload/" + key, { method:"PUT", body:file });
+                const lr = await fetch(WORKER_URL+"/list"); R2_FILES = await lr.json();
+                renderFiles();
+            } catch(e) { alert(e.message); }
+        }
+
+        function navUp() { if(!CUR_PATH) return; const parts = CUR_PATH.split('/'); parts.pop(); parts.pop(); CUR_PATH = parts.length > 0 ? parts.join('/') + "/" : ""; renderFiles(); }
+        function closeMedia() { document.getElementById('media-modal').style.display='none'; }
+
+        // --- HELPERS ---
+        function registerFocus(el) { LAST_INPUT = el; }
+        function saveMem() { const p = DATA[CAT].products[PROD]; ['name','sku','thumb','desc','link','model'].forEach(k => p[k] = document.getElementById('p-'+k).value); p.price = document.getElementById('p-price').value; }
+        function editCat(i) { const n=prompt("Kategori Adını Düzenle:", DATA[i].name); if(n) { DATA[i].name = newName; renderTree(); } }
+        window.updVar = (g,i,k,v) => DATA[CAT].products[PROD].variantGroups[g].items[i][k]=v;
+        window.updConf = (g,i,k,v) => { if(!DATA[CAT].products[PROD].variantGroups[g].items[i].textureConfig) DATA[CAT].products[PROD].variantGroups[g].items[i].textureConfig={}; DATA[CAT].products[PROD].variantGroups[g].items[i].textureConfig[k]=v; }
+        window.addGrp = () => { DATA[CAT].products[PROD].variantGroups.push({groupName:"Yeni Grup",items:[]}); renderVars(DATA[CAT].products[PROD].variantGroups); }
+        window.addItem = (g) => { DATA[CAT].products[PROD].variantGroups[g].items.push({name:"Yeni",value:"",textureConfig:{}}); renderVars(DATA[CAT].products[PROD].variantGroups); }
+        window.delGrp = (g) => { if(confirm("Grup silinsin mi?")) DATA[CAT].products[PROD].variantGroups.splice(g,1); renderVars(DATA[CAT].products[PROD].variantGroups); }
+        window.delItem = (g,i) => { DATA[CAT].products[PROD].variantGroups[g].items.splice(i,1); renderVars(DATA[CAT].products[PROD].variantGroups); }
+        
+        async function saveGithub() {
+            if(PROD>-1) saveMem(); document.getElementById('loader').style.display='flex';
+            const u = `https://api.github.com/repos/${CRED.owner}/${CRED.repo}/contents/${CRED.path}`;
+            const b = { message:"Update via v9.2", content:btoa(unescape(encodeURIComponent(JSON.stringify(DATA,null,2)))), sha:SHA, branch:CRED.branch };
+            try { const r = await fetch(u, {method:'PUT', headers:{'Authorization':`token ${CRED.token}`}, body:JSON.stringify(b)}); if(r.ok) { SHA = (await r.json()).content.sha; alert("Kayıt Başarılı!"); } } catch(e) { alert("Hata: " + e.message); } document.getElementById('loader').style.display='none';
+        }
+        
+        window.newProd = () => { if(!DATA.length) return; if(CAT==-1) CAT=0; DATA[CAT].products.push({name:"Yeni Ürün", variantGroups:[]}); renderTree(); }
+        window.newCat = () => { const n=prompt("Kategori Adı"); if(n) DATA.push({name:n, products:[]}); renderTree(); }
+        window.delProd = () => { if(confirm("Ürün silinsin mi?")) { DATA[CAT].products.splice(PROD,1); location.reload(); } }
+        window.moveCat = () => { const newC = document.getElementById('p-cat').value; saveMem(); const p = DATA[CAT].products.splice(PROD,1)[0]; DATA[newC].products.push(p); renderTree(); }
+    </script>
+</body>
+</html>
