@@ -34,7 +34,7 @@ function renderCategories(categories) {
             <img src="${cat.thumbnail}" class="cat-thumb" alt="${cat.name}">
             <div class="cat-info">
                 <div class="cat-title">${cat.name}</div>
-                <div class="cat-count">${cat.products?.length || 0} ürün</div>
+                <div class="cat-count">${cat.products?.length || 0} product</div>
             </div>
         `;
         card.onclick = () => openCategory(cat);
@@ -62,7 +62,7 @@ function openCategory(category) {
 
     if (categoryInfo) categoryInfo.style.display = 'block';
     if (categoryTitle) categoryTitle.textContent = category.name;
-    if (categoryCount) categoryCount.textContent = `${category.products?.length || 0} ürün`;
+    if (categoryCount) categoryCount.textContent = `${category.products?.length || 0} product`;
     if (categoryDesc) {
         categoryDesc.textContent = category.description || '';
         categoryDesc.classList.add('category-desc-collapsed');
@@ -70,7 +70,7 @@ function openCategory(category) {
         // Açıklama uzunsa toggle butonu göster
         if (categoryDescToggle) {
             categoryDescToggle.style.display = (category.description && category.description.length > 100) ? 'inline-block' : 'none';
-            categoryDescToggle.textContent = 'Devamını gör';
+            categoryDescToggle.textContent = 'Read more';
         }
     }
 
@@ -137,7 +137,7 @@ window.toggleDescription = function (descId, toggleBtnId, collapsedClass) {
             toggleBtn.textContent = 'Daha az';
         } else {
             desc.classList.add(collapsedClass);
-            toggleBtn.textContent = 'Devamını gör';
+            toggleBtn.textContent = 'Read more';
         }
     }
 }
@@ -820,7 +820,7 @@ function populateDetailPanel(product) {
             const shouldShow = (product.description && product.description.length > 200); // 100 -> 200 karakter
             // Inline style kullan (kategori gibi)
             toggleBtn.style.display = shouldShow ? 'inline-block' : 'none';
-            toggleBtn.textContent = 'Devamını gör';
+            toggleBtn.textContent = 'Read more';
         }
     }
 
