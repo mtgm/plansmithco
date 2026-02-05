@@ -1773,55 +1773,67 @@
 
                         <!-- NEW: Product Card Tab -->
                         <div id="tab-card" class="tab-content">
+                            <!-- Info Banner -->
                             <div
-                                style="background:rgba(234, 179, 8, 0.1); padding:20px; border-radius:12px; margin-bottom:25px; text-align:center; border:1px dashed var(--primary);">
-                                <h4 style="margin:0 0 8px 0; color:var(--primary);">📦 Etsy Ürün Kartı Oluşturucu</h4>
-                                <p style="font-size:12px; margin-bottom:15px; color:var(--text-muted);">
+                                style="background:rgba(234, 179, 8, 0.1); padding:15px 20px; border-radius:12px; margin-bottom:20px; text-align:center; border:1px dashed var(--primary);">
+                                <h4 style="margin:0 0 5px 0; color:var(--primary); font-size:15px;">📦 Etsy Ürün Kartı
+                                    Oluşturucu</h4>
+                                <p style="font-size:12px; margin:0; color:var(--text-muted);">
                                     QR kodlu ürün kartını önizleyin ve yüksek kalitede JPEG olarak indirin.
                                 </p>
                             </div>
 
-                            <div style="display:flex; flex-direction:column; gap:20px;">
-                                <!-- Preview Area -->
-                                <div
-                                    style="background:#fff; border-radius:12px; padding:20px; border:1px solid #e2e8f0;">
-                                    <h5 style="margin:0 0 15px 0; color:var(--secondary); font-size:14px;">Kart Önizleme
-                                    </h5>
-                                    <div
-                                        style="position:relative; width:100%; padding-bottom:100%; background:#f8fafc; border-radius:8px; overflow:hidden; border:2px solid #e2e8f0;">
-                                        <iframe id="card-preview-frame"
-                                            style="position:absolute; top:0; left:0; width:100%; height:100%; border:none; transform:scale(0.5); transform-origin:top left; width:200%; height:200%;">
-                                        </iframe>
-                                    </div>
-                                    <p
-                                        style="font-size:11px; color:var(--text-muted); margin-top:10px; text-align:center;">
-                                        Önizleme %50 ölçeklendirilmiş gösterilmektedir
-                                    </p>
-                                </div>
+                            <!-- AR Description Input -->
+                            <div
+                                style="background:#fff; border-radius:12px; padding:20px; border:1px solid #e2e8f0; margin-bottom:15px;">
+                                <h5 style="margin:0 0 10px 0; color:var(--secondary); font-size:14px;">AR Açıklama Metni
+                                </h5>
+                                <input type="text" id="card-description"
+                                    placeholder="Örn: Scan to preview the finished rack in your garage"
+                                    style="width:100%; padding:10px 12px; border:1px solid #e2e8f0; border-radius:6px; font-size:13px; font-family:inherit;">
+                                <small style="display:block; margin-top:6px; font-size:11px; color:var(--text-muted);">
+                                    Bu metin QR kodun altında görünecek. Her ürün için özelleştirilebilir.
+                                </small>
+                            </div>
 
-                                <!-- Actions -->
-                                <div style="display:flex; gap:12px;">
-                                    <button class="btn btn-primary" onclick="refreshCardPreview()" style="flex:1;">
-                                        🔄 Önizlemeyi Yenile
-                                    </button>
-                                    <button class="btn btn-success" onclick="downloadCardAsJPEG()" style="flex:1;">
-                                        💾 JPEG Olarak İndir (2000x2000)
-                                    </button>
-                                </div>
-
-                                <!-- Instructions -->
+                            <!-- Main Content: Card Preview -->
+                            <div
+                                style="background:#fff; border-radius:12px; padding:20px; border:1px solid #e2e8f0; margin-bottom:15px;">
+                                <h5 style="margin:0 0 12px 0; color:var(--secondary); font-size:14px;">Kart Önizleme
+                                </h5>
                                 <div
-                                    style="background:rgba(16, 185, 129, 0.1); padding:15px; border-radius:8px; border:1px solid rgba(16, 185, 129, 0.3);">
-                                    <h5 style="margin:0 0 8px 0; color:#059669; font-size:13px;">ℹ️ Kullanım Talimatları
-                                    </h5>
-                                    <ul
-                                        style="margin:0; padding-left:20px; font-size:12px; color:#047857; line-height:1.6;">
-                                        <li>Önce ürünü kaydedin (SKU ve isim gerekli)</li>
-                                        <li>"Önizlemeyi Yenile" butonuna tıklayın</li>
-                                        <li>Kartı kontrol edin ve "JPEG Olarak İndir" butonuna basın</li>
-                                        <li>İndirilen dosyayı Etsy'de ürün resmi olarak yükleyin</li>
-                                    </ul>
+                                    style="position:relative; width:100%; max-width:500px; aspect-ratio:1/1; background:#f8fafc; border-radius:8px; overflow:hidden; border:2px solid #e2e8f0; margin:0 auto;">
+                                    <iframe id="card-preview-frame"
+                                        style="position:absolute; top:0; left:0; width:2000px; height:2000px; border:none; transform:scale(0.25); transform-origin:top left;">
+                                    </iframe>
                                 </div>
+                                <p style="font-size:11px; color:var(--text-muted); margin-top:8px; text-align:center;">
+                                    Önizleme 2000x2000px kartın tam görünümüdür
+                                </p>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                                <button class="btn btn-primary" onclick="refreshCardPreview()" style="flex:1;">
+                                    🔄 Önizlemeyi Yenile
+                                </button>
+                                <button class="btn btn-success" onclick="downloadCardAsJPEG()" style="flex:1;">
+                                    💾 JPEG İndir (2000x2000)
+                                </button>
+                            </div>
+
+                            <!-- Instructions -->
+                            <div
+                                style="background:rgba(16, 185, 129, 0.1); padding:12px 15px; border-radius:8px; border:1px solid rgba(16, 185, 129, 0.3);">
+                                <h5 style="margin:0 0 6px 0; color:#059669; font-size:13px;">ℹ️ Kullanım Talimatları
+                                </h5>
+                                <ul
+                                    style="margin:0; padding-left:20px; font-size:11px; color:#047857; line-height:1.5;">
+                                    <li>Önce ürünü kaydedin (SKU ve isim gerekli)</li>
+                                    <li>"Önizlemeyi Yenile" butonuna tıklayın</li>
+                                    <li>Kartı kontrol edin ve "JPEG İndir" butonuna basın</li>
+                                    <li>İndirilen dosyayı Etsy'de ürün resmi olarak yükleyin</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -3849,6 +3861,7 @@
         function refreshCardPreview() {
             const sku = document.getElementById('p-sku').value;
             const name = document.getElementById('p-name').value;
+            const description = document.getElementById('card-description').value;
 
             if (!sku || !name) {
                 showToast('⚠️ Uyarı', 'Önce ürünü kaydedin (SKU ve isim gerekli)', 'warning');
@@ -3856,7 +3869,12 @@
             }
 
             const iframe = document.getElementById('card-preview-frame');
-            const url = `/etsy-card.html?sku=${encodeURIComponent(sku)}&name=${encodeURIComponent(name)}`;
+            let url = `/etsy-card.html?sku=${encodeURIComponent(sku)}&name=${encodeURIComponent(name)}`;
+
+            if (description) {
+                url += `&description=${encodeURIComponent(description)}`;
+            }
+
             iframe.src = url;
 
             showToast('✅ Başarılı', 'Kart önizlemesi yüklendi', 'success');
@@ -3865,6 +3883,7 @@
         async function downloadCardAsJPEG() {
             const sku = document.getElementById('p-sku').value;
             const name = document.getElementById('p-name').value;
+            const description = document.getElementById('card-description').value;
 
             if (!sku || !name) {
                 showToast('⚠️ Uyarı', 'Önce ürünü kaydedin (SKU ve isim gerekli)', 'warning');
@@ -3885,8 +3904,12 @@
             showToast('⏳ İşleniyor', 'Kart JPEG olarak hazırlanıyor...', 'info');
 
             // Open card in a new window for capture
-            const url = `/etsy-card.html?sku=${encodeURIComponent(sku)}&name=${encodeURIComponent(name)}`;
-            const captureWindow = window.open(url, '_blank', 'width=2000,height=2000');
+            let url = `/etsy-card.html?sku=${encodeURIComponent(sku)}&name=${encodeURIComponent(name)}`;
+
+            if (description) {
+                url += `&description=${encodeURIComponent(description)}`;
+            }
+            const captureWindow = window.open(url, '_blank', 'width=2100,height=2100');
 
             if (!captureWindow) {
                 showToast('❌ Hata', 'Pop-up engellendi. Lütfen pop-up izni verin.', 'error');
@@ -3896,19 +3919,28 @@
             // Wait for the window to load
             captureWindow.addEventListener('load', async () => {
                 try {
-                    // Wait a bit more for QR code to render
-                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    // Wait for QR code and fonts to render
+                    await new Promise(resolve => setTimeout(resolve, 2000));
 
-                    const canvas = await html2canvas(captureWindow.document.body, {
+                    // Find the card container element
+                    const cardContainer = captureWindow.document.querySelector('.card-container');
+
+                    if (!cardContainer) {
+                        throw new Error('Kart container bulunamadı');
+                    }
+
+                    // Capture the card container at exact 2000x2000
+                    const canvas = await html2canvas(cardContainer, {
                         width: 2000,
                         height: 2000,
                         scale: 1,
                         useCORS: true,
                         allowTaint: true,
-                        backgroundColor: null
+                        backgroundColor: '#0f172a',
+                        logging: false
                     });
 
-                    // Convert to JPEG
+                    // Convert to JPEG with high quality
                     canvas.toBlob((blob) => {
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement('a');
@@ -3920,7 +3952,7 @@
                         URL.revokeObjectURL(url);
 
                         captureWindow.close();
-                        showToast('✅ Başarılı', 'JPEG dosyası indirildi!', 'success');
+                        showToast('✅ Başarılı', 'JPEG dosyası indirildi! (2000x2000px)', 'success');
                     }, 'image/jpeg', 0.95);
 
                 } catch (error) {

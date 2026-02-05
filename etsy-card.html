@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlanSmithCo - Product Card</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>PlanSmithCoDIY - Product Card</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -15,55 +15,68 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
+            background: #ffffff;
+            margin: 0;
+            padding: 0;
+            width: 2000px;
+            height: 2000px;
         }
 
         .card-container {
             width: 2000px;
             height: 2000px;
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            border-radius: 40px;
-            padding: 80px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            background: #ffffff;
+            padding: 0;
             display: flex;
             flex-direction: column;
             position: relative;
+            overflow: hidden;
         }
 
-        /* Product Title */
-        .product-title {
+        /* Main Content Box */
+        .content-box {
+            background: #ffffff;
+            padding: 60px;
+            margin: 0px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            flex: 1;
+        }
+
+        /* Top Header Bar */
+        .header-bar {
+            background: #f59e0b;
+            border-radius: 20px;
+            padding: 28px 50px;
             text-align: center;
-            font-size: 72px;
-            font-weight: 800;
-            color: #f8fafc;
-            margin-bottom: 60px;
-            letter-spacing: -1px;
         }
 
-        /* QR Code Area - Yellow Background */
+        .header-text {
+            font-size: 64px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0px;
+        }
+
+        /* QR Code Area */
         .qr-area {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            background: #f8fafc;
             border-radius: 32px;
-            padding: 80px;
+            padding: 70px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            margin-bottom: 60px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid #e2e8f0;
         }
 
         .qr-code-wrapper {
-            background: white;
-            padding: 40px;
+            background: #ffffff;
+            padding: 45px;
             border-radius: 24px;
             margin-bottom: 40px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
         }
 
         #qr-code {
@@ -74,49 +87,45 @@
         #qr-code img {
             width: 100% !important;
             height: 100% !important;
-            border-radius: 12px;
+            border-radius: 8px;
         }
 
         .scan-instruction {
             display: flex;
             align-items: center;
-            gap: 30px;
-            font-size: 56px;
+            gap: 25px;
+            font-size: 52px;
             font-weight: 700;
-            color: #78350f;
+            color: #475569;
+            margin-bottom: 15px;
         }
 
         .scan-icon {
-            font-size: 80px;
-            animation: pulse 2s ease-in-out infinite;
+            font-size: 72px;
         }
 
-        @keyframes pulse {
-
-            0%,
-            100% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.1);
-            }
+        .scan-subtext {
+            font-size: 36px;
+            font-weight: 500;
+            color: #94a3b8;
+            text-align: center;
+            line-height: 1.4;
+            max-width: 900px;
         }
 
         /* How to Use Section */
         .how-to-use {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 24px;
-            padding: 60px;
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 45px 55px;
+            border: 1px solid #e2e8f0;
         }
 
         .how-to-title {
             font-size: 48px;
-            font-weight: 700;
-            color: #fbbf24;
-            margin-bottom: 40px;
+            font-weight: 800;
+            color: #f59e0b;
+            margin-bottom: 35px;
             text-align: center;
             letter-spacing: 2px;
         }
@@ -124,87 +133,109 @@
         .steps {
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 22px;
         }
 
         .step {
             display: flex;
             align-items: center;
-            gap: 30px;
-            background: rgba(255, 255, 255, 0.08);
-            padding: 30px 40px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            gap: 28px;
+            background: #f8fafc;
+            padding: 25px 35px;
+            border-radius: 18px;
+            border: 2px solid #e2e8f0;
         }
 
         .step-number {
-            width: 80px;
-            height: 80px;
-            background: #f59e0b;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
             color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
-            font-weight: 700;
+            font-size: 42px;
+            font-weight: 900;
             flex-shrink: 0;
         }
 
         .step-text {
-            font-size: 42px;
-            font-weight: 600;
-            color: #f1f5f9;
+            font-size: 38px;
+            font-weight: 700;
+            color: #475569;
             line-height: 1.4;
         }
 
-        /* Branding Footer */
-        .brand-footer {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 36px;
+        /* Etsy Link Footer */
+        .etsy-footer {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 28px;
+            padding: 20px 35px;
+            text-align: center;
+        }
+
+        .etsy-link {
+            font-size: 28px;
             font-weight: 700;
-            color: rgba(255, 255, 255, 0.4);
-            letter-spacing: 2px;
+            color: #64748b;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+        }
+
+        .etsy-label {
+            color: #f59e0b;
+            font-weight: 800;
         }
     </style>
 </head>
 
 <body>
     <div class="card-container">
-        <h1 class="product-title" id="product-name">Loading Product...</h1>
-
-        <div class="qr-area">
-            <div class="qr-code-wrapper">
-                <div id="qr-code"></div>
+        <div class="content-box">
+            <!-- Top Header Bar -->
+            <div class="header-bar">
+                <div class="header-text">View in Augmented Reality (AR)</div>
             </div>
-            <div class="scan-instruction">
-                <span class="scan-icon">📱</span>
-                <span>View on your space</span>
+
+            <!-- QR Code Area -->
+            <div class="qr-area">
+                <div class="qr-code-wrapper">
+                    <div id="qr-code"></div>
+                </div>
+                <div class="scan-instruction">
+                    <span class="scan-icon">📱</span>
+                    <span id="scan-description">Scan to preview the finished rack in your garage or workshop.</span>
+                </div>
+            </div>
+
+            <!-- How to Use Section -->
+            <div class="how-to-use">
+                <h2 class="how-to-title">HOW TO USE</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-text">Scan QR code with your phone</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-text">Allow camera access</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-text">Place product in your space</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Etsy Shop Link -->
+            <div class="etsy-footer">
+                <span class="etsy-link">
+                    <span class="etsy-label">Etsy:</span> https://www.etsy.com/shop/PlanSmithCoDIY
+                </span>
             </div>
         </div>
-
-        <div class="how-to-use">
-            <h2 class="how-to-title">HOW TO USE</h2>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <div class="step-text">Scan QR code with your phone</div>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <div class="step-text">Allow camera access</div>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <div class="step-text">Place product in your space</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="brand-footer">PlanSmithCo</div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -214,43 +245,23 @@
             const params = new URLSearchParams(window.location.search);
             return {
                 sku: params.get('sku'),
-                name: params.get('name')
+                name: params.get('name'),
+                description: params.get('description')
             };
         }
 
         // Initialize card
         async function init() {
-            const { sku, name } = getUrlParams();
+            const { sku, name, description } = getUrlParams();
 
             if (!sku) {
                 console.error('No SKU provided');
                 return;
             }
 
-            // Set product name
-            if (name) {
-                document.getElementById('product-name').textContent = decodeURIComponent(name);
-            } else {
-                // Try to fetch from products.json
-                try {
-                    const response = await fetch('/products.json');
-                    const data = await response.json();
-                    let foundProduct = null;
-
-                    for (const cat of data) {
-                        const p = cat.products.find(x => x && x.sku && x.sku.toString() === sku.toString());
-                        if (p) {
-                            foundProduct = p;
-                            break;
-                        }
-                    }
-
-                    if (foundProduct) {
-                        document.getElementById('product-name').textContent = foundProduct.name;
-                    }
-                } catch (e) {
-                    console.error('Error loading product data:', e);
-                }
+            // Set custom description if provided
+            if (description) {
+                document.getElementById('scan-description').textContent = decodeURIComponent(description);
             }
 
             // Generate QR code pointing to mobile AR view
@@ -264,7 +275,7 @@
                 height: 600,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H // High error correction for better scanning
+                correctLevel: QRCode.CorrectLevel.H
             });
         }
 
