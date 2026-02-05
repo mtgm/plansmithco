@@ -842,8 +842,8 @@ async function updateARandQR(configs) {
         }
     });
 
-    // Build URL - Yönlendirme /m/ sayfasına yapılıyor (Bilgi Kartı Sayfası)
-    const baseUrl = window.location.origin + '/m/';
+    // Build URL - Yönlendirme /m/ar-view.html sayfasına yapılıyor (Mobil AR Sayfası)
+    const baseUrl = window.location.origin + '/m/ar-view.html';
     const params = new URLSearchParams();
     if (state.sku) params.set('sku', state.sku);
     if (Object.keys(state.variants).length > 0) {

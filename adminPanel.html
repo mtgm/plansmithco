@@ -1708,6 +1708,7 @@
                     <div class="tabs-header">
                         <div class="tab-btn active" onclick="switchTab('genel')">Genel Bilgiler</div>
                         <div class="tab-btn" onclick="switchTab('varyasyon')">Varyasyonlar & Konfigürasyon</div>
+                        <div class="tab-btn" onclick="switchTab('card')">🎨 Ürün Kartı</div>
                     </div>
 
                     <div class="editor-content">
@@ -1756,6 +1757,60 @@
                             <button class="btn btn-ghost"
                                 style="width:100%; margin-top:15px; border-style:dashed; border-color:#cbd5e1; color:var(--text-muted);"
                                 onclick="addGrp()">+ Manuel Grup Ekle</button>
+                        </div>
+
+                        <!-- NEW: Product Card Tab -->
+                        <div id="tab-card" class="tab-content">
+                            <div
+                                style="background:rgba(234, 179, 8, 0.1); padding:20px; border-radius:12px; margin-bottom:25px; text-align:center; border:1px dashed var(--primary);">
+                                <h4 style="margin:0 0 8px 0; color:var(--primary);">📦 Etsy Ürün Kartı Oluşturucu</h4>
+                                <p style="font-size:12px; margin-bottom:15px; color:var(--text-muted);">
+                                    QR kodlu ürün kartını önizleyin ve yüksek kalitede JPEG olarak indirin.
+                                </p>
+                            </div>
+
+                            <div style="display:flex; flex-direction:column; gap:20px;">
+                                <!-- Preview Area -->
+                                <div
+                                    style="background:#fff; border-radius:12px; padding:20px; border:1px solid #e2e8f0;">
+                                    <h5 style="margin:0 0 15px 0; color:var(--secondary); font-size:14px;">Kart Önizleme
+                                    </h5>
+                                    <div
+                                        style="position:relative; width:100%; padding-bottom:100%; background:#f8fafc; border-radius:8px; overflow:hidden; border:2px solid #e2e8f0;">
+                                        <iframe id="card-preview-frame"
+                                            style="position:absolute; top:0; left:0; width:100%; height:100%; border:none; transform:scale(0.5); transform-origin:top left; width:200%; height:200%;">
+                                        </iframe>
+                                    </div>
+                                    <p
+                                        style="font-size:11px; color:var(--text-muted); margin-top:10px; text-align:center;">
+                                        Önizleme %50 ölçeklendirilmiş gösterilmektedir
+                                    </p>
+                                </div>
+
+                                <!-- Actions -->
+                                <div style="display:flex; gap:12px;">
+                                    <button class="btn btn-primary" onclick="refreshCardPreview()" style="flex:1;">
+                                        🔄 Önizlemeyi Yenile
+                                    </button>
+                                    <button class="btn btn-success" onclick="downloadCardAsJPEG()" style="flex:1;">
+                                        💾 JPEG Olarak İndir (2000x2000)
+                                    </button>
+                                </div>
+
+                                <!-- Instructions -->
+                                <div
+                                    style="background:rgba(16, 185, 129, 0.1); padding:15px; border-radius:8px; border:1px solid rgba(16, 185, 129, 0.3);">
+                                    <h5 style="margin:0 0 8px 0; color:#059669; font-size:13px;">ℹ️ Kullanım Talimatları
+                                    </h5>
+                                    <ul
+                                        style="margin:0; padding-left:20px; font-size:12px; color:#047857; line-height:1.6;">
+                                        <li>Önce ürünü kaydedin (SKU ve isim gerekli)</li>
+                                        <li>"Önizlemeyi Yenile" butonuna tıklayın</li>
+                                        <li>Kartı kontrol edin ve "JPEG Olarak İndir" butonuna basın</li>
+                                        <li>İndirilen dosyayı Etsy'de ürün resmi olarak yükleyin</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -3773,6 +3828,95 @@
         function backToSelection() {
             document.getElementById('catalog-selector-area').classList.remove('hidden');
             document.getElementById('catalog-preview-area').classList.add('hidden');
+        }
+
+        // ========================================
+        // PRODUCT CARD GENERATOR FUNCTIONS
+        // ========================================
+
+        function refreshCardPreview() {
+            const sku = document.getElementById('p-sku').value;
+            const name = document.getElementById('p-name').value;
+
+            if (!sku || !name) {
+                showToast('⚠️ Uyarı', 'Önce ürünü kaydedin (SKU ve isim gerekli)', 'warning');
+                return;
+            }
+
+            const iframe = document.getElementById('card-preview-frame');
+            const url = `/etsy-card.html?sku=${encodeURIComponent(sku)}&name=${encodeURIComponent(name)}`;
+            iframe.src = url;
+
+            showToast('✅ Başarılı', 'Kart önizlemesi yüklendi', 'success');
+        }
+
+        async function downloadCardAsJPEG() {
+            const sku = document.getElementById('p-sku').value;
+            const name = document.getElementById('p-name').value;
+
+            if (!sku || !name) {
+                showToast('⚠️ Uyarı', 'Önce ürünü kaydedin (SKU ve isim gerekli)', 'warning');
+                return;
+            }
+
+            // Check if html2canvas is loaded
+            if (typeof html2canvas === 'undefined') {
+                // Load html2canvas dynamically
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                script.onload = () => downloadCardAsJPEG(); // Retry after loading
+                document.head.appendChild(script);
+                showToast('⏳ Yükleniyor', 'Kütüphane yükleniyor, lütfen tekrar deneyin...', 'info');
+                return;
+            }
+
+            showToast('⏳ İşleniyor', 'Kart JPEG olarak hazırlanıyor...', 'info');
+
+            // Open card in a new window for capture
+            const url = `/etsy-card.html?sku=${encodeURIComponent(sku)}&name=${encodeURIComponent(name)}`;
+            const captureWindow = window.open(url, '_blank', 'width=2000,height=2000');
+
+            if (!captureWindow) {
+                showToast('❌ Hata', 'Pop-up engellendi. Lütfen pop-up izni verin.', 'error');
+                return;
+            }
+
+            // Wait for the window to load
+            captureWindow.addEventListener('load', async () => {
+                try {
+                    // Wait a bit more for QR code to render
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+
+                    const canvas = await html2canvas(captureWindow.document.body, {
+                        width: 2000,
+                        height: 2000,
+                        scale: 1,
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: null
+                    });
+
+                    // Convert to JPEG
+                    canvas.toBlob((blob) => {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${sku}_etsy_card.jpg`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+
+                        captureWindow.close();
+                        showToast('✅ Başarılı', 'JPEG dosyası indirildi!', 'success');
+                    }, 'image/jpeg', 0.95);
+
+                } catch (error) {
+                    console.error('Capture error:', error);
+                    captureWindow.close();
+                    showToast('❌ Hata', 'Kart oluşturulamadı: ' + error.message, 'error');
+                }
+            });
         }
     </script>
 </body>

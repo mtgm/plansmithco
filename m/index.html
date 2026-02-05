@@ -827,7 +827,38 @@
             setupVariants(product);
         }
 
+        let currentModelUrl = null; // Track current model to prevent redundant loads
+
         async function loadModel(url) {
+            // Helper function: Reset textures to defaults
+            const resetToDefaults = () => {
+                if (selectedProduct && selectedProduct.variantGroups) {
+                    selectedProduct.variantGroups.forEach(g => {
+                        if (g.items[0] && g.items[0].textureConfig) {
+                            applyTextureConfig(g.items[0].textureConfig);
+                        }
+                    });
+                }
+            };
+
+            // CASE 1: Model already loaded (Cache Hit)
+            if (currentModelUrl === url) {
+                console.log("Cache Hit. Model ready, resetting textures...");
+                loader.classList.add('hidden');
+
+                // CRITICAL: Reset textures even if model hasn't changed
+                // Wait a bit to ensure model is ready
+                setTimeout(() => {
+                    const { config } = getUrlParams();
+                    if (!config) {
+                        resetToDefaults();
+                    }
+                }, 100);
+
+                return;
+            }
+
+            // CASE 2: New model loading
             try {
                 let finalUrl = url;
                 if (url.includes('/api/engine')) {
@@ -835,18 +866,23 @@
                     const data = await res.json();
                     if (data.ok) finalUrl = data.url;
                 }
+
                 viewer.src = finalUrl;
+                currentModelUrl = url; // Update cache
+
                 viewer.addEventListener('load', () => {
                     loader.classList.add('hidden');
+
                     // Check if config exists in URL to avoid overwriting user selection with defaults
                     const { config } = getUrlParams();
-                    if (!config && selectedProduct && selectedProduct.variantGroups) {
-                        selectedProduct.variantGroups.forEach(g => {
-                            if (g.items[0] && g.items[0].textureConfig) applyTextureConfig(g.items[0].textureConfig);
-                        });
+                    if (!config) {
+                        resetToDefaults();
                     }
                 }, { once: true });
-            } catch (e) { console.error('Model load error:', e); loader.classList.add('hidden'); }
+            } catch (e) {
+                console.error('Model load error:', e);
+                loader.classList.add('hidden');
+            }
         }
 
         function setupVariants(product) {
