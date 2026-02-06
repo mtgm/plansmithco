@@ -383,6 +383,13 @@
             align-items: center;
         }
 
+        /* Checkbox Styling for Media Window */
+        .media-window input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
         .mw-body {
             flex: 1;
             overflow-y: auto;
@@ -2846,7 +2853,7 @@
 
         function loadCategory(catIndex) {
             // Önceki ürünü kaydet
-            if (PROD > -1 && CAT > -1) saveMem();
+            // if (PROD > -1 && CAT > -1) saveMem(); // TODO: Implement saveMem
 
             CURRENT_CAT_INDEX = catIndex;
             PROD = -1; // Ürün seçimini temizle
@@ -2869,6 +2876,34 @@
 
             // Tree'deki vurgulamayı temizle
             document.querySelectorAll('.tree-item').forEach(el => el.classList.remove('active'));
+
+            // Initialize split-view for category description
+            setTimeout(() => {
+                const catDescTextarea = document.getElementById('cat-desc');
+                if (catDescTextarea && catDescTextarea.tagName === 'TEXTAREA') {
+                    // Check if already converted
+                    if (catDescTextarea.parentElement.classList.contains('split-editor')) return;
+
+                    const parent = catDescTextarea.parentElement;
+                    const container = document.createElement('div');
+                    container.className = 'split-editor';
+                    container.style.cssText = 'display:flex; gap:10px;';
+
+                    const preview = document.createElement('div');
+                    preview.className = 'split-preview';
+                    preview.style.cssText = 'flex:1; padding:12px; border:1px solid #cbd5e1; border-radius:8px; background:#f8fafc; min-height:120px; overflow-y:auto;';
+                    preview.innerHTML = catDescTextarea.value ? marked.parse(catDescTextarea.value) : '<em style="color:#94a3b8;">Preview will appear here...</em>';
+
+                    catDescTextarea.style.flex = '1';
+                    catDescTextarea.addEventListener('input', () => {
+                        preview.innerHTML = catDescTextarea.value ? marked.parse(catDescTextarea.value) : '<em style="color:#94a3b8;">Preview will appear here...</em>';
+                    });
+
+                    parent.replaceChild(container, catDescTextarea);
+                    container.appendChild(catDescTextarea);
+                    container.appendChild(preview);
+                }
+            }, 100);
         }
 
         // Kategori verilerini güncelle
@@ -4097,38 +4132,38 @@
                 attrDiv.id = attrId;
                 attrDiv.style.cssText = 'display:grid; grid-template-columns:60px 200px 1fr 40px; gap:8px; align-items:start; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px; border:1px solid #e2e8f0;';
 
-                // Create icon input
+                // Icon input
                 const iconInput = document.createElement('input');
                 iconInput.type = 'text';
                 iconInput.value = attr.icon || '📋';
                 iconInput.maxLength = 2;
                 iconInput.style.cssText = 'width:100%; text-align:center; font-size:20px; padding:8px; border:1px solid #e2e8f0; border-radius:6px;';
 
-                // Create label input
+                // Label input
                 const labelInput = document.createElement('input');
                 labelInput.type = 'text';
                 labelInput.value = attr.label;
                 labelInput.placeholder = 'Label';
                 labelInput.style.cssText = 'width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:6px;';
 
-                // Create split-view container for value
+                // Split-view container for value
                 const splitContainer = document.createElement('div');
                 splitContainer.className = 'split-editor';
                 splitContainer.style.cssText = 'display:flex; gap:10px; width:100%;';
 
-                // Create value input (textarea for multiline)
+                // Value textarea
                 const valueInput = document.createElement('textarea');
                 valueInput.value = attr.value;
                 valueInput.placeholder = 'Value (supports Markdown)';
                 valueInput.style.cssText = 'flex:1; padding:8px; border:1px solid #e2e8f0; border-radius:6px; min-height:60px; resize:vertical; font-family:inherit; font-size:13px;';
 
-                // Create preview div
+                // Preview div
                 const previewDiv = document.createElement('div');
                 previewDiv.className = 'split-preview';
                 previewDiv.style.cssText = 'flex:1; padding:8px; border:1px solid #cbd5e1; border-radius:6px; background:#f8fafc; min-height:60px; overflow-y:auto; font-size:13px; line-height:1.6;';
                 previewDiv.innerHTML = attr.value ? marked.parse(attr.value) : '<em style="color:#94a3b8;">Preview...</em>';
 
-                // Add live update
+                // Live update
                 valueInput.addEventListener('input', () => {
                     previewDiv.innerHTML = valueInput.value ? marked.parse(valueInput.value) : '<em style="color:#94a3b8;">Preview...</em>';
                 });
@@ -4136,14 +4171,14 @@
                 splitContainer.appendChild(valueInput);
                 splitContainer.appendChild(previewDiv);
 
-                // Create delete button
+                // Delete button
                 const deleteBtn = document.createElement('button');
                 deleteBtn.type = 'button';
                 deleteBtn.textContent = '×';
                 deleteBtn.onclick = () => removeCustomAttribute(attrId);
                 deleteBtn.style.cssText = 'width:32px; height:32px; border:none; background:#ef4444; color:white; border-radius:6px; cursor:pointer; font-size:16px;';
 
-                // Append all to attrDiv
+                // Append all
                 attrDiv.appendChild(iconInput);
                 attrDiv.appendChild(labelInput);
                 attrDiv.appendChild(splitContainer);
@@ -4215,10 +4250,16 @@
         });
 
         // Also observe DOM changes to catch dynamically added textareas
-        const observer = new MutationObserver(() => {
-            initSplitViewEditors();
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
+        // TEMPORARILY DISABLED - Testing if this causes 3D viewer issues
+        /*
+        const editorArea = document.getElementById('editor-area');
+        if (editorArea) {
+            const observer = new MutationObserver(() => {
+                initSplitViewEditors();
+            });
+            observer.observe(editorArea, { childList: true, subtree: true });
+        }
+        */
     </script>
 </body>
 

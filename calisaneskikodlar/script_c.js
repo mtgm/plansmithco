@@ -22,23 +22,7 @@ fetch('products.json')
         allData = data;
         renderCategories(allData);
         loader.style.opacity = '0';
-
-        // Handle deep linking - load product if SKU is in URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const sku = urlParams.get('sku');
-        if (sku) {
-            // Find product by SKU across all categories
-            for (const category of allData) {
-                const product = category.products.find(p => p.sku === sku);
-                if (product) {
-                    // Open category first
-                    openCategory(category);
-                    // Then select product
-                    setTimeout(() => selectProduct(product), 100);
-                    break;
-                }
-            }
-        }
+        handleDeepLink(); // Check for URL params
     });
 
 function renderCategories(categories) {
@@ -50,7 +34,7 @@ function renderCategories(categories) {
             <img src="${cat.thumbnail}" class="cat-thumb" alt="${cat.name}">
             <div class="cat-info">
                 <div class="cat-title">${cat.name}</div>
-                <div class="cat-count">${cat.products?.length || 0} product</div>
+                <div class="cat-count">${cat.products?.length || 0} ürün</div>
             </div>
         `;
         card.onclick = () => openCategory(cat);
@@ -59,15 +43,6 @@ function renderCategories(categories) {
 }
 
 function openCategory(category) {
-    // Clear SKU parameter from URL when returning to category view
-    const url = new URL(window.location);
-    url.searchParams.delete('sku');
-    window.history.pushState({}, '', url);
-
-    // Reset product selection and model cache
-    selectedProduct = null;
-    currentMasterUrl = null;
-
     currentCategoryProducts = category.products;
     const aboutSection = document.getElementById('about-section');
     if (aboutSection) aboutSection.classList.add('hidden');
@@ -87,15 +62,15 @@ function openCategory(category) {
 
     if (categoryInfo) categoryInfo.style.display = 'block';
     if (categoryTitle) categoryTitle.textContent = category.name;
-    if (categoryCount) categoryCount.textContent = `${category.products?.length || 0} product`;
+    if (categoryCount) categoryCount.textContent = `${category.products?.length || 0} ürün`;
     if (categoryDesc) {
-        categoryDesc.innerHTML = category.description ? marked.parse(category.description) : '';
+        categoryDesc.textContent = category.description || '';
         categoryDesc.classList.add('category-desc-collapsed');
 
         // Açıklama uzunsa toggle butonu göster
         if (categoryDescToggle) {
             categoryDescToggle.style.display = (category.description && category.description.length > 100) ? 'inline-block' : 'none';
-            categoryDescToggle.textContent = 'Read more';
+            categoryDescToggle.textContent = 'Devamını gör';
         }
     }
 
@@ -113,15 +88,6 @@ function openCategory(category) {
 
 // --- GERİ DÖNÜŞ ---
 window.goBackToCategories = function () {
-    // Clear SKU parameter from URL
-    const url = new URL(window.location);
-    url.searchParams.delete('sku');
-    window.history.pushState({}, '', url);
-
-    // Reset product selection and model cache
-    selectedProduct = null;
-    currentMasterUrl = null;
-
     const aboutSection = document.getElementById('about-section');
     if (aboutSection) aboutSection.classList.remove('hidden');
 
@@ -168,10 +134,10 @@ window.toggleDescription = function (descId, toggleBtnId, collapsedClass) {
 
         if (isCollapsed) {
             desc.classList.remove(collapsedClass);
-            toggleBtn.textContent = 'Read less';
+            toggleBtn.textContent = 'Daha az';
         } else {
             desc.classList.add(collapsedClass);
-            toggleBtn.textContent = 'Read more';
+            toggleBtn.textContent = 'Devamını gör';
         }
     }
 }
@@ -243,12 +209,6 @@ function filterProducts() {
 }
 
 function selectProduct(product) {
-    // Prevent re-selecting the same product
-    if (selectedProduct && selectedProduct.sku === product.sku) {
-        console.log("Product already selected, ignoring re-selection");
-        return;
-    }
-
     selectedProduct = product;
 
     // Model-viewer'ı göster
@@ -285,11 +245,7 @@ function selectProduct(product) {
 
     populateDetailPanel(product);
 
-    // Update URL with SKU for deep linking
-    const newUrl = new URL(window.location);
-    newUrl.searchParams.set('sku', product.sku);
-    window.history.pushState({}, '', newUrl);
-
+    // Generate initial QR
     // Generate initial QR
     setTimeout(() => updateARandQR(null), 500);
 }
@@ -563,14 +519,8 @@ async function loadMasterModel(url) {
     // DURUM 1: Model zaten hafızada (Cache Hit)
     if (currentMasterUrl === url) {
         console.log("Cache Hit. Model hazır, dokular sıfırlanıyor...");
-
-        // Ensure viewer is visible
-        viewer.style.display = 'block';
         loader.style.opacity = '0';
         defaultPoster.style.display = 'none';
-
-        // Show controls
-        controlsDock.classList.remove('hidden-dock');
 
         // ==> KRİTİK EKLEME: Model değişmese bile dokuları sıfırla!
         // 100ms gecikme ekle - Mobil versiyondaki gibi race condition önlemek için
@@ -809,18 +759,15 @@ function applyRecommended() {
 }
 // Share Product
 function shareProduct() {
-    const productName = document.getElementById('panel-product-name')?.textContent || 'Product';
-    const currentUrl = window.location.href; // Use current URL with SKU
-
     if (navigator.share) {
         navigator.share({
-            title: productName,
-            text: `Check out ${productName}!`,
-            url: currentUrl
+            title: document.getElementById('panel-product-name').textContent,
+            text: 'Check out this product!',
+            url: window.location.href
         }).catch(err => console.log('Share failed:', err));
     } else {
         // Fallback: Copy link to clipboard
-        navigator.clipboard.writeText(currentUrl)
+        navigator.clipboard.writeText(window.location.href)
             .then(() => alert('Link copied to clipboard!'))
             .catch(err => console.log('Copy failed:', err));
     }
@@ -852,7 +799,7 @@ function populateDetailPanel(product) {
 
     // CONDITIONAL: Update product description in Info tab
     if (descEl) {
-        descEl.innerHTML = product.description ? marked.parse(product.description) : '';
+        descEl.textContent = product.description || '';
         // Don't set inline display style - it overrides CSS display:-webkit-box!
         // Just add/remove the collapsed class
         if (product.description) {
@@ -873,7 +820,7 @@ function populateDetailPanel(product) {
             const shouldShow = (product.description && product.description.length > 200); // 100 -> 200 karakter
             // Inline style kullan (kategori gibi)
             toggleBtn.style.display = shouldShow ? 'inline-block' : 'none';
-            toggleBtn.textContent = 'Read more';
+            toggleBtn.textContent = 'Devamını gör';
         }
     }
 
@@ -926,7 +873,7 @@ function populateDetailPanel(product) {
 
                 const inner = document.createElement('div');
                 inner.className = 'custom-attr-content-inner';
-                inner.innerHTML = attr.value ? marked.parse(attr.value) : ''; // Markdown support
+                inner.innerHTML = attr.value.replace(/\n/g, '<br>'); // Handle multiline
 
                 content.appendChild(inner);
                 item.appendChild(header);
