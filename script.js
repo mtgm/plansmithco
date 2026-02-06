@@ -61,13 +61,21 @@ function renderCategories(categories) {
 function openCategory(category) {
     console.log('[openCategory] Opening category:', category.name);
 
+    // CRITICAL FIX: Reset textures BEFORE clearing selectedProduct
+    // User won't see this because viewer is already hidden
+    if (selectedProduct && selectedProduct.variantGroups) {
+        console.log('[openCategory] Resetting textures to defaults (invisible to user)');
+        selectedProduct.variantGroups.forEach(g => {
+            if (g.items[0] && g.items[0].textureConfig) {
+                applyTextureConfig(g.items[0].textureConfig);
+            }
+        });
+    }
+
     // Clear SKU parameter from URL when returning to category view
     const url = new URL(window.location);
     url.searchParams.delete('sku');
     window.history.pushState({}, '', url);
-
-    // NOTE: We DON'T reset textures here to avoid visible flash
-    // Textures will be reset when next product loads (in loadMasterModel)
 
     // Reset product selection and model cache
     selectedProduct = null;
@@ -123,13 +131,21 @@ function openCategory(category) {
 window.goBackToCategories = function () {
     console.log('[goBackToCategories] Returning to categories');
 
+    // CRITICAL FIX: Reset textures BEFORE clearing selectedProduct
+    // User won't see this because viewer is already hidden
+    if (selectedProduct && selectedProduct.variantGroups) {
+        console.log('[goBackToCategories] Resetting textures to defaults (invisible to user)');
+        selectedProduct.variantGroups.forEach(g => {
+            if (g.items[0] && g.items[0].textureConfig) {
+                applyTextureConfig(g.items[0].textureConfig);
+            }
+        });
+    }
+
     // Clear SKU parameter from URL
     const url = new URL(window.location);
     url.searchParams.delete('sku');
     window.history.pushState({}, '', url);
-
-    // NOTE: We DON'T reset textures here to avoid visible flash
-    // Textures will be reset when next product loads (in loadMasterModel)
 
     // Reset product selection and model cache
     selectedProduct = null;
@@ -327,12 +343,19 @@ function selectProduct(product) {
 function closeMobileProduct() {
     console.log('[closeMobileProduct] Closing mobile product view');
 
+    // CRITICAL FIX: Reset textures BEFORE closing
+    // User won't see this because they're navigating away
+    if (selectedProduct && selectedProduct.variantGroups) {
+        console.log('[closeMobileProduct] Resetting textures to defaults (invisible to user)');
+        selectedProduct.variantGroups.forEach(g => {
+            if (g.items[0] && g.items[0].textureConfig) {
+                applyTextureConfig(g.items[0].textureConfig);
+            }
+        });
+    }
+
     const mainLayout = document.getElementById('main-layout');
     if (mainLayout) mainLayout.classList.remove('mobile-product-active');
-
-    // NOTE: We DON'T reset textures here to avoid visible flash
-    // Textures will be reset when next product loads (in loadMasterModel)
-    // This keeps the model looking the same while user navigates back
 
     // Close detail panel
     closeDetailPanel();
