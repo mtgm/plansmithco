@@ -104,6 +104,9 @@ function openCategory(category) {
     // Detail panel'i kapat (yeni kategoriye geçildiğinde)
     closeDetailPanel();
 
+    // CRITICAL FIX: Hide viewer when returning to category view
+    viewer.style.display = 'none';
+
     // Kullanıcı ürün seçene kadar poster göster
     defaultPoster.style.display = 'flex';
     controlsDock.classList.add('hidden-dock');
@@ -243,9 +246,12 @@ function filterProducts() {
 }
 
 function selectProduct(product) {
+    console.log('[selectProduct] START - Product:', product.name, 'SKU:', product.sku);
+    console.log('[selectProduct] viewer.style.display BEFORE:', viewer.style.display);
+
     // Prevent re-selecting the same product
     if (selectedProduct && selectedProduct.sku === product.sku) {
-        console.log("Product already selected, ignoring re-selection");
+        console.log("[selectProduct] Product already selected, ignoring re-selection");
         return;
     }
 
@@ -258,6 +264,8 @@ function selectProduct(product) {
     // Ensure viewer is in the correct state
     viewer.style.opacity = '1';
     viewer.style.visibility = 'visible';
+
+    console.log('[selectProduct] viewer.style.display AFTER:', viewer.style.display);
 
     // Poster'ı gizle ve loader göster
     defaultPoster.style.display = 'none';
@@ -286,6 +294,8 @@ function selectProduct(product) {
     setupVariantTabs(product);
 
     const masterUrl = product.masterModel ? product.masterModel : `/api/engine?sku=${product.sku}`;
+    console.log('[selectProduct] Calling loadMasterModel with URL:', masterUrl);
+    console.log('[selectProduct] currentMasterUrl before load:', currentMasterUrl);
     loadMasterModel(masterUrl);
 
     populateDetailPanel(product);
@@ -552,6 +562,9 @@ function updateConfigItem(partName, variantName) {
 
 // --- FİNAL YÜKLEME MOTORU (RESET ÖZELLİKLİ) ---
 async function loadMasterModel(url) {
+    console.log('[loadMasterModel] START - URL:', url);
+    console.log('[loadMasterModel] currentMasterUrl:', currentMasterUrl);
+    console.log('[loadMasterModel] Cache hit?', currentMasterUrl === url);
 
     // Yardımcı Fonksiyon: Dokuları Varsayılana Sıfırla
     const resetToDefaults = () => {
@@ -601,20 +614,44 @@ async function loadMasterModel(url) {
             if (data.ok) finalUrl = data.url;
         }
 
-        viewer.src = finalUrl;
-        currentMasterUrl = url;
+        // CRITICAL FIX: Check if model is already loaded
+        const isModelAlreadyLoaded = viewer.src === finalUrl;
+        console.log('[loadMasterModel] Model already loaded?', isModelAlreadyLoaded);
+        console.log('[loadMasterModel] Current viewer.src:', viewer.src);
+        console.log('[loadMasterModel] New finalUrl:', finalUrl);
 
-        viewer.addEventListener('load', () => {
+        if (isModelAlreadyLoaded) {
+            // Model is already loaded, no 'load' event will fire
+            // Immediately hide loader and show controls
+            console.log('[loadMasterModel] Model already loaded, skipping reload');
             loader.style.opacity = '0';
             defaultPoster.style.display = 'none';
-
-            // Show controls after model loads - CRITICAL FIX
             controlsDock.classList.remove('hidden-dock');
+            currentMasterUrl = url; // Update cache reference
 
-            // İlk yüklemede varsayılanları uygula
-            resetToDefaults();
+            // Reset textures to defaults
+            setTimeout(() => {
+                resetToDefaults();
+            }, 100);
+        } else {
+            // Model needs to be loaded
+            console.log('[loadMasterModel] Loading new model...');
+            viewer.src = finalUrl;
+            currentMasterUrl = url;
 
-        }, { once: true });
+            viewer.addEventListener('load', () => {
+                console.log('[loadMasterModel] Model load event fired');
+                loader.style.opacity = '0';
+                defaultPoster.style.display = 'none';
+
+                // Show controls after model loads - CRITICAL FIX
+                controlsDock.classList.remove('hidden-dock');
+
+                // İlk yüklemede varsayılanları uygula
+                resetToDefaults();
+
+            }, { once: true });
+        }
 
     } catch (e) {
         console.error(e);
