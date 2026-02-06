@@ -4095,14 +4095,59 @@
 
                 const attrDiv = document.createElement('div');
                 attrDiv.id = attrId;
-                attrDiv.style.cssText = 'display:grid; grid-template-columns:60px 1fr 2fr 40px; gap:8px; align-items:center; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px; border:1px solid #e2e8f0;';
+                attrDiv.style.cssText = 'display:grid; grid-template-columns:60px 200px 1fr 40px; gap:8px; align-items:start; padding:10px; background:rgba(255,255,255,0.05); border-radius:8px; border:1px solid #e2e8f0;';
 
-                attrDiv.innerHTML = `
-                    <input type="text" value="${attr.icon || '📋'}" maxlength="2" style="width:100%; text-align:center; font-size:20px; padding:8px; border:1px solid #e2e8f0; border-radius:6px;">
-                    <input type="text" value="${attr.label}" placeholder="Label" style="width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:6px;">
-                    <input type="text" value="${attr.value}" placeholder="Value" style="width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:6px;">
-                    <button type="button" onclick="removeCustomAttribute('${attrId}')" style="width:32px; height:32px; border:none; background:#ef4444; color:white; border-radius:6px; cursor:pointer; font-size:16px;">×</button>
-                `;
+                // Create icon input
+                const iconInput = document.createElement('input');
+                iconInput.type = 'text';
+                iconInput.value = attr.icon || '📋';
+                iconInput.maxLength = 2;
+                iconInput.style.cssText = 'width:100%; text-align:center; font-size:20px; padding:8px; border:1px solid #e2e8f0; border-radius:6px;';
+
+                // Create label input
+                const labelInput = document.createElement('input');
+                labelInput.type = 'text';
+                labelInput.value = attr.label;
+                labelInput.placeholder = 'Label';
+                labelInput.style.cssText = 'width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:6px;';
+
+                // Create split-view container for value
+                const splitContainer = document.createElement('div');
+                splitContainer.className = 'split-editor';
+                splitContainer.style.cssText = 'display:flex; gap:10px; width:100%;';
+
+                // Create value input (textarea for multiline)
+                const valueInput = document.createElement('textarea');
+                valueInput.value = attr.value;
+                valueInput.placeholder = 'Value (supports Markdown)';
+                valueInput.style.cssText = 'flex:1; padding:8px; border:1px solid #e2e8f0; border-radius:6px; min-height:60px; resize:vertical; font-family:inherit; font-size:13px;';
+
+                // Create preview div
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'split-preview';
+                previewDiv.style.cssText = 'flex:1; padding:8px; border:1px solid #cbd5e1; border-radius:6px; background:#f8fafc; min-height:60px; overflow-y:auto; font-size:13px; line-height:1.6;';
+                previewDiv.innerHTML = attr.value ? marked.parse(attr.value) : '<em style="color:#94a3b8;">Preview...</em>';
+
+                // Add live update
+                valueInput.addEventListener('input', () => {
+                    previewDiv.innerHTML = valueInput.value ? marked.parse(valueInput.value) : '<em style="color:#94a3b8;">Preview...</em>';
+                });
+
+                splitContainer.appendChild(valueInput);
+                splitContainer.appendChild(previewDiv);
+
+                // Create delete button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.type = 'button';
+                deleteBtn.textContent = '×';
+                deleteBtn.onclick = () => removeCustomAttribute(attrId);
+                deleteBtn.style.cssText = 'width:32px; height:32px; border:none; background:#ef4444; color:white; border-radius:6px; cursor:pointer; font-size:16px;';
+
+                // Append all to attrDiv
+                attrDiv.appendChild(iconInput);
+                attrDiv.appendChild(labelInput);
+                attrDiv.appendChild(splitContainer);
+                attrDiv.appendChild(deleteBtn);
 
                 container.appendChild(attrDiv);
             });
@@ -4128,7 +4173,9 @@
             // Create preview div
             const preview = document.createElement('div');
             preview.className = 'split-preview';
-            preview.innerHTML = textarea.value ? marked.parse(textarea.value) : '<em style="color: #94a3b8;">Preview will appear here...</em>';
+            // Parse initial value from textarea
+            const initialValue = textarea.value.trim();
+            preview.innerHTML = initialValue ? marked.parse(initialValue) : '<em style="color: #94a3b8;">Preview will appear here...</em>';
 
             // Insert wrapper before textarea
             textarea.parentNode.insertBefore(wrapper, textarea);
@@ -4145,25 +4192,27 @@
 
         // Auto-convert all textareas with specific IDs or attributes
         function initSplitViewEditors() {
-            // Wait for DOM to be ready
-            setTimeout(() => {
-                // Find all textareas that might be description fields
-                const textareas = document.querySelectorAll('textarea');
-                textareas.forEach(textarea => {
-                    // Check if it's likely a description field (has more than 2 rows or contains certain text)
-                    const label = textarea.previousElementSibling;
-                    if (label && label.tagName === 'LABEL') {
-                        const labelText = label.textContent.toLowerCase();
-                        if (labelText.includes('açıklama') || labelText.includes('description')) {
-                            convertToSplitView(textarea);
-                        }
+            // Find all textareas that might be description fields
+            const textareas = document.querySelectorAll('textarea');
+            textareas.forEach(textarea => {
+                // Skip if already converted
+                if (textarea.dataset.splitViewEnabled) return;
+
+                // Check if it's likely a description field
+                const label = textarea.previousElementSibling;
+                if (label && label.tagName === 'LABEL') {
+                    const labelText = label.textContent.toLowerCase();
+                    if (labelText.includes('açıklama') || labelText.includes('description')) {
+                        convertToSplitView(textarea);
                     }
-                });
-            }, 500);
+                }
+            });
         }
 
         // Call on page load
-        window.addEventListener('load', initSplitViewEditors);
+        window.addEventListener('load', () => {
+            setTimeout(initSplitViewEditors, 100);
+        });
 
         // Also observe DOM changes to catch dynamically added textareas
         const observer = new MutationObserver(() => {
