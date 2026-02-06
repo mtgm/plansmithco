@@ -15,93 +15,8 @@ let allData = [];
 let selectedProduct = null;
 let currentMasterUrl = null;
 
-// --- HELPER FUNCTIONS ---
-
-// Extract URL parameters
-function getUrlParams() {
-    const params = {};
-    const queryString = window.location.search.slice(1);
-    if (queryString) {
-        queryString.split('&').forEach(pair => {
-            const [key, value] = pair.split('=');
-            params[decodeURIComponent(key)] = decodeURIComponent(value);
-        });
-    }
-    return params;
-}
-
-// Handle deep linking via URL parameters
-function handleDeepLink() {
-    const params = getUrlParams();
-    if (params.category) {
-        const category = allData.find(c => c.name.toLowerCase() === params.category.toLowerCase());
-        if (category) {
-            openCategory(category);
-            if (params.product) {
-                const product = category.products.find(p => p.sku === params.product || p.name.toLowerCase() === params.product.toLowerCase());
-                if (product) {
-                    selectProduct(product);
-                }
-            }
-        }
-    }
-}
-
-// Close the detail panel and reset to product list view
-function closeDetailPanel() {
-    const mainLayout = document.getElementById('main-layout');
-    if (mainLayout) mainLayout.classList.remove('mobile-product-active');
-
-    viewer.style.display = 'none';
-    defaultPoster.style.display = 'flex';
-    controlsDock.classList.add('hidden-dock');
-
-    // Clear current selection
-    selectedProduct = null;
-    currentMasterUrl = null;
-
-    // Reset product list selection
-    document.querySelectorAll('.prod-item').forEach(item => item.classList.remove('active'));
-}
-
-// Populate the right panel with product details
-function populateDetailPanel(product) {
-    // Update product title
-    const panelTitle = document.getElementById('panel-product-title');
-    if (panelTitle) panelTitle.textContent = product.name;
-
-    // Update product SKU
-    const panelSku = document.getElementById('panel-product-sku');
-    if (panelSku) panelSku.textContent = `SKU: ${product.sku}`;
-
-    // Update product price
-    const panelPrice = document.getElementById('panel-product-price');
-    if (panelPrice) panelPrice.textContent = `$${product.price}`;
-
-    // Update product description
-    const panelDesc = document.getElementById('panel-product-description');
-    if (panelDesc) {
-        panelDesc.textContent = product.description || 'No description available';
-        panelDesc.classList.add('panel-product-desc-collapsed');
-
-        // Show/hide description toggle button
-        const toggleBtn = document.getElementById('panel-product-desc-toggle');
-        if (toggleBtn) {
-            toggleBtn.style.display = (product.description && product.description.length > 100) ? 'inline-block' : 'none';
-            toggleBtn.textContent = 'Read more';
-        }
-    }
-
-    // Ensure detail panel is visible
-    const detailPanel = document.querySelector('.detail-panel');
-    if (detailPanel) detailPanel.style.display = 'flex';
-
-    // Show controls dock
-    controlsDock.classList.remove('hidden-dock');
-}
-
 // 1. Verileri Çek
-fetch('js/products.json')
+fetch('products.json')
     .then(res => res.json())
     .then(data => {
         allData = data;
@@ -367,19 +282,15 @@ function setupVariantTabs(product) {
     } else {
         // NO VARIANTS - Hide and clear variant section
         const variantSection = document.querySelector('.variant-section');
-        variantSection.style.display = 'none';
+        if (variantSection) variantSection.style.display = 'none';
 
         // Hide config card when no variants
         const configCard = document.querySelector('.config-card');
-        configCard.style.display = 'none';
+        if (configCard) configCard.style.display = 'none';
 
         // Clear accordion container
         const accordionContainer = document.getElementById('variant-accordion-container');
         if (accordionContainer) accordionContainer.innerHTML = '';
-
-        // Clear mobile tabs container (Fix for ghost tabs)
-        const mobileTabsContainer = document.getElementById('mobile-variant-tabs');
-        if (mobileTabsContainer) mobileTabsContainer.innerHTML = '';
 
         // Clear configuration display
         const configList = document.querySelector('.config-list');
@@ -488,6 +399,8 @@ function renderPartToggles(variantGroups) {
                 // Remove active from all swatches in this accordion item
                 accordionContent.querySelectorAll('.swatch-item').forEach(s => s.classList.remove('active'));
                 swatchItem.classList.add('active');
+
+                // Apply texture to model
                 // Update configuration display
                 updateConfigItem(group.groupName, item.name);
 
@@ -617,19 +530,478 @@ async function loadMasterModel(url) {
             const data = await res.json();
             if (data.ok) finalUrl = data.url;
         }
-        viewer.src = finalUrl;
-        viewer.addEventListener('load', () => {
-            loader.classList.add('hidden');
-            // Check if config exists in URL to avoid overwriting user selection with defaults
-            const { config } = getUrlParams();
-            if (!config && selectedProduct && selectedProduct.variantGroups) {
-                selectedProduct.variantGroups.forEach(g => {
-                    if (g.items[0] && g.items[0].textureConfig) applyTextureConfig(g.items[0].textureConfig);
-                });
-            }
-        }, { once: true });
-    } catch (e) { console.error('Model load error:', e); loader.classList.add('hidden'); }
 
+        viewer.src = finalUrl;
+        currentMasterUrl = url;
+
+        viewer.addEventListener('load', () => {
+            loader.style.opacity = '0';
+            defaultPoster.style.display = 'none';
+
+            // İlk yüklemede varsayılanları uygula
+            resetToDefaults();
+
+        }, { once: true });
+
+    } catch (e) {
+        console.error(e);
+        loader.style.opacity = '0';
+        defaultPoster.style.display = 'flex';
+    }
 }
 
-// (file continues...)
+function activateAR() { if (viewer.canActivateAR) viewer.activateAR(); }
+
+async function applyTextureConfig(configs) {
+    if (!viewer.model) return;
+    const configList = Array.isArray(configs) ? configs : [configs];
+
+    for (const cfg of configList) {
+        const material = viewer.model.materials.find(m => m.name === cfg.materialName);
+        if (!material) continue;
+
+        if (cfg.baseColor) {
+            const texture = await viewer.createTexture(cfg.baseColor);
+            material.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
+        }
+        if (cfg.normal) {
+            const texture = await viewer.createTexture(cfg.normal);
+            material.normalTexture.setTexture(texture);
+        }
+        if (cfg.orm) {
+            const texture = await viewer.createTexture(cfg.orm);
+            material.pbrMetallicRoughness.metallicRoughnessTexture.setTexture(texture);
+        }
+    }
+}
+
+// ========================================
+// DETAIL PANEL JAVASCRIPT
+// ========================================
+// Panel Control
+function showDetailPanel() {
+    const panel = document.getElementById('detail-panel');
+    const mainLayout = document.getElementById('main-layout');
+    const btn = document.getElementById('panel-close-btn');
+
+    if (panel) {
+        panel.classList.add('show');
+        // Remove collapsed state if it exists
+        panel.classList.remove('collapsed');
+    }
+    if (mainLayout) mainLayout.classList.add('panel-open');
+
+    // Reset button to collapse (›) state
+    if (btn) btn.innerHTML = '›';
+}
+function closeDetailPanel() {
+    const panel = document.getElementById('detail-panel');
+    const mainLayout = document.getElementById('main-layout');
+    if (panel) panel.classList.remove('show');
+    if (mainLayout) mainLayout.classList.remove('panel-open');
+}
+
+// Toggle Panel Collapse/Expand
+function togglePanelCollapse() {
+    const panel = document.getElementById('detail-panel');
+    const btn = document.getElementById('panel-close-btn');
+    const mainLayout = document.getElementById('main-layout');
+
+    if (!panel || !btn) return;
+
+    if (panel.classList.contains('collapsed')) {
+        // Genişlet
+        panel.classList.remove('collapsed');
+        btn.innerHTML = '›'; // Sağ ok
+        if (mainLayout) mainLayout.classList.add('panel-open');
+    } else {
+        // Daralt
+        panel.classList.add('collapsed');
+        btn.innerHTML = '🛠️'; // Sol ok
+        if (mainLayout) mainLayout.classList.remove('panel-open');
+    }
+}
+// Tab Switching
+document.addEventListener('DOMContentLoaded', () => {
+    const tabButtons = document.querySelectorAll('.panel-tab');
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabName = btn.dataset.tab;
+            // Remove active from all tabs and content
+            document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            // Add active to clicked tab and its content
+            btn.classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        });
+    });
+});
+// Accordion Toggle with smooth scrollHeight animation
+document.addEventListener('click', (e) => {
+    if (e.target.closest('.accordion-header')) {
+        const item = e.target.closest('.accordion-item');
+        const content = item.querySelector('.accordion-content');
+
+        if (item.classList.contains('open')) {
+            // Closing - set exact height first, then animate to 0
+            content.style.height = content.scrollHeight + 'px';
+            // Force reflow
+            content.offsetHeight;
+            content.style.height = '0px';
+            item.classList.remove('open');
+        } else {
+            // Opening - ensure proper height calculation to avoid stutter
+            item.classList.add('open');
+
+            // 1. Get the true height by temporarily setting to auto
+            const currentTransition = content.style.transition;
+            content.style.transition = 'none'; // Disable transition for measurement
+            content.style.height = 'auto';
+            const targetHeight = content.scrollHeight;
+
+            // 2. Set start state (0px)
+            content.style.height = '0px';
+            content.offsetHeight; // Force reflow
+
+            // 3. Restore transition and animate to target
+            content.style.transition = currentTransition;
+            content.style.height = targetHeight + 'px';
+
+            // Reset to auto after transition completes
+            setTimeout(() => {
+                if (item.classList.contains('open')) {
+                    content.style.height = 'auto';
+                }
+            }, 305); // Match CSS transition duration + buffer
+        }
+    }
+});
+// Part Toggle Selection
+document.addEventListener('click', (e) => {
+    if (e.target.closest('.part-toggle')) {
+        const btn = e.target.closest('.part-toggle');
+        document.querySelectorAll('.part-toggle').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        // TODO: Load colors for selected part
+        const partType = btn.dataset.part;
+        console.log('Selected part:', partType);
+    }
+});
+// Color Swatch Selection
+document.addEventListener('click', (e) => {
+    if (e.target.closest('.swatch-item')) {
+        const swatch = e.target.closest('.swatch-item');
+        const swatchContainer = swatch.parentElement;
+        swatchContainer.querySelectorAll('.swatch-item').forEach(s => s.classList.remove('active'));
+        swatch.classList.add('active');
+        // TODO: Apply color to model
+        const colorName = swatch.querySelector('span').textContent;
+        console.log('Selected color:', colorName);
+    }
+});
+// Variant Actions
+function resetVariants() {
+    console.log('Resetting to default variants');
+
+    // Reset to first variant in each group
+    if (selectedProduct && selectedProduct.variantGroups) {
+        selectedProduct.variantGroups.forEach((group, groupIndex) => {
+            if (group.items[0]) {
+                // Apply first texture
+                if (group.items[0].textureConfig) {
+                    applyTextureConfig(group.items[0].textureConfig);
+                }
+
+                // Update config display
+                updateConfigItem(group.groupName, group.items[0].name);
+
+                // Update UI - select first swatch in each accordion
+                const accordionContainer = document.getElementById('variant-accordion-container');
+                if (accordionContainer) {
+                    const accordionItems = accordionContainer.querySelectorAll('.variant-accordion-item');
+                    if (accordionItems[groupIndex]) {
+                        const swatches = accordionItems[groupIndex].querySelectorAll('.swatch-item');
+                        swatches.forEach((s, i) => {
+                            if (i === 0) {
+                                s.classList.add('active');
+                            } else {
+                                s.classList.remove('active');
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    }
+}
+
+function applyRecommended() {
+    console.log('Applying recommended configuration');
+    // Same as reset for now - apply first variants
+    resetVariants();
+}
+// Share Product
+function shareProduct() {
+    if (navigator.share) {
+        navigator.share({
+            title: document.getElementById('panel-product-name').textContent,
+            text: 'Check out this product!',
+            url: window.location.href
+        }).catch(err => console.log('Share failed:', err));
+    } else {
+        // Fallback: Copy link to clipboard
+        navigator.clipboard.writeText(window.location.href)
+            .then(() => alert('Link copied to clipboard!'))
+            .catch(err => console.log('Copy failed:', err));
+    }
+}
+// Populate Panel with Product Data
+function populateDetailPanel(product) {
+    // Update product name and price
+    const nameEl = document.getElementById('panel-product-name');
+    const priceEl = document.getElementById('panel-product-price');
+    const buyLink = document.getElementById('panel-buy-link');
+    const descEl = document.getElementById('panel-product-description');
+
+    if (nameEl) nameEl.textContent = product.name;
+    if (priceEl) priceEl.textContent = `$${product.price}`;
+    if (buyLink && product.listingUrl) {
+        buyLink.href = product.listingUrl;
+    }
+
+    // Update product description in Bilgi tab
+    if (descEl) {
+        descEl.textContent = product.description || '';
+        // Don't set inline display style - it overrides CSS display:-webkit-box!
+        // Just add/remove the collapsed class
+        if (product.description) {
+            descEl.classList.add('panel-product-desc-collapsed');
+        } else {
+            descEl.classList.remove('panel-product-desc-collapsed');
+        }
+
+        // Açıklama uzunsa toggle butonu göster
+        const toggleBtn = document.getElementById('panel-product-desc-toggle');
+        console.log('[DEBUG] Description length:', product.description?.length);
+        console.log('[DEBUG] Toggle button found:', !!toggleBtn);
+
+        if (toggleBtn) {
+            const shouldShow = (product.description && product.description.length);
+            console.log('[DEBUG] Should show button:', shouldShow);
+            // Inline style kullan (kategori gibi)
+            toggleBtn.style.display = shouldShow ? 'inline-block' : 'none';
+            toggleBtn.textContent = 'Devamını gör';
+            console.log('[DEBUG] Button display:', toggleBtn.style.display);
+        }
+    }
+
+    // Show the panel
+    showDetailPanel();
+}
+// ========================================
+// QR CODE & DEEP LINKING SYSTEM
+// ========================================
+
+// ========================================
+// QR CODE & DEEP LINKING SYSTEM
+// ========================================
+
+let qrCodeObj = null;
+
+// Wrapper Function (User Request)
+async function updateARandQR(configs) {
+    // 1. Call Original Function (if configs exist)
+    if (configs) {
+        await applyTextureConfig(configs);
+    }
+
+    // 2. Generate QR Code Logic
+    const qrContainer = document.getElementById('ar-qr-code'); // ID updated per request
+    if (!qrContainer || !selectedProduct) return;
+
+    // Capture Full State (More robust than just passing 'configs')
+    const state = {
+        sku: selectedProduct.sku,
+        variants: {}
+    };
+
+    document.querySelectorAll('.variant-accordion-item').forEach(item => {
+        const groupName = item.querySelector('.accordion-header span')?.textContent;
+        const activeSwatch = item.querySelector('.swatch-item.active span');
+        if (groupName && activeSwatch) {
+            state.variants[groupName.trim()] = activeSwatch.textContent.trim();
+        }
+    });
+
+    // Build URL - Yönlendirme /m/ sayfasına yapılıyor (Bilgi Kartı Sayfası)
+    const baseUrl = window.location.origin + '/m/';
+    const params = new URLSearchParams();
+    if (state.sku) params.set('sku', state.sku);
+    if (Object.keys(state.variants).length > 0) {
+        params.set('config', JSON.stringify(state.variants));
+    }
+
+    const finalUrl = `${baseUrl}?${params.toString()}`;
+
+    // Render QR
+    qrContainer.innerHTML = '';
+    qrCodeObj = new QRCode(qrContainer, {
+        text: finalUrl,
+        width: 160,
+        height: 160,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+    });
+}
+
+
+// Deep Linking Handler (Call this on window load)
+function handleDeepLink() {
+    console.log('[DeepLink] Checking for params...');
+    const params = new URLSearchParams(window.location.search);
+    const sku = params.get('sku');
+    const configStr = params.get('config');
+
+    if (!sku) {
+        console.log('[DeepLink] No SKU found in URL.');
+        return;
+    }
+
+    console.log('[DeepLink] SKU found:', sku);
+
+    if (allData.length > 0) {
+        // Find product across all categories
+        let foundProduct = null;
+        let foundCategory = null;
+
+        for (const cat of allData) {
+            // Loose comparison for SKU to be safe
+            const p = cat.products.find(x => x && x.sku && x.sku.toString() === sku.toString());
+            if (p) {
+                foundProduct = p;
+                foundCategory = cat;
+                break;
+            }
+        }
+
+        if (foundProduct) {
+            console.log('[DeepLink] Product found:', foundProduct.name);
+
+            // 1. Ensure UI is ready (Category View)
+            renderCategories(allData);
+            openCategory(foundCategory);
+
+            // 2. Select Product (Opens Model View)
+            selectProduct(foundProduct);
+
+            // 3. Apply Variants if config exists
+            if (configStr) {
+                console.log('[DeepLink] Config found:', configStr);
+                try {
+                    const config = JSON.parse(configStr);
+                    applyDeepLinkConfig(config);
+                } catch (e) {
+                    console.error('[DeepLink] Error parsing config JSON:', e);
+                }
+            }
+
+            // 4. Mobile & QR Optimization: Switch to AR Tab & Auto-Launch
+            setTimeout(() => {
+                // Switch to AR Tab
+                const arTabBtn = document.querySelector('.panel-tab[data-tab="ar"]');
+                if (arTabBtn) {
+                    console.log('[DeepLink] Switching to AR tab...');
+                    arTabBtn.click();
+                }
+
+                // Attempt to auto-activate AR (Browser might block this without user gesture)
+                // However, switching the tab puts the "Start AR" button right under their thumb
+                // If this is a PWA or specific browser context, it might work.
+                try {
+                    if (window.innerWidth <= 900) { // Only on mobile
+                        console.log('[DeepLink] Attempting auto-AR...');
+
+                        // Method 1: Direct Call
+                        activateAR();
+
+                        // Method 2: Simulate Button Click (Backup)
+                        const arBtn = document.querySelector('.btn-ar');
+                        if (arBtn) arBtn.click();
+                    }
+                } catch (e) {
+                    console.warn('[DeepLink] Auto-AR failed:', e);
+                }
+            }, 800); // Wait for panel to open and textures to apply
+        } else {
+            console.warn('[DeepLink] SKU not found in product list:', sku);
+        }
+    } else {
+        console.warn('[DeepLink] keys allData is empty?');
+    }
+}
+
+function applyDeepLinkConfig(config) {
+    console.log('[DeepLink] Applying config...', config);
+    // Wait a bit for DOM to be ready inside panel
+    // Retry mechanism to ensure accordions are rendered
+    let attempts = 0;
+    const maxAttempts = 10; // Increased attempts
+
+    const tryApply = () => {
+        let allFound = true;
+        const headers = Array.from(document.querySelectorAll('.accordion-header span'));
+
+        if (headers.length === 0 && attempts < maxAttempts) {
+            attempts++;
+            setTimeout(tryApply, 300); // Check every 300ms
+            return;
+        }
+
+        Object.keys(config).forEach(groupName => {
+            const variantName = config[groupName];
+
+            // Find accordion item for this group
+            // Use contains matching to be safer against whitespace
+            const header = headers.find(h => h.textContent.includes(groupName));
+
+            if (header) {
+                const accordionItem = header.closest('.accordion-item');
+                if (accordionItem) {
+                    // Find swatch with this name
+                    const swatches = Array.from(accordionItem.querySelectorAll('.swatch-item'));
+                    const targetSwatch = swatches.find(s => {
+                        const label = s.querySelector('span');
+                        return label && label.textContent.includes(variantName);
+                    });
+
+                    if (targetSwatch) {
+                        console.log('[DeepLink] Clicking swatch:', variantName);
+                        // Check if already active to avoid redundant clicks
+                        if (!targetSwatch.classList.contains('active')) {
+                            targetSwatch.click();
+                        }
+                    } else {
+                        console.warn('[DeepLink] Swatch not found:', variantName);
+                        allFound = false;
+                    }
+                }
+            } else {
+                console.warn('[DeepLink] Group header not found:', groupName);
+                allFound = false;
+            }
+        });
+    };
+
+    setTimeout(tryApply, 500);
+}
+
+// Export functions for global use
+window.showDetailPanel = showDetailPanel;
+window.closeDetailPanel = closeDetailPanel;
+window.togglePanelCollapse = togglePanelCollapse;
+window.resetVariants = resetVariants;
+window.applyRecommended = applyRecommended;
+window.shareProduct = shareProduct;
+window.populateDetailPanel = populateDetailPanel;
+window.updateQRCode = updateQRCode; // Export new function

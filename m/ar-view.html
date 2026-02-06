@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PlanSmithCo - AR View</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent-color: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #f1f5f9;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Loader */
+        #loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+
+        #loader-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Model Viewer Area - Upper Half */
+        #model-area {
+            height: 45vh;
+            height: 45dvh;
+            position: relative;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            --poster-color: transparent;
+        }
+
+        model-viewer::part(default-ar-button) {
+            display: none;
+        }
+
+        /* Info Area - Lower Half */
+        #info-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+        }
+
+        /* Product Title */
+        .product-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        /* Yellow Info Card */
+        .info-card {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .info-card-icon {
+            font-size: 40px;
+            margin-bottom: 8px;
+        }
+
+        .info-card-text {
+            font-size: 15px;
+            font-weight: 600;
+            color: #78350f;
+            line-height: 1.4;
+        }
+
+        /* AR Button */
+        .btn-ar {
+            width: 100%;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .btn-ar:active {
+            transform: scale(0.98);
+        }
+
+        /* How to Use Steps */
+        .how-to-use {
+            flex: 1;
+        }
+
+        .steps-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .step-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        .step-content h5 {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #f8fafc;
+        }
+
+        .step-content p {
+            font-size: 11px;
+            line-height: 1.4;
+            color: #cbd5e1;
+        }
+
+        /* Error State */
+        .error-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            height: 100%;
+        }
+
+        .error-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .error-state h2 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #f8fafc;
+        }
+
+        .error-state p {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loader-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="model-area">
+        <model-viewer id="mv" src="" ar ar-scale="fixed" ar-placement="floor" camera-controls interaction-prompt="none"
+            environment-image="/studio.hdr" shadow-intensity="1" exposure="1.5" tone-mapping="neutral"
+            loading="eager"></model-viewer>
+    </div>
+
+    <div id="info-area">
+        <h1 class="product-title" id="product-name">Loading...</h1>
+
+        <div class="info-card">
+            <div class="info-card-icon">🏠</div>
+            <div class="info-card-text">Try this product in your own space with AR</div>
+        </div>
+
+        <button class="btn-ar" onclick="activateAR()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            Start AR Mode
+        </button>
+
+        <div class="how-to-use">
+            <h4 class="steps-title">HOW TO USE</h4>
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h5>Open Camera</h5>
+                    <p>Allow camera access to start AR</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h5>Scan Surface</h5>
+                    <p>Point camera at a flat surface</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h5>Place Product</h5>
+                    <p>Tap screen to place the model</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+    <script>
+        const viewer = document.getElementById('mv');
+        const loader = document.getElementById('loader-overlay');
+        let selectedProduct = null;
+        let allData = [];
+
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                sku: params.get('sku'),
+                config: params.get('config')
+            };
+        }
+
+        async function init() {
+            const { sku, config } = getUrlParams();
+
+            if (!sku) {
+                showError('Product Not Found', 'No product SKU provided in URL.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/products.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                allData = await response.json();
+                let foundProduct = null;
+
+                for (const cat of allData) {
+                    const p = cat.products.find(x => x && x.sku && x.sku.toString() === sku.toString());
+                    if (p) {
+                        foundProduct = p;
+                        break;
+                    }
+                }
+
+                if (!foundProduct) {
+                    showError('Product Not Found', `Product with SKU "${sku}" not found in database.`);
+                    return;
+                }
+
+                selectedProduct = foundProduct;
+                loadProduct(foundProduct);
+
+                // Apply configuration from URL if exists
+                if (config) {
+                    try {
+                        const configObj = JSON.parse(config);
+                        setTimeout(() => applyConfig(configObj), 800);
+                    } catch (e) {
+                        console.error('Config parse error:', e);
+                    }
+                }
+            } catch (e) {
+                console.error('Init error:', e);
+                showError('Loading Error', `Failed to load product data.<br><small>${e.message}</small>`);
+            }
+        }
+
+        function loadProduct(product) {
+            document.getElementById('product-name').textContent = product.name;
+
+            const masterUrl = product.masterModel ? product.masterModel : `/api/engine?sku=${product.sku}`;
+            loadModel(masterUrl);
+        }
+
+        async function loadModel(url) {
+            try {
+                let finalUrl = url;
+                if (url.includes('/api/engine')) {
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    if (data.ok) finalUrl = data.url;
+                }
+
+                viewer.src = finalUrl;
+                viewer.addEventListener('load', () => {
+                    loader.classList.add('hidden');
+
+                    // Apply default textures if no config in URL
+                    const { config } = getUrlParams();
+                    if (!config && selectedProduct && selectedProduct.variantGroups) {
+                        selectedProduct.variantGroups.forEach(g => {
+                            if (g.items[0] && g.items[0].textureConfig) {
+                                applyTextureConfig(g.items[0].textureConfig);
+                            }
+                        });
+                    }
+                }, { once: true });
+            } catch (e) {
+                console.error('Model load error:', e);
+                loader.classList.add('hidden');
+                showError('Model Error', 'Failed to load 3D model.');
+            }
+        }
+
+        async function applyTextureConfig(configs) {
+            if (!viewer.model) {
+                console.warn('Model not loaded yet');
+                return;
+            }
+
+            const configList = Array.isArray(configs) ? configs : [configs];
+
+            for (const cfg of configList) {
+                const material = viewer.model.materials.find(m => m.name === cfg.materialName);
+                if (!material) {
+                    console.warn('Material not found:', cfg.materialName);
+                    continue;
+                }
+
+                try {
+                    if (cfg.baseColor) {
+                        const texture = await viewer.createTexture(cfg.baseColor);
+                        material.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
+                    }
+                    if (cfg.normal) {
+                        const texture = await viewer.createTexture(cfg.normal);
+                        material.normalTexture.setTexture(texture);
+                    }
+                    if (cfg.orm) {
+                        const texture = await viewer.createTexture(cfg.orm);
+                        material.pbrMetallicRoughness.metallicRoughnessTexture.setTexture(texture);
+                    }
+                } catch (e) {
+                    console.error('Texture application error:', e);
+                }
+            }
+        }
+
+        function applyConfig(config) {
+            let attempts = 0;
+            const tryApply = () => {
+                if (!viewer.model && attempts < 15) {
+                    attempts++;
+                    setTimeout(tryApply, 300);
+                    return;
+                }
+
+                if (!selectedProduct || !selectedProduct.variantGroups) return;
+
+                // Apply variants based on config
+                Object.keys(config).forEach(groupName => {
+                    const variantName = config[groupName];
+                    const group = selectedProduct.variantGroups.find(g => g.groupName === groupName);
+
+                    if (group) {
+                        const variant = group.items.find(item => item.name.includes(variantName));
+                        if (variant && variant.textureConfig) {
+                            applyTextureConfig(variant.textureConfig);
+                        }
+                    }
+                });
+            };
+
+            setTimeout(tryApply, 500);
+        }
+
+        function activateAR() {
+            if (viewer.canActivateAR) {
+                viewer.activateAR();
+            } else {
+                alert('AR is not supported on this device.');
+            }
+        }
+
+        function showError(title, message) {
+            loader.classList.add('hidden');
+            document.getElementById('info-area').innerHTML = `
+                <div class="error-state">
+                    <div class="error-icon">⚠️</div>
+                    <h2>${title}</h2>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

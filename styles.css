@@ -39,7 +39,7 @@ body {
 
 /* --- SOL PANEL --- */
 #sidebar {
-    width: 300px;
+    width: 280px;
     min-width: 280px;
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(30px) saturate(150%);
@@ -261,8 +261,8 @@ body {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
     text-align: justify;
-
-
+    hyphens: auto;
+    /* Kelime bölme desteği */
 }
 
 .desc-wrapper {
@@ -366,6 +366,7 @@ body {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 8px;
     text-align: justify;
+    hyphens: auto;
 }
 
 .desc-collapsed {
@@ -479,7 +480,7 @@ body {
 
 .prod-thumb {
     width: 60px;
-    height: 44px;
+    height: 60px;
     border-radius: 6px;
     background: rgba(255, 255, 255, 0.1);
     object-fit: cover;
@@ -523,6 +524,77 @@ body {
 
 #panel-product-desc-toggle:hover {
     text-decoration: underline;
+}
+
+/* --- DETAIL PANEL CUSTOM ATTRIBUTES (Accordion Style) --- */
+#custom-attributes-container {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.custom-attr-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custom-attr-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 4px;
+    background: transparent;
+    border: none;
+    color: #f1f5f9;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: color 0.2s;
+}
+
+.custom-attr-header:hover {
+    color: #ffffff;
+}
+
+.custom-attr-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.custom-attr-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.custom-attr-arrow {
+    transition: transform 0.3s ease;
+    width: 16px;
+    height: 16px;
+    color: #94a3b8;
+}
+
+.custom-attr-item.open .custom-attr-arrow {
+    transform: rotate(180deg);
+}
+
+.custom-attr-content {
+    height: 0;
+    overflow: hidden;
+    transition: height 0.3s ease;
+}
+
+.custom-attr-content-inner {
+    padding: 8px 4px 16px 32px;
+    /* Indent content */
+    font-size: 13px;
+    color: #cbd5e1;
+    line-height: 1.5;
+    text-align: justify;
+    hyphens: auto;
 }
 
 /* --- SAĞ PANEL (3D SAHNE) --- */
@@ -840,6 +912,11 @@ model-viewer::part(default-ar-button) {
         -webkit-line-clamp: unset !important;
         line-clamp: unset !important;
     }
+
+    /* Hide mobile back button on desktop */
+    #mobile-back-btn {
+        display: none !important;
+    }
 }
 
 /* MOBILE LAYOUT (Split Screen: AR Top / Info Bottom) */
@@ -997,15 +1074,64 @@ model-viewer::part(default-ar-button) {
         gap: 24px;
         overflow-x: auto;
         padding: 0 8px;
-        margin-bottom: 20px;
+        margin-bottom: 0;
+        /* Remove margin from list itself, container has it */
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         border-top: 1px solid rgba(255, 255, 255, 0.1);
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
+        /* Hide scrollbar again */
     }
 
     #mobile-variant-tabs::-webkit-scrollbar {
         display: none;
+    }
+
+    /* Container for tabs and arrows */
+    .mobile-tabs-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        width: 100%;
+    }
+
+    /* Scroll Arrow Buttons */
+    .tab-arrow {
+        position: absolute;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        padding: 0;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .tab-arrow:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .tab-arrow.left {
+        left: 0;
+        background: linear-gradient(90deg, rgba(30, 41, 59, 0.9), rgba(30, 41, 59, 0.1));
+        /* Fade effect attempt, or solid */
+        background: rgba(15, 23, 42, 0.8);
+        /* Solid is safer for visibility */
+    }
+
+    .tab-arrow.right {
+        right: 0;
+        background: rgba(15, 23, 42, 0.8);
     }
 
     .mobile-variant-tab {
