@@ -505,7 +505,7 @@
             font-size: 13px;
             color: var(--text-on-light);
             transition: all 0.2s;
-            min-height: 80px;
+            min-height: 50px;
             /* Minimum height */
             resize: vertical;
             /* Allow manual resizing */
@@ -835,6 +835,48 @@
             50% {
                 opacity: 0.6;
             }
+        }
+
+        /* --- SPLIT-VIEW MARKDOWN EDITOR --- */
+        .split-editor {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .split-editor textarea {
+            flex: 1;
+            min-height: 120px;
+        }
+
+        .split-preview {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #f8fafc;
+            min-height: 120px;
+            overflow-y: auto;
+            font-size: 13px;
+            color: var(--text-on-light);
+            line-height: 1.6;
+        }
+
+        .split-preview h1,
+        .split-preview h2,
+        .split-preview h3 {
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
+        }
+
+        .split-preview p {
+            margin: 0.5em 0;
+        }
+
+        .split-preview ul,
+        .split-preview ol {
+            margin: 0.5em 0;
+            padding-left: 1.5em;
         }
 
         /* Custom Modal */
@@ -4066,9 +4108,68 @@
             });
         }
 
+
         // Note: Custom attributes will be saved with product data
         // When saving product, call: product.customAttributes = collectCustomAttributes();
         // When loading product, call: renderCustomAttributes(product.customAttributes);
+
+        // === SPLIT-VIEW MARKDOWN EDITOR ===
+        // Convert textarea to split-view with live Markdown preview
+        function convertToSplitView(textarea) {
+            if (!textarea || textarea.dataset.splitViewEnabled) return; // Already converted
+
+            // Mark as converted
+            textarea.dataset.splitViewEnabled = 'true';
+
+            // Create wrapper
+            const wrapper = document.createElement('div');
+            wrapper.className = 'split-editor';
+
+            // Create preview div
+            const preview = document.createElement('div');
+            preview.className = 'split-preview';
+            preview.innerHTML = textarea.value ? marked.parse(textarea.value) : '<em style="color: #94a3b8;">Preview will appear here...</em>';
+
+            // Insert wrapper before textarea
+            textarea.parentNode.insertBefore(wrapper, textarea);
+
+            // Move textarea into wrapper
+            wrapper.appendChild(textarea);
+            wrapper.appendChild(preview);
+
+            // Add live update listener
+            textarea.addEventListener('input', () => {
+                preview.innerHTML = textarea.value ? marked.parse(textarea.value) : '<em style="color: #94a3b8;">Preview will appear here...</em>';
+            });
+        }
+
+        // Auto-convert all textareas with specific IDs or attributes
+        function initSplitViewEditors() {
+            // Wait for DOM to be ready
+            setTimeout(() => {
+                // Find all textareas that might be description fields
+                const textareas = document.querySelectorAll('textarea');
+                textareas.forEach(textarea => {
+                    // Check if it's likely a description field (has more than 2 rows or contains certain text)
+                    const label = textarea.previousElementSibling;
+                    if (label && label.tagName === 'LABEL') {
+                        const labelText = label.textContent.toLowerCase();
+                        if (labelText.includes('açıklama') || labelText.includes('description')) {
+                            convertToSplitView(textarea);
+                        }
+                    }
+                });
+            }, 500);
+        }
+
+        // Call on page load
+        window.addEventListener('load', initSplitViewEditors);
+
+        // Also observe DOM changes to catch dynamically added textareas
+        const observer = new MutationObserver(() => {
+            initSplitViewEditors();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
     </script>
 </body>
 
