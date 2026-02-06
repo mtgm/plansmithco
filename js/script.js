@@ -15,6 +15,91 @@ let allData = [];
 let selectedProduct = null;
 let currentMasterUrl = null;
 
+// --- HELPER FUNCTIONS ---
+
+// Extract URL parameters
+function getUrlParams() {
+    const params = {};
+    const queryString = window.location.search.slice(1);
+    if (queryString) {
+        queryString.split('&').forEach(pair => {
+            const [key, value] = pair.split('=');
+            params[decodeURIComponent(key)] = decodeURIComponent(value);
+        });
+    }
+    return params;
+}
+
+// Handle deep linking via URL parameters
+function handleDeepLink() {
+    const params = getUrlParams();
+    if (params.category) {
+        const category = allData.find(c => c.name.toLowerCase() === params.category.toLowerCase());
+        if (category) {
+            openCategory(category);
+            if (params.product) {
+                const product = category.products.find(p => p.sku === params.product || p.name.toLowerCase() === params.product.toLowerCase());
+                if (product) {
+                    selectProduct(product);
+                }
+            }
+        }
+    }
+}
+
+// Close the detail panel and reset to product list view
+function closeDetailPanel() {
+    const mainLayout = document.getElementById('main-layout');
+    if (mainLayout) mainLayout.classList.remove('mobile-product-active');
+
+    viewer.style.display = 'none';
+    defaultPoster.style.display = 'flex';
+    controlsDock.classList.add('hidden-dock');
+
+    // Clear current selection
+    selectedProduct = null;
+    currentMasterUrl = null;
+
+    // Reset product list selection
+    document.querySelectorAll('.prod-item').forEach(item => item.classList.remove('active'));
+}
+
+// Populate the right panel with product details
+function populateDetailPanel(product) {
+    // Update product title
+    const panelTitle = document.getElementById('panel-product-title');
+    if (panelTitle) panelTitle.textContent = product.name;
+
+    // Update product SKU
+    const panelSku = document.getElementById('panel-product-sku');
+    if (panelSku) panelSku.textContent = `SKU: ${product.sku}`;
+
+    // Update product price
+    const panelPrice = document.getElementById('panel-product-price');
+    if (panelPrice) panelPrice.textContent = `$${product.price}`;
+
+    // Update product description
+    const panelDesc = document.getElementById('panel-product-description');
+    if (panelDesc) {
+        panelDesc.textContent = product.description || 'No description available';
+        panelDesc.classList.add('panel-product-desc-collapsed');
+
+        // Show/hide description toggle button
+        const toggleBtn = document.getElementById('panel-product-desc-toggle');
+        if (toggleBtn) {
+            toggleBtn.style.display = (product.description && product.description.length > 100) ? 'inline-block' : 'none';
+            toggleBtn.textContent = 'Read more';
+        }
+    }
+
+    // Ensure detail panel is visible
+    const detailPanel = document.querySelector('.detail-panel');
+    if (detailPanel) detailPanel.style.display = 'flex';
+
+    // Show controls dock
+    controlsDock.classList.remove('hidden-dock');
+}
+
 // 1. Verileri Çek
 fetch('js/products.json')
     .then(res => res.json())
