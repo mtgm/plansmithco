@@ -678,7 +678,7 @@ async function loadMasterModel(url) {
 
             // Step 1: Hide viewer temporarily  
             viewer.style.opacity = '0';
-            loader.style.opacity = '0';
+
             // Step 2: Reset textures while viewer is hidden
             resetToDefaults();
 
