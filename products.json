@@ -10,11 +10,54 @@
         "name": "27-Gal Tote Rack (2-Bin)",
         "sku": "1X2_STR",
         "thumbnail": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
-        "description": "**Does it fit your space? 🛠️**\n\nThis is a DIGITAL BUILD PLAN. Get the blueprints to build this rack this weekend.\n\n✅ **COMPATIBLE BINS:**\n\n• Home Depot HDX (27-Gal)\n\n• Lowe's Commander (27-Gal)\n\n• Husky & Sterilite Industrial\n\nTap the button below to download the PDF plans instantly from Etsy.",
+        "description": "**Does it fit your space? 🛠️**\n\nThis is a DIGITAL BUILD PLAN. Get the blueprints to build this rack this weekend.\n\n✅ **COMPATIBLE BINS:**\n\n• Home Depot HDX (27-Gal)\n\n• Lowe's Commander (27-Gal)\n\n• Husky & Sterilite Industrial\n\nTap the button below to download the PDF plans instantly from Etsy.\n",
         "listingUrl": "https://www.etsy.com/shop/PlanSmithCoDIY",
         "masterModel": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/1x2STR.glb",
         "price": 0,
-        "variantGroups": [],
+        "variantGroups": [
+          {
+            "groupName": "Dikmeler",
+            "items": [
+              {
+                "name": "Default",
+                "value": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
+                "textureConfig": {
+                  "materialName": "texture-1",
+                  "baseColor": "/assets-r2/textures/1x2V3/texture-1_baseColor.png"
+                }
+              },
+              {
+                "name": "Black",
+                "value": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
+                "textureConfig": {
+                  "materialName": "texture-1",
+                  "baseColor": "/assets-r2/textures/1x2V3/dark_grey_low_gloss_plastic_baseColor.png"
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "Shelves",
+            "items": [
+              {
+                "name": "Default",
+                "value": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
+                "textureConfig": {
+                  "materialName": "texture-3",
+                  "baseColor": "/assets-r2/textures/1x2V3/texture-3_baseColor.png"
+                }
+              },
+              {
+                "name": "Black",
+                "value": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
+                "textureConfig": {
+                  "materialName": "texture-3",
+                  "baseColor": "/assets-r2/textures/1x2V3/dark_grey_low_gloss_plastic_baseColor.png"
+                }
+              }
+            ]
+          }
+        ],
         "customAttributes": [
           {
             "icon": "📏",
