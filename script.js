@@ -670,13 +670,27 @@ async function loadMasterModel(url) {
         console.log('[loadMasterModel] New finalUrl:', finalUrl);
 
         if (isModelAlreadyLoaded) {
-            console.log('[loadMasterModel] Model already loaded. Textures already reset');
+            // Model is already loaded, no 'load' event will fire
+            console.log('[loadMasterModel] Model already loaded, skipping reload');
 
-            // Textures already reset in exit function, just hide loader
-            loader.style.opacity = '0';
-            defaultPoster.style.display = 'none';
-            controlsDock.classList.remove('hidden-dock');
-            currentMasterUrl = url;
+            // CRITICAL FIX: Hide viewer, reset textures, then show viewer
+            console.log('[loadMasterModel] Hiding viewer to reset textures invisibly');
+
+            // Step 1: Hide viewer temporarily  
+            viewer.style.opacity = '0';
+
+            // Step 2: Reset textures while viewer is hidden
+            resetToDefaults();
+
+            // Step 3: Show viewer with correct textures
+            setTimeout(() => {
+                viewer.style.opacity = '1';
+                loader.style.opacity = '0';
+                defaultPoster.style.display = 'none';
+                controlsDock.classList.remove('hidden-dock');
+            }, 50); // Small delay to ensure texture application
+
+            currentMasterUrl = url; // Update cache reference
         } else {
             // Model needs to be loaded
             console.log('[loadMasterModel] Loading new model...');
