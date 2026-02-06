@@ -602,22 +602,28 @@ async function loadMasterModel(url) {
     if (currentMasterUrl === url) {
         console.log("Cache Hit. Model hazır, dokular sıfırlanıyor...");
 
-        // Ensure viewer is visible
-        viewer.style.display = 'block';
-        viewer.style.opacity = '1';
-        viewer.style.visibility = 'visible';
+        // CRITICAL FIX: Hide viewer first, reset textures, then show viewer
+        // This ensures user NEVER sees texture changes
+        console.log('[loadMasterModel] Hiding viewer to reset textures invisibly');
 
-        loader.style.opacity = '0';
-        defaultPoster.style.display = 'none';
+        // Step 1: Hide viewer temporarily
+        viewer.style.opacity = '0';
 
-        // Show controls - CRITICAL FIX
-        controlsDock.classList.remove('hidden-dock');
+        // Step 2: Reset textures while viewer is hidden
+        resetToDefaults();
 
-        // ==> KRİTİK EKLEME: Model değişmese bile dokuları sıfırla!
-        // 100ms gecikme ekle - Mobil versiyondaki gibi race condition önlemek için
+        // Step 3: Show viewer with correct textures (use setTimeout to ensure textures are applied)
         setTimeout(() => {
-            resetToDefaults();
-        }, 100);
+            viewer.style.display = 'block';
+            viewer.style.opacity = '1';
+            viewer.style.visibility = 'visible';
+
+            loader.style.opacity = '0';
+            defaultPoster.style.display = 'none';
+
+            // Show controls
+            controlsDock.classList.remove('hidden-dock');
+        }, 50); // Small delay to ensure texture application
 
         return;
     }
@@ -642,17 +648,26 @@ async function loadMasterModel(url) {
 
         if (isModelAlreadyLoaded) {
             // Model is already loaded, no 'load' event will fire
-            // Immediately hide loader and show controls
             console.log('[loadMasterModel] Model already loaded, skipping reload');
-            loader.style.opacity = '0';
-            defaultPoster.style.display = 'none';
-            controlsDock.classList.remove('hidden-dock');
-            currentMasterUrl = url; // Update cache reference
 
-            // Reset textures to defaults
+            // CRITICAL FIX: Hide viewer, reset textures, then show viewer
+            console.log('[loadMasterModel] Hiding viewer to reset textures invisibly');
+
+            // Step 1: Hide viewer temporarily  
+            viewer.style.opacity = '0';
+
+            // Step 2: Reset textures while viewer is hidden
+            resetToDefaults();
+
+            // Step 3: Show viewer with correct textures
             setTimeout(() => {
-                resetToDefaults();
-            }, 100);
+                viewer.style.opacity = '1';
+                loader.style.opacity = '0';
+                defaultPoster.style.display = 'none';
+                controlsDock.classList.remove('hidden-dock');
+            }, 50); // Small delay to ensure texture application
+
+            currentMasterUrl = url; // Update cache reference
         } else {
             // Model needs to be loaded
             console.log('[loadMasterModel] Loading new model...');
@@ -661,14 +676,17 @@ async function loadMasterModel(url) {
 
             viewer.addEventListener('load', () => {
                 console.log('[loadMasterModel] Model load event fired');
+
+                // CRITICAL FIX: Reset textures BEFORE hiding loader
+                console.log('[loadMasterModel] Resetting textures BEFORE hiding loader');
+                resetToDefaults();
+
+                // Now hide loader and show controls
                 loader.style.opacity = '0';
                 defaultPoster.style.display = 'none';
 
                 // Show controls after model loads - CRITICAL FIX
                 controlsDock.classList.remove('hidden-dock');
-
-                // İlk yüklemede varsayılanları uygula
-                resetToDefaults();
 
             }, { once: true });
         }
