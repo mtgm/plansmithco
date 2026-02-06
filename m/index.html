@@ -759,6 +759,7 @@
         </aside>
     </div>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         const viewer = document.getElementById('mv');
         const loader = document.getElementById('loader-overlay');
@@ -818,7 +819,7 @@
             document.getElementById('panel-product-name').textContent = product.name;
             document.getElementById('panel-product-name').textContent = product.name;
             const descEl = document.getElementById('panel-product-description');
-            if (descEl) descEl.textContent = product.description || '';
+            if (descEl) descEl.innerHTML = product.description ? marked.parse(product.description) : '';
             document.getElementById('ar-product-name').textContent = `${product.name} modelini gerçek ortamınızda deneyimleyin.`;
             const buyLink = document.getElementById('panel-buy-link');
             if (buyLink && product.listingUrl) buyLink.href = product.listingUrl;
@@ -1057,8 +1058,8 @@
         function toggleProductDesc() {
             const desc = document.getElementById('panel-product-description');
             const btn = document.getElementById('panel-product-desc-toggle');
-            if (desc.classList.contains('panel-product-desc-collapsed')) { desc.classList.remove('panel-product-desc-collapsed'); btn.textContent = 'Daha az'; }
-            else { desc.classList.add('panel-product-desc-collapsed'); btn.textContent = 'Devamını gör'; }
+            if (desc.classList.contains('panel-product-desc-collapsed')) { desc.classList.remove('panel-product-desc-collapsed'); btn.textContent = 'Read less'; }
+            else { desc.classList.add('panel-product-desc-collapsed'); btn.textContent = 'Read more'; }
         }
         function activateAR() { if (viewer.canActivateAR) viewer.activateAR(); else alert('AR bu cihazda desteklenmiyor.'); }
         function shareProduct() {

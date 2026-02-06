@@ -64,7 +64,7 @@ function openCategory(category) {
     if (categoryTitle) categoryTitle.textContent = category.name;
     if (categoryCount) categoryCount.textContent = `${category.products?.length || 0} product`;
     if (categoryDesc) {
-        categoryDesc.textContent = category.description || '';
+        categoryDesc.innerHTML = category.description ? marked.parse(category.description) : '';
         categoryDesc.classList.add('category-desc-collapsed');
 
         // Açıklama uzunsa toggle butonu göster
@@ -134,7 +134,7 @@ window.toggleDescription = function (descId, toggleBtnId, collapsedClass) {
 
         if (isCollapsed) {
             desc.classList.remove(collapsedClass);
-            toggleBtn.textContent = 'Daha az';
+            toggleBtn.textContent = 'Read less';
         } else {
             desc.classList.add(collapsedClass);
             toggleBtn.textContent = 'Read more';
@@ -245,7 +245,11 @@ function selectProduct(product) {
 
     populateDetailPanel(product);
 
-    // Generate initial QR
+    // Update URL with SKU for deep linking
+    const newUrl = new URL(window.location);
+    newUrl.searchParams.set('sku', product.sku);
+    window.history.pushState({}, '', newUrl);
+
     // Generate initial QR
     setTimeout(() => updateARandQR(null), 500);
 }
@@ -759,15 +763,18 @@ function applyRecommended() {
 }
 // Share Product
 function shareProduct() {
+    const productName = document.getElementById('panel-product-name')?.textContent || 'Product';
+    const currentUrl = window.location.href; // Use current URL with SKU
+
     if (navigator.share) {
         navigator.share({
-            title: document.getElementById('panel-product-name').textContent,
-            text: 'Check out this product!',
-            url: window.location.href
+            title: productName,
+            text: `Check out ${productName}!`,
+            url: currentUrl
         }).catch(err => console.log('Share failed:', err));
     } else {
         // Fallback: Copy link to clipboard
-        navigator.clipboard.writeText(window.location.href)
+        navigator.clipboard.writeText(currentUrl)
             .then(() => alert('Link copied to clipboard!'))
             .catch(err => console.log('Copy failed:', err));
     }
@@ -799,7 +806,7 @@ function populateDetailPanel(product) {
 
     // CONDITIONAL: Update product description in Info tab
     if (descEl) {
-        descEl.textContent = product.description || '';
+        descEl.innerHTML = product.description ? marked.parse(product.description) : '';
         // Don't set inline display style - it overrides CSS display:-webkit-box!
         // Just add/remove the collapsed class
         if (product.description) {
@@ -873,7 +880,7 @@ function populateDetailPanel(product) {
 
                 const inner = document.createElement('div');
                 inner.className = 'custom-attr-content-inner';
-                inner.innerHTML = attr.value.replace(/\n/g, '<br>'); // Handle multiline
+                inner.innerHTML = attr.value ? marked.parse(attr.value) : ''; // Markdown support
 
                 content.appendChild(inner);
                 item.appendChild(header);

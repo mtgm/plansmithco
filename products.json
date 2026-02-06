@@ -2,51 +2,29 @@
   {
     "id": "cat_storage",
     "name": "Storage Tote Racks",
-    "description": "Storage Tote Rack is a modular shelving system that allows you to stack plastic storage bins in an organized, accessible, and secure manner in warehouses, workshops, and garages. It uses space efficiently, eliminates clutter, and provides quick access to bins. Its sturdy construction is suitable for heavy loads and can be scaled as needed.",
+    "description": "Maximize your vertical space with industrial-strength organization.\n\nThese engineered DIY plans allow you to build sturdy, custom-fit racks for your heavy-duty totes (27-Gallon). Stop stacking bins on the floor—transform your garage into a professional, clutter-free workspace this weekend.",
     "thumbnail": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
     "products": [
       {
         "id": "prod_1x2_v3",
-        "name": "1x2 Storage Tote Rack",
-        "sku": "1X2V3",
+        "name": "27-Gal Tote Rack (2-Bin)",
+        "sku": "1X2_STR",
         "thumbnail": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
-        "description": "Storage Tote Rack is a modular shelving system that allows you to stack plastic storage bins in an organized, accessible, and secure manner in warehouses, workshops, and garages. It uses space efficiently, eliminates clutter, and provides quick access to bins. Its sturdy construction is suitable for heavy loads and can be scaled as needed.",
+        "description": "Does it fit your space? 🛠️\nThis is a DIGITAL BUILD PLAN. Get the blueprints to build this rack this weekend.\n\n✅ COMPATIBLE BINS:\n• Home Depot HDX (27-Gal)\n• Lowe's Commander (27-Gal)\n• Husky & Sterilite Industrial\n\nTap the button below to download the PDF plans instantly from Etsy.",
         "listingUrl": "https://www.etsy.com/shop/PlanSmithCoDIY",
-        "masterModel": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/1x2V3.glb",
-        "price": 55,
-        "variantGroups": [
-          {
-            "groupName": "Seperators",
-            "items": [
-              {
-                "name": "Color 1",
-                "value": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
-                "textureConfig": {
-                  "materialName": "texture-1.001",
-                  "baseColor": "/assets-r2/textures/1x2V3/texture-1_baseColor.png"
-                }
-              },
-              {
-                "name": "Color 2",
-                "value": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
-                "textureConfig": {
-                  "materialName": "texture-1.001",
-                  "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
-                }
-              }
-            ]
-          }
-        ],
+        "masterModel": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/1x2STR.glb",
+        "price": 0,
+        "variantGroups": [],
         "customAttributes": [
           {
-            "icon": "📋",
+            "icon": "📏",
             "label": "Dimensions",
-            "value": "w33xl55xh89"
+            "value": "30 in L x 23.5 in W x 36.97 in H"
           },
           {
             "icon": "📋",
             "label": "Materials",
-            "value": "Lumbers,Screw"
+            "value": "Standard 2x4 Lumber, Plywood, Screw"
           }
         ]
       }

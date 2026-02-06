@@ -10,6 +10,7 @@
         rel="stylesheet">
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         /* --- 1. RENK PALETİ VE CAM EFEKTİ (PROFESYONEL) --- */
         :root {
@@ -504,6 +505,12 @@
             font-size: 13px;
             color: var(--text-on-light);
             transition: all 0.2s;
+            min-height: 80px;
+            /* Minimum height */
+            resize: vertical;
+            /* Allow manual resizing */
+            overflow-y: auto;
+            /* Show scrollbar when needed */
         }
 
         input:focus,
