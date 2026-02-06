@@ -8,7 +8,55 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
+            /* === LOGO RENKLERİ === */
+            --logo-gold: #f59e0b;
+            --logo-navy: #111827;
+
+            /* === ANA RENKLER === */
             --accent-color: #f59e0b;
+            --primary-dark: var(--logo-navy);
+            --bg-color: #eef2f6;
+
+            /* === TEXT PALETTE === */
+            --primary-darkest: #030712;
+            --primary-medium: #374151;
+            --primary-light: #6b7280;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --text-muted: #9ca3af;
+
+            /* === ACCENT PALETTE === */
+            --accent-primary: #f59e0b;
+            --accent-hover: #f59e0b;
+            --accent-light: #fffbeb;
+
+            /* === GLASS SYSTEM (Premium / Frosty) === */
+            --glass-bg: linear-gradient(135deg,
+                    rgba(255, 255, 255, 0.70) 0%,
+                    rgba(255, 255, 255, 0.40) 100%);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.65);
+            --glass-shadow:
+                0 8px 32px 0 rgba(31, 38, 135, 0.15),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+            --glass-blur: blur(20px) saturate(180%);
+
+            /* Child elements on glass */
+            --surface-glass: rgba(255, 255, 255, 0.5);
+            --surface-glass-hover: rgba(255, 255, 255, 0.75);
+            --surface-glass-active: rgba(255, 255, 255, 0.9);
+
+            --border-light: rgba(255, 255, 255, 0.5);
+            --border-medium: rgba(255, 255, 255, 0.7);
+
+            --surface-solid: #ffffff;
+            --surface-dark: #111827;
+
+            --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+            --radius-xl: 24px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
         }
 
         * {
@@ -20,8 +68,13 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            color: #f1f5f9;
-            background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+            color: var(--text-primary);
+            background-color: #eef2f6;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            background-size: cover;
             height: 100vh;
             height: 100dvh;
             overflow: hidden;
@@ -52,7 +105,7 @@
         .spinner {
             width: 48px;
             height: 48px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
+            border: 4px solid var(--border-light);
             border-top-color: var(--accent-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -69,7 +122,7 @@
             height: 45vh;
             height: 45dvh;
             position: relative;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            border-bottom: 1px solid var(--border-light);
         }
 
         model-viewer {
@@ -89,23 +142,26 @@
             flex-direction: column;
             padding: 20px;
             overflow-y: auto;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
+            background: transparent;
+            backdrop-filter: none;
         }
 
         /* Product Title */
         .product-title {
             font-size: 20px;
             font-weight: 700;
-            color: #f8fafc;
+            color: var(--text-primary);
             margin-bottom: 16px;
             text-align: center;
         }
 
-        /* Yellow Info Card */
         .info-card {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border-radius: 16px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            border-radius: var(--radius-lg);
             padding: 20px;
             text-align: center;
             margin-bottom: 16px;
@@ -119,14 +175,15 @@
         .info-card-text {
             font-size: 15px;
             font-weight: 600;
-            color: #78350f;
+            color: var(--text-primary);
             line-height: 1.4;
         }
 
         /* AR Button */
         .btn-ar {
             width: 100%;
-            background: var(--accent-color);
+            background: var(--primary-dark);
+            /* Dark button for contrast */
             color: white;
             border: none;
             padding: 16px 20px;
@@ -139,7 +196,7 @@
             justify-content: center;
             gap: 10px;
             margin-bottom: 16px;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             transition: transform 0.2s;
         }
 
@@ -155,32 +212,36 @@
         .steps-title {
             font-size: 11px;
             font-weight: 700;
-            color: #94a3b8;
+            color: var(--text-secondary);
             letter-spacing: 1px;
             text-transform: uppercase;
             margin-bottom: 12px;
+            padding-left: 4px;
         }
 
         .step-card {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: var(--surface-glass);
+            border: 1px solid var(--border-light);
             border-radius: 12px;
             padding: 14px;
             display: flex;
             gap: 12px;
             margin-bottom: 8px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .step-number {
             width: 32px;
             height: 32px;
-            background: var(--accent-color);
-            color: white;
+            background: rgba(255, 255, 255, 0.5);
+            color: var(--accent-color);
+            border: 1px solid var(--border-light);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
+            font-weight: 800;
             flex-shrink: 0;
             font-size: 14px;
         }
@@ -189,13 +250,13 @@
             font-size: 13px;
             font-weight: 700;
             margin-bottom: 4px;
-            color: #f8fafc;
+            color: var(--text-primary);
         }
 
         .step-content p {
             font-size: 11px;
             line-height: 1.4;
-            color: #cbd5e1;
+            color: var(--text-secondary);
         }
 
         /* Error State */
@@ -217,12 +278,12 @@
         .error-state h2 {
             font-size: 20px;
             margin-bottom: 12px;
-            color: #f8fafc;
+            color: var(--text-primary);
         }
 
         .error-state p {
             font-size: 14px;
-            color: #94a3b8;
+            color: var(--text-secondary);
         }
     </style>
 </head>
@@ -247,7 +308,7 @@
         </div>
 
         <button class="btn-ar" onclick="activateAR()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                 <circle cx="12" cy="13" r="4"></circle>
             </svg>

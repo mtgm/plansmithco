@@ -1,10 +1,53 @@
 /* --- TASARIM SİSTEMİ --- */
 :root {
-    --bg-color: #f0f2f5;
-    --sidebar-bg: #ffffff;
-    --primary-dark: #0f172a;
+    /* === LOGO RENKLERİ === */
+    --logo-gold: #f59e0b;
+    --logo-navy: #111827;
+
+    /* === ANA RENKLER === */
     --accent-color: #f59e0b;
-    --radius-xl: 16px;
+    --primary-dark: var(--logo-navy);
+    --bg-color: #eef2f6;
+
+    /* === TEXT PALETTE === */
+    --primary-darkest: #030712;
+    --primary-medium: #374151;
+    --primary-light: #6b7280;
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #9ca3af;
+
+    /* === ACCENT PALETTE === */
+    --accent-primary: #f59e0b;
+    --accent-hover: #f59e0b;
+    --accent-light: #fffbeb;
+
+    /* === GLASS SYSTEM (Premium / Frosty) === */
+    /* Daha "buzlu" ve kalın cam hissi için gradient + noise */
+    --glass-bg: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.70) 0%,
+            rgba(255, 255, 255, 0.40) 100%);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.65);
+    --glass-shadow:
+        0 8px 32px 0 rgba(31, 38, 135, 0.15),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    /* İç parlama */
+    --glass-blur: blur(20px) saturate(180%);
+
+    /* Child elements on glass (lighter / distinct) */
+    --surface-glass: rgba(255, 255, 255, 0.5);
+    --surface-glass-hover: rgba(255, 255, 255, 0.75);
+    --surface-glass-active: rgba(255, 255, 255, 0.9);
+
+    --border-light: rgba(255, 255, 255, 0.5);
+    --border-medium: rgba(255, 255, 255, 0.7);
+
+    --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+    --radius-xl: 24px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
 }
 
 * {
@@ -18,9 +61,70 @@ body {
     height: 100dvh;
     overflow: hidden;
     font-family: 'Inter', sans-serif;
-    color: #f1f5f9;
-    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+    color: var(--text-primary);
+    background-color: #eef2f6;
+    /* Derinlik katan gradient arka plan */
+    background-image:
+        radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.15) 0px, transparent 50%);
+    background-attachment: fixed;
+    background-size: cover;
     display: flex;
+}
+
+/* === BASE TYPOGRAPHY & ELEMENTS === */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--text-primary);
+    margin: 0 0 16px 0;
+}
+
+p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+}
+
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--accent-hover);
+}
+
+small {
+    color: var(--text-muted);
+}
+
+label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+input,
+button,
+select,
+textarea {
+    font-family: inherit;
+    color: var(--text-primary);
+}
+
+/* Lists */
+ul,
+ol {
+    color: var(--text-secondary);
+}
+
+strong,
+b {
+    color: var(--text-primary);
 }
 
 #main-layout {
@@ -41,14 +145,14 @@ body {
 #sidebar {
     width: 280px;
     min-width: 280px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(30px) saturate(150%);
-    -webkit-backdrop-filter: blur(30px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
     border-radius: var(--radius-xl);
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--glass-shadow);
     z-index: 10;
     overflow: hidden;
 }
@@ -60,8 +164,9 @@ body {
     align-items: left;
     gap: 8px;
     flex-shrink: 0;
-    background: rgba(255, 255, 255, 0.1);
-    border-bottom: 2px solid #f8fafc;
+    background: transparent;
+    /* Camın kendisi zaten sidebar'da */
+    border-bottom: 1px solid var(--border-light);
 }
 
 .brand-info {
@@ -74,32 +179,33 @@ body {
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-medium);
+    background: var(--surface-glass);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     cursor: pointer;
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
-    color: #f1f5f9;
+    color: var(--text-primary);
 }
 
 #back-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
+    background: var(--surface-glass-hover);
+    border-color: var(--border-medium);
 }
 
 .brand-name {
     font-size: 20px;
     font-weight: 800;
-    color: #ffffff;
+    color: var(--text-primary);
     margin-bottom: 4px;
 }
 
 .brand-tagline {
     font-size: 12px;
-    color: #fbbf24;
+    color: var(--text-secondary);
+    /* Daha yumuşak */
     font-weight: 600;
 }
 
@@ -108,15 +214,16 @@ body {
     font-size: 10px;
     color: var(--accent-color);
     font-weight: 600;
-    background: rgba(245, 158, 11, 0.1);
+    background: rgba(245, 158, 11, 0.10);
+    border: 1px solid rgba(245, 158, 11, 0.2);
     padding: 3px 8px;
-    border-radius: 4px;
+    border-radius: 6px;
     display: inline-block;
 }
 
 .section-divider {
     height: 10px;
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--surface-glass-hover);
     margin: 0 16px;
 }
 
@@ -124,7 +231,7 @@ body {
     font-family: 'Inter', sans-serif;
     font-size: 16px;
     font-weight: 700;
-    color: #94a3b8 !important;
+    color: var(--text-muted) !important;
     padding: 16px 20px 12px;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -136,18 +243,18 @@ body {
 
 #back-arrow {
     display: none;
-    color: #94a3b8;
+    color: var(--text-muted);
 }
 
 .logo-box {
     width: 90px;
     height: 90px;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--border-medium);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--surface-glass-hover);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     margin-left: auto;
@@ -168,57 +275,77 @@ body {
 #category-grid {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
     padding: 0 16px 20px;
 }
 
 .cat-card {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 12px;
+    background: var(--surface-glass);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 12px;
     cursor: pointer;
     text-align: left;
-    transition: all 0.3s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.cat-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+    pointer-events: none;
 }
 
 .cat-card:hover {
-    border-color: var(--accent-color);
-    background: rgba(255, 255, 255, 0.12);
-    transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+    border-color: var(--border-medium);
+    background: var(--surface-glass-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.cat-card:hover::before {
+    transform: translateX(100%);
 }
 
 .cat-thumb {
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
     object-fit: cover;
     flex-shrink: 0;
     background: rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--border-light);
 }
 
 .cat-info {
     flex: 1;
     min-width: 0;
-
 }
 
 .cat-title {
     font-size: 14px;
     font-weight: 600;
-    color: #f1f5f9;
+    color: var(--text-primary);
     margin-bottom: 4px;
 }
 
 .cat-count {
-    font-size: 12px;
-    color: #cbd5e1;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
 }
 
 /* Category Info Panel */
@@ -232,13 +359,13 @@ body {
     margin: 0 0 8px 0;
     font-size: 16px;
     font-weight: 700;
-    color: #f1f5f9;
+    color: var(--text-primary);
 }
 
 .category-panel-count {
     margin: 0 0 12px 0;
     font-size: 12px;
-    color: #fbbf24;
+    color: var(--accent-color);
     font-weight: 600;
 }
 
@@ -255,14 +382,15 @@ body {
 #category-desc {
     margin: 0;
     font-size: 13px;
-    color: #cbd5e1;
+    color: var(--text-secondary);
     line-height: 1.6;
     padding: 12px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.3);
+    /* Slightly flatter for text readability */
+    border: 1px solid var(--border-light);
     border-radius: 8px;
     text-align: justify;
     hyphens: auto;
-    /* Kelime bölme desteği */
 }
 
 .desc-wrapper {
@@ -274,7 +402,7 @@ body {
     margin-top: 8px;
     background: none;
     border: none;
-    color: #fbbf24;
+    color: var(--accent-color);
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -283,7 +411,7 @@ body {
 }
 
 .desc-toggle-btn:hover {
-    color: #f59e0b;
+    color: var(--accent-hover);
 }
 
 /* Search Wrapper */
@@ -298,11 +426,30 @@ body {
     top: 24.5px;
     transform: translateY(-50%);
     pointer-events: none;
-    color: #94a3b8;
+    color: var(--text-secondary);
+    opacity: 0.7;
 }
 
 #search-input {
+    width: 100%;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.4);
+    box-shadow: none;
+    /* Temiz görünüm */
+    color: var(--text-primary);
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s;
     padding-left: 36px;
+    padding-right: 12px;
+}
+
+#search-input:focus {
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: var(--accent-color);
 }
 
 /* Ürün Detay */
@@ -314,7 +461,7 @@ body {
 
 #product-detail-area {
     padding: 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--surface-glass);
     background: transparent;
 }
 
@@ -323,7 +470,7 @@ body {
     font-weight: 700;
     margin: 0 0 8px 0;
     line-height: 1.2;
-    color: #ffffff;
+    color: var(--text-primary);
 }
 
 /* AÇIKLAMA ALANI (Accordion) */
@@ -335,7 +482,7 @@ body {
 
 #p-desc {
     font-size: 13px;
-    color: #cbd5e1;
+    color: var(--text-secondary);
     line-height: 1.6;
     transition: all 0.3s ease;
 }
@@ -360,10 +507,11 @@ body {
 #panel-product-description {
     margin: 0;
     font-size: 13px;
-    color: #cbd5e1;
+    color: var(--text-secondary);
     line-height: 1.6;
     padding: 12px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--surface-glass);
+    border: 1px solid var(--border-medium);
     border-radius: 8px;
     text-align: justify;
     hyphens: auto;
@@ -376,7 +524,7 @@ body {
     -webkit-box-orient: vertical;
     overflow: hidden;
     padding-right: 24px;
-    color: #94a3b8;
+    color: var(--text-muted);
     /* Ok için yer */
 }
 
@@ -392,7 +540,7 @@ body {
     display: none;
     align-items: center;
     justify-content: center;
-    color: #fbbf24;
+    color: var(--accent-color);
     transition: transform 0.3s;
 }
 
@@ -400,56 +548,68 @@ body {
     transform: rotate(180deg);
 }
 
-/* Aksiyon Satırı */
+/* AKSİYON SATIRI */
 .action-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     padding: 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    margin-top: 16px;
 }
 
 #p-price {
     font-family: 'JetBrains Mono', monospace;
     font-size: 18px;
     font-weight: 700;
-    color: #ffffff;
+    color: var(--text-primary);
+    /* Changed for better contrast on glass */
 }
 
 .buy-btn {
     background: var(--primary-dark);
     color: white;
     text-decoration: none;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: 10px 18px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    transition: background 0.2s;
+    gap: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.buy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
 #p-learn-more {
-    color: #fbbf24;
+    color: var(--text-secondary);
     text-decoration: none;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: 10px 16px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     gap: 6px;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid transparent;
 }
 
 #p-learn-more:hover {
-    color: #f59e0b;
-    background: rgba(251, 191, 36, 0.1);
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.4);
+    border-color: var(--border-light);
 }
 
 /* Alt Liste (Kompakt) */
@@ -462,27 +622,51 @@ body {
     align-items: center;
     gap: 12px;
     padding: 10px;
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    margin-bottom: 6px;
+    background: var(--surface-glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    margin-bottom: 8px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.prod-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+    pointer-events: none;
+}
+
+.prod-item:hover {
+    background: var(--surface-glass-hover);
+    border-color: var(--border-medium);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.prod-item:hover::before {
+    transform: translateX(100%);
 }
 
 .prod-item.active {
-    background: rgba(251, 191, 36, 0.15);
-    border-color: rgba(251, 191, 36, 0.5);
-    box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.3), 0 4px 12px rgba(251, 191, 36, 0.2);
+    background: rgba(255, 255, 255, 0.6);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 1px var(--accent-color), 0 4px 12px rgba(245, 158, 11, 0.2);
 }
 
 .prod-thumb {
     width: 60px;
     height: 60px;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--border-light);
     object-fit: cover;
 }
 
@@ -495,14 +679,15 @@ body {
     margin: 0 0 4px 0;
     font-size: 14px;
     font-weight: 600;
-    color: #ffffff;
+    font-weight: 600;
+    color: var(--text-primary);
 }
 
 .prod-price {
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
     font-weight: 700;
-    color: #fbbf24;
+    color: var(--accent-color);
 }
 
 #panel-product-desc-toggle {
@@ -511,7 +696,7 @@ body {
     margin-left: 12px;
     background: none;
     border: none;
-    color: #f59e0b;
+    color: var(--accent-color);
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
@@ -524,6 +709,7 @@ body {
 
 #panel-product-desc-toggle:hover {
     text-decoration: underline;
+    color: var(--accent-hover);
 }
 
 /* --- DETAIL PANEL CUSTOM ATTRIBUTES (Accordion Style) --- */
@@ -546,7 +732,7 @@ body {
     padding: 12px 4px;
     background: transparent;
     border: none;
-    color: #f1f5f9;
+    color: var(--text-primary);
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -555,7 +741,7 @@ body {
 }
 
 .custom-attr-header:hover {
-    color: #ffffff;
+    color: var(--surface-solid);
 }
 
 .custom-attr-header-left {
@@ -574,7 +760,7 @@ body {
     transition: transform 0.3s ease;
     width: 16px;
     height: 16px;
-    color: #94a3b8;
+    color: var(--text-muted);
 }
 
 .custom-attr-item.open .custom-attr-arrow {
@@ -591,7 +777,7 @@ body {
     padding: 8px 4px 16px 32px;
     /* Indent content */
     font-size: 13px;
-    color: #cbd5e1;
+    color: var(--text-secondary);
     line-height: 1.5;
     text-align: justify;
     hyphens: auto;
@@ -601,15 +787,15 @@ body {
 #stage-wrapper {
     flex: 1;
     position: relative;
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(30px) saturate(150%);
-    -webkit-backdrop-filter: blur(30px) saturate(150%);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     border-radius: var(--radius-xl);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: var(--glass-border);
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--glass-shadow);
 }
 
 #default-poster {
@@ -696,14 +882,14 @@ model-viewer::part(default-ar-button) {
     padding: 8px 16px 0 16px;
     overflow-x: auto;
     scrollbar-width: none;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--text-primary);
 }
 
 .tab-btn {
     padding: 6px 4px;
     font-size: 10px;
     font-weight: 700;
-    color: #94a3b8;
+    color: var(--text-muted);
     background: transparent;
     border: none;
     cursor: pointer;
@@ -713,7 +899,7 @@ model-viewer::part(default-ar-button) {
 }
 
 .tab-btn.active {
-    color: #ffffff;
+    color: var(--surface-solid);
     border-bottom-color: var(--accent-color);
 }
 
@@ -727,7 +913,7 @@ model-viewer::part(default-ar-button) {
 .spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid #f1f5f9;
+    border: 4px solid var(--text-primary);
     border-top-color: var(--accent-color);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -765,7 +951,7 @@ model-viewer::part(default-ar-button) {
     width: 40px;
     height: 40px;
     border-radius: 10px;
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--text-secondary);
     background-size: cover;
     background-position: center;
     transition: all 0.2s;
@@ -775,13 +961,13 @@ model-viewer::part(default-ar-button) {
 .variant-item.selected .v-btn {
     border-color: var(--accent-color);
     transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(245, 158, 11, 0.2);
+    box-shadow: 0 2px 5px rgba(212, 165, 116, 0.3);
 }
 
 .v-label {
     font-size: 9px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-secondary);
     text-align: center;
     max-width: 50px;
     white-space: nowrap;
@@ -895,7 +1081,7 @@ model-viewer::part(default-ar-button) {
 .about-description {
     margin-top: 24px;
     padding-top: 24px;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--text-primary);
 }
 
 /* --- RESPONSIVE --- */
@@ -945,7 +1131,7 @@ model-viewer::part(default-ar-button) {
         border-radius: 24px;
         /* Rounded all corners */
         border: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        border-bottom: 1px solid var(--border-medium);
         z-index: 5;
     }
 
@@ -996,15 +1182,15 @@ model-viewer::part(default-ar-button) {
         transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
         /* Match Desktop Glassmorphism */
-        background: rgba(255, 255, 255, 0.1);
+        background: var(--surface-glass);
         backdrop-filter: blur(30px) saturate(150%);
         -webkit-backdrop-filter: blur(30px) saturate(150%);
 
-        border: 1px solid rgba(255, 255, 255, 0.18);
+        border: 1px solid var(--border-light);
         border-bottom: none;
         z-index: 50;
         flex-direction: column;
-        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 -10px 40px var(--shadow-lg);
         flex-shrink: 0;
         /* Don't shrink below set height unless collapsed */
     }
@@ -1140,19 +1326,19 @@ model-viewer::part(default-ar-button) {
         /* No side padding, rely on gap */
         background: transparent;
         border: none;
-        color: rgba(255, 255, 255, 0.5);
+        color: var(--text-secondary);
         font-family: 'Inter', sans-serif;
         font-size: 15px;
         /* Slightly larger */
-        font-weight: 500;
+        font-weight: 600;
         cursor: pointer;
         position: relative;
         transition: color 0.3s ease;
     }
 
     .mobile-variant-tab.active {
-        color: #fff;
-        font-weight: 600;
+        color: var(--accent-primary);
+        font-weight: 700;
     }
 
     /* Orange Underline Indicator */
@@ -1165,9 +1351,9 @@ model-viewer::part(default-ar-button) {
         width: 100%;
         height: 3px;
         /* Thicker line */
-        background: #f59e0b;
+        background: var(--accent-primary);
         border-radius: 3px 3px 0 0;
-        box-shadow: 0 -2px 10px rgba(245, 158, 11, 0.3);
+        box-shadow: 0 -2px 10px rgba(212, 165, 116, 0.4);
     }
 
     /* HIDE Desktop Accordion Headers on Mobile */
@@ -1195,10 +1381,10 @@ model-viewer::part(default-ar-button) {
     /* Sticky Header Container */
     #panel-sticky-header {
         flex-shrink: 0;
-        background: rgba(255, 255, 255, 0.1);
+        background: var(--surface-glass);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        border-bottom: 2px solid #e2e8f0;
+        border-bottom: 2px solid var(--text-secondary);
         z-index: 100;
         border-radius: 16px 16px 0 0;
     }
@@ -1215,12 +1401,12 @@ model-viewer::part(default-ar-button) {
         top: 16px;
         width: 400px;
         height: calc(100vh - 32px);
-        background: rgba(255, 255, 255, 0.1);
+        background: var(--surface-glass);
         backdrop-filter: blur(30px) saturate(150%);
         -webkit-backdrop-filter: blur(30px) saturate(150%);
-        border: 1px solid rgba(255, 255, 255, 0.18);
+        border: 1px solid var(--border-light);
         border-radius: var(--radius-xl);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 8px 32px var(--shadow-lg);
         z-index: 100;
         overflow: hidden;
         transform: translateX(calc(100% + 16px));
@@ -1262,13 +1448,13 @@ model-viewer::part(default-ar-button) {
     right: 16px;
     width: 32px;
     height: 32px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--border-medium);
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--surface-glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     font-size: 20px;
-    color: #e2e8f0;
+    color: var(--text-secondary);
     cursor: pointer;
     z-index: 10;
     /* Only animate background and border, not position - prevents awkward sliding */
@@ -1280,8 +1466,9 @@ model-viewer::part(default-ar-button) {
 }
 
 #panel-close-btn:hover {
-    background: #f8fafc;
-    border-color: #cbd5e1;
+    background: var(--surface-glass-hover);
+    border-color: var(--accent-color);
+    color: var(--text-primary);
 }
 
 /* Daraltılmış halde buton - sadece stil değişikliği, pozisyon aynı */
@@ -1291,10 +1478,10 @@ model-viewer::part(default-ar-button) {
     opacity: 1 !important;
     pointer-events: auto !important;
     /* Make it more visible when collapsed */
-    background: rgba(245, 158, 11, 0.9);
+    background: var(--accent-primary);
     border-color: var(--accent-color);
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 4px 12px rgba(212, 165, 116, 0.4);
     /* Bring to front */
     z-index: 101 !important;
 
@@ -1303,10 +1490,11 @@ model-viewer::part(default-ar-button) {
 /* Sticky Header Container */
 #panel-sticky-header {
     flex-shrink: 0;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.8);
     z-index: 100;
     opacity: 1;
 }
@@ -1314,7 +1502,7 @@ model-viewer::part(default-ar-button) {
 /* Panel Header - Product Title */
 #panel-header {
     padding: 20px 20px 16px;
-    border-bottom: 2px solid #f8fafc;
+    border-bottom: none;
 
 
 }
@@ -1331,7 +1519,7 @@ model-viewer::part(default-ar-button) {
     font-size: 18px;
     font-weight: 700;
     margin: 0;
-    color: #f8fafc;
+    color: var(--accent-color);
 }
 
 /* Tab Navigation */
@@ -1348,7 +1536,7 @@ model-viewer::part(default-ar-button) {
     background: transparent;
     font-size: 14px;
     font-weight: 600;
-    color: #cbd5e1;
+    color: var(--text-secondary);
     cursor: pointer;
     border-bottom: 3px solid transparent;
     transition: all 0.2s;
@@ -1356,14 +1544,14 @@ model-viewer::part(default-ar-button) {
 }
 
 .panel-tab:hover {
-    color: #ffffff;
+    color: var(--text-primary);
     background: transparent;
     border-radius: 8px 8px 0 0;
 }
 
 .panel-tab.active {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    background: var(--surface-glass);
     border-bottom-color: var(--accent-color);
 }
 
@@ -1433,7 +1621,7 @@ model-viewer::part(default-ar-button) {
 }
 
 .btn-primary {
-    background: #d97706;
+    background: var(--accent-hover);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     color: white;
@@ -1503,13 +1691,14 @@ model-viewer::part(default-ar-button) {
     justify-content: space-between;
     font-size: 14px;
     font-weight: 600;
-    color: #f1f5f9;
+    font-weight: 600;
+    color: var(--text-primary);
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .accordion-header:hover {
-    color: #ffffff;
+    color: var(--accent-color);
 }
 
 .accordion-header svg {
@@ -1535,7 +1724,7 @@ model-viewer::part(default-ar-button) {
     margin: 0;
     font-size: 13px;
     line-height: 1.6;
-    color: #cbd5e1;
+    color: var(--text-secondary);
     background: transparent;
 }
 
@@ -1551,14 +1740,14 @@ model-viewer::part(default-ar-button) {
 .btn-action {
     flex: 1;
     padding: 10px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-medium);
+    background: var(--surface-glass);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border-radius: 8px;
     font-size: 13px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.3s ease;
 }
@@ -1577,7 +1766,7 @@ model-viewer::part(default-ar-button) {
     font-family: 'Inter', sans-serif;
     font-size: 14px;
     font-weight: 700;
-    color: #cbd5e1;
+    color: var(--text-secondary);
     letter-spacing: 0.5px;
     text-transform: uppercase;
     margin: 0 0 12px 0;
@@ -1592,7 +1781,7 @@ model-viewer::part(default-ar-button) {
 
 .option-count {
     font-size: 12px;
-    color: #cbd5e1;
+    color: var(--text-secondary);
 }
 
 /* Part Toggles */
@@ -1604,25 +1793,25 @@ model-viewer::part(default-ar-button) {
 
 .part-toggle {
     padding: 10px 18px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-medium);
+    background: var(--surface-glass);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border-radius: 20px;
     font-size: 13px;
     font-weight: 600;
-    color: #e2e8f0;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .part-toggle:hover {
-    border-color: #cbd5e1;
+    border-color: var(--text-secondary);
 }
 
 .part-toggle.active {
     background: var(--accent-color);
-    color: white;
+    color: var(--surface-solid);
     border-color: var(--accent-color);
 }
 
@@ -1669,7 +1858,7 @@ model-viewer::part(default-ar-button) {
 .swatch-item span {
     font-size: 12px;
     font-weight: 600;
-    color: #f1f5f9;
+    color: var(--text-secondary);
 }
 
 /* Variant Accordion Items - use same smooth animation as info accordions */
@@ -1687,10 +1876,8 @@ model-viewer::part(default-ar-button) {
 
 /* Configuration Card */
 .config-card {
-    background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: var(--surface-glass-solid);
+    border: none;
     border-radius: 12px;
     padding: 16px;
     margin-top: 24px;
@@ -1713,7 +1900,7 @@ model-viewer::part(default-ar-button) {
     font-size: 13px;
     font-weight: 700;
     margin: 0;
-    color: #f1f5f9;
+    color: var(--text-primary);
 }
 
 .config-list {
@@ -1730,19 +1917,20 @@ model-viewer::part(default-ar-button) {
 }
 
 .config-item span:first-child {
-    color: #e2e8f0;
+    color: var(--text-primary);
 }
 
 .config-item span:last-child {
     font-weight: 600;
-    color: #f8fafc;
+    color: var(--text-primary);
 }
 
 /* ========================================
    AR TAB - AR Instructions
    ======================================== */
 .ar-intro-card {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    background: var(--surface-glass);
+    border: 1px solid var(--border-medium);
     border-radius: 16px;
     padding: 24px;
     text-align: center;
@@ -1758,13 +1946,13 @@ model-viewer::part(default-ar-button) {
     font-size: 18px;
     font-weight: 700;
     margin: 0 0 8px 0;
-    color: #78350f;
+    color: var(--text-primary);
 }
 
 .ar-intro-card p {
     font-size: 13px;
     line-height: 1.6;
-    color: #713f12;
+    color: var(--text-secondary);
     margin: 0;
 }
 
@@ -1787,9 +1975,9 @@ model-viewer::part(default-ar-button) {
 }
 
 .btn-ar:hover {
-    background: #d97706;
+    background: var(--accent-hover);
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 6px 16px rgba(212, 165, 116, 0.4);
 }
 
 .ar-steps {
@@ -1800,17 +1988,17 @@ model-viewer::part(default-ar-button) {
     font-family: 'Inter', sans-serif;
     font-size: 11px;
     font-weight: 700;
-    color: #94a3b8;
+    color: var(--text-muted);
     letter-spacing: 1px;
     text-transform: uppercase;
     margin: 0 0 12px 0;
 }
 
 .step-card {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--surface-glass);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid var(--border-medium);
     border-radius: 12px;
     padding: 16px;
     display: flex;
@@ -1822,7 +2010,7 @@ model-viewer::part(default-ar-button) {
     width: 32px;
     height: 32px;
     background: var(--accent-color);
-    color: white;
+    color: var(--surface-solid);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -1835,21 +2023,22 @@ model-viewer::part(default-ar-button) {
     font-size: 14px;
     font-weight: 700;
     margin: 0 0 4px 0;
-    color: #f8fafc;
+    color: var(--text-primary);
 }
 
 .step-card p {
     font-size: 12px;
     line-height: 1.5;
-    color: #e2e8f0;
+    color: var(--text-secondary);
     margin: 0;
 }
 
 .ar-requirements {
-    background: rgba(254, 243, 199, 0.15);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(254, 243, 199, 0.3);
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid white;
+    box-shadow: var(--shadow-sm);
     border-radius: 12px;
     padding: 16px;
     display: flex;
@@ -1864,13 +2053,13 @@ model-viewer::part(default-ar-button) {
     font-size: 13px;
     font-weight: 700;
     margin: 0 0 6px 0;
-    color: #fef3c7;
+    color: var(--text-primary);
 }
 
 .ar-requirements p {
     font-size: 12px;
     line-height: 1.5;
-    color: #fde68a;
+    color: var(--text-secondary);
     margin: 0;
 }
 
