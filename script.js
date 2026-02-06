@@ -66,16 +66,8 @@ function openCategory(category) {
     url.searchParams.delete('sku');
     window.history.pushState({}, '', url);
 
-    // TEXTURE FIX: Reset textures to defaults BEFORE clearing selectedProduct
-    // This prevents texture flash when loading next product
-    if (selectedProduct && selectedProduct.variantGroups) {
-        console.log('[openCategory] Resetting textures to defaults');
-        selectedProduct.variantGroups.forEach(g => {
-            if (g.items[0] && g.items[0].textureConfig) {
-                applyTextureConfig(g.items[0].textureConfig);
-            }
-        });
-    }
+    // NOTE: We DON'T reset textures here to avoid visible flash
+    // Textures will be reset when next product loads (in loadMasterModel)
 
     // Reset product selection and model cache
     selectedProduct = null;
@@ -136,15 +128,8 @@ window.goBackToCategories = function () {
     url.searchParams.delete('sku');
     window.history.pushState({}, '', url);
 
-    // TEXTURE FIX: Reset textures to defaults BEFORE clearing selectedProduct
-    if (selectedProduct && selectedProduct.variantGroups) {
-        console.log('[goBackToCategories] Resetting textures to defaults');
-        selectedProduct.variantGroups.forEach(g => {
-            if (g.items[0] && g.items[0].textureConfig) {
-                applyTextureConfig(g.items[0].textureConfig);
-            }
-        });
-    }
+    // NOTE: We DON'T reset textures here to avoid visible flash
+    // Textures will be reset when next product loads (in loadMasterModel)
 
     // Reset product selection and model cache
     selectedProduct = null;
@@ -345,15 +330,9 @@ function closeMobileProduct() {
     const mainLayout = document.getElementById('main-layout');
     if (mainLayout) mainLayout.classList.remove('mobile-product-active');
 
-    // TEXTURE FIX: Reset textures to defaults immediately to prevent flash on next product load
-    if (selectedProduct && selectedProduct.variantGroups) {
-        console.log('[closeMobileProduct] Resetting textures to defaults');
-        selectedProduct.variantGroups.forEach(g => {
-            if (g.items[0] && g.items[0].textureConfig) {
-                applyTextureConfig(g.items[0].textureConfig);
-            }
-        });
-    }
+    // NOTE: We DON'T reset textures here to avoid visible flash
+    // Textures will be reset when next product loads (in loadMasterModel)
+    // This keeps the model looking the same while user navigates back
 
     // Close detail panel
     closeDetailPanel();
