@@ -59,10 +59,23 @@ function renderCategories(categories) {
 }
 
 function openCategory(category) {
+    console.log('[openCategory] Opening category:', category.name);
+
     // Clear SKU parameter from URL when returning to category view
     const url = new URL(window.location);
     url.searchParams.delete('sku');
     window.history.pushState({}, '', url);
+
+    // TEXTURE FIX: Reset textures to defaults BEFORE clearing selectedProduct
+    // This prevents texture flash when loading next product
+    if (selectedProduct && selectedProduct.variantGroups) {
+        console.log('[openCategory] Resetting textures to defaults');
+        selectedProduct.variantGroups.forEach(g => {
+            if (g.items[0] && g.items[0].textureConfig) {
+                applyTextureConfig(g.items[0].textureConfig);
+            }
+        });
+    }
 
     // Reset product selection and model cache
     selectedProduct = null;
@@ -116,10 +129,22 @@ function openCategory(category) {
 
 // --- GERİ DÖNÜŞ ---
 window.goBackToCategories = function () {
+    console.log('[goBackToCategories] Returning to categories');
+
     // Clear SKU parameter from URL
     const url = new URL(window.location);
     url.searchParams.delete('sku');
     window.history.pushState({}, '', url);
+
+    // TEXTURE FIX: Reset textures to defaults BEFORE clearing selectedProduct
+    if (selectedProduct && selectedProduct.variantGroups) {
+        console.log('[goBackToCategories] Resetting textures to defaults');
+        selectedProduct.variantGroups.forEach(g => {
+            if (g.items[0] && g.items[0].textureConfig) {
+                applyTextureConfig(g.items[0].textureConfig);
+            }
+        });
+    }
 
     // Reset product selection and model cache
     selectedProduct = null;
@@ -249,9 +274,13 @@ function selectProduct(product) {
     console.log('[selectProduct] START - Product:', product.name, 'SKU:', product.sku);
     console.log('[selectProduct] viewer.style.display BEFORE:', viewer.style.display);
 
-    // Prevent re-selecting the same product
-    if (selectedProduct && selectedProduct.sku === product.sku) {
-        console.log("[selectProduct] Product already selected, ignoring re-selection");
+    // MOBILE FIX: Allow re-selecting same product (needed when user closes mobile product card and reopens)
+    // Only skip if product is already selected AND detail panel is open
+    const detailPanel = document.getElementById('detail-panel');
+    const isPanelOpen = detailPanel && detailPanel.classList.contains('show');
+
+    if (selectedProduct && selectedProduct.sku === product.sku && isPanelOpen) {
+        console.log("[selectProduct] Product already selected and panel open, ignoring re-selection");
         return;
     }
 
@@ -311,8 +340,20 @@ function selectProduct(product) {
 
 // NEW: Close Mobile Product View (Return to List)
 function closeMobileProduct() {
+    console.log('[closeMobileProduct] Closing mobile product view');
+
     const mainLayout = document.getElementById('main-layout');
     if (mainLayout) mainLayout.classList.remove('mobile-product-active');
+
+    // TEXTURE FIX: Reset textures to defaults immediately to prevent flash on next product load
+    if (selectedProduct && selectedProduct.variantGroups) {
+        console.log('[closeMobileProduct] Resetting textures to defaults');
+        selectedProduct.variantGroups.forEach(g => {
+            if (g.items[0] && g.items[0].textureConfig) {
+                applyTextureConfig(g.items[0].textureConfig);
+            }
+        });
+    }
 
     // Close detail panel
     closeDetailPanel();
