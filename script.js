@@ -251,8 +251,13 @@ function selectProduct(product) {
 
     selectedProduct = product;
 
-    // Model-viewer'ı göster
+    // CRITICAL FIX: Always ensure viewer is visible first
+    // This fixes the issue where viewer remains hidden after navigating back from category
     viewer.style.display = 'block';
+
+    // Ensure viewer is in the correct state
+    viewer.style.opacity = '1';
+    viewer.style.visibility = 'visible';
 
     // Poster'ı gizle ve loader göster
     defaultPoster.style.display = 'none';
@@ -566,10 +571,13 @@ async function loadMasterModel(url) {
 
         // Ensure viewer is visible
         viewer.style.display = 'block';
+        viewer.style.opacity = '1';
+        viewer.style.visibility = 'visible';
+
         loader.style.opacity = '0';
         defaultPoster.style.display = 'none';
 
-        // Show controls
+        // Show controls - CRITICAL FIX
         controlsDock.classList.remove('hidden-dock');
 
         // ==> KRİTİK EKLEME: Model değişmese bile dokuları sıfırla!
@@ -599,6 +607,9 @@ async function loadMasterModel(url) {
         viewer.addEventListener('load', () => {
             loader.style.opacity = '0';
             defaultPoster.style.display = 'none';
+
+            // Show controls after model loads - CRITICAL FIX
+            controlsDock.classList.remove('hidden-dock');
 
             // İlk yüklemede varsayılanları uygula
             resetToDefaults();
