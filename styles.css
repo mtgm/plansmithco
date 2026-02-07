@@ -195,6 +195,13 @@ b {
     border-color: var(--border-medium);
 }
 
+#panel-product-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary) !important;
+    margin-bottom: 4px;
+}
+
 .brand-name {
     font-size: 20px;
     font-weight: 800;
@@ -1114,7 +1121,6 @@ model-viewer::part(default-ar-button) {
         height: 100dvh;
         padding: 0;
         gap: 0;
-        /* background: var(--bg-color); REMOVED to allow body gradient to show */
         background: transparent;
         overflow: hidden;
     }
@@ -1122,17 +1128,16 @@ model-viewer::part(default-ar-button) {
     /* 1. AR View - Hidden by default, shown when product active */
     #stage-wrapper {
         display: none;
-        /* Default: Hidden (Full screen lists) */
         order: 1;
         width: 100%;
-        /* Flex grow to fill available space */
         flex: 1;
         min-height: 0;
-        border-radius: 24px;
-        /* Rounded all corners */
+        /* User requested FLAT borders like ar-view.html */
+        border-radius: 0;
         border: none;
-        border-bottom: 1px solid var(--border-medium);
+        border-bottom: 1px solid var(--border-light);
         z-index: 5;
+        background: transparent;
     }
 
     /* 2. Sidebar (Lists) - Full Screen by default */
@@ -1145,54 +1150,55 @@ model-viewer::part(default-ar-button) {
         position: absolute;
         inset: 0;
         z-index: 20;
+        background: var(--bg-color);
+        /* Ensure opaque background */
     }
 
     /* STATE: Product Active (Split Screen) */
     #main-layout.mobile-product-active #stage-wrapper {
         display: flex;
-        /* Show AR */
     }
 
     #main-layout.mobile-product-active #sidebar {
         display: none;
-        /* Hide List */
     }
 
     /* 3. Detail Panel - Bottom 50% originally, now Dynamic */
     #detail-panel {
         display: none;
-        /* Hidden by default */
         order: 2;
-        /* Below stage */
-
         position: relative;
-        /* In flow */
         bottom: auto;
         left: auto;
         right: auto;
         top: auto;
-
         width: 100%;
         height: 50vh;
         height: 50dvh;
 
-        border-radius: 20px 20px 0 0;
-        /* Remove transform transition, use height transition */
+        /* Match AR View: Flat Top */
+        border-radius: 0;
+        /* User said "flat", but ar-view has 20px top radius. I will use 20px per code. -> UPDATED: User explicitly requested NO radius. */
         transform: none;
         transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
-        /* Match Desktop Glassmorphism */
-        background: var(--surface-glass);
-        backdrop-filter: blur(30px) saturate(150%);
-        -webkit-backdrop-filter: blur(30px) saturate(150%);
-
-        border: 1px solid var(--border-light);
+        /* THEME: Milky Glass */
+        background: var(--glass-bg);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        border-top: var(--glass-border);
         border-bottom: none;
+        border-left: none;
+        /* Full width */
+        border-right: none;
+        /* Fix double radius by clipping children */
+        overflow: hidden;
+
         z-index: 50;
         flex-direction: column;
-        box-shadow: 0 -10px 40px var(--shadow-lg);
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+        /* Softer shadow */
         flex-shrink: 0;
-        /* Don't shrink below set height unless collapsed */
     }
 
     /* Show panel when product is active */
@@ -1200,99 +1206,133 @@ model-viewer::part(default-ar-button) {
         display: flex;
     }
 
-    /* Remove the old .show transform logic for mobile */
     #main-layout.mobile-product-active #detail-panel.show {
         transform: none;
     }
 
     /* Mobile specific adjustments inside panel */
+    #panel-header {
+        text-align: center;
+        padding-bottom: 8px;
+    }
+
+    #panel-header .product-title-row {
+        justify-content: center;
+        flex-direction: column;
+        gap: 4px;
+    }
+
     #panel-product-name {
-        font-size: 16px;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
     }
 
     .panel-tab {
-        padding: 10px;
-        font-size: 13px;
+        padding: 12px;
+        font-size: 14px;
+        color: var(--text-secondary);
     }
 
-    /* Mobile Collapsed State: SHRINK HEIGHT, let AR grow */
+    .panel-tab.active {
+        color: var(--text-primary);
+        border-bottom-color: var(--accent-color);
+    }
+
+    /* Mobile Collapsed State */
     #detail-panel.collapsed {
-        height: 60px !important;
+        height: 80px !important;
+        /* Slightly taller for handle visibility */
         transform: none !important;
         overflow: hidden;
     }
 
-    /* FIX: Prevent desktop padding when panel opens on mobile */
+    #detail-panel.collapsed #panel-close-btn {
+        background: var(--accent-color) !important;
+        color: white !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    }
+
     #main-layout.panel-open {
         padding-right: 0 !important;
     }
 
-    /* Polish: Rotate 'Right Arrow' to 'Down Arrow' on mobile when expanded */
     #detail-panel:not(.collapsed) #panel-close-btn {
         transform: rotate(90deg);
+        background: var(--surface-glass-active);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-sm);
+        border: none;
     }
 
     /* Mobile Back Button (In AR View) */
     #mobile-back-btn {
         position: absolute;
-        top: 16px;
-        left: 16px;
+        top: 24px;
+        right: 24px;
+        /* Move to right like ar-view if needed, or keep left? Standard is left. */
+        left: 24px;
+        right: auto;
         width: 40px;
         height: 40px;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        /* Circle like ar-view */
+        background: var(--surface-glass);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 1px solid var(--border-light);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: white;
+        color: var(--text-primary);
         font-size: 20px;
         cursor: pointer;
         z-index: 20;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        box-shadow: var(--shadow-sm);
     }
 
     /* --- MOBILE VARIANT TABS (Modern Horizontal) --- */
     #mobile-variant-tabs {
         display: flex;
-        gap: 24px;
+        gap: 16px;
         overflow-x: auto;
-        padding: 0 8px;
+        padding: 0 16px 12px 16px;
         margin-bottom: 0;
-        /* Remove margin from list itself, container has it */
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid var(--border-light);
+        border-top: 1px solid var(--border-light);
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
-        /* Hide scrollbar again */
     }
 
     #mobile-variant-tabs::-webkit-scrollbar {
         display: none;
     }
 
-    /* Container for tabs and arrows */
     .mobile-tabs-container {
         position: relative;
         display: flex;
-        align-items: center;
-        margin-bottom: 20px;
+        align-items: left;
+        margin-bottom: 0px;
         width: 100%;
+
+
+
+        /* Slight bg for tab strip */
     }
 
-    /* Scroll Arrow Buttons */
+    /* Scroll Arrow Buttons - Glass Style */
     .tab-arrow {
         position: absolute;
-        width: 28px;
-        height: 28px;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.1);
+        background: var(--surface-glass);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: #f1f5f9;
+        border: 1px solid var(--border-light);
+        color: var(--text-primary);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1300,36 +1340,29 @@ model-viewer::part(default-ar-button) {
         z-index: 10;
         padding: 0;
         transition: all 0.2s;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        box-shadow: var(--shadow-sm);
     }
 
     .tab-arrow:hover {
-        background: rgba(255, 255, 255, 0.2);
+        background: var(--surface-glass-hover);
     }
 
     .tab-arrow.left {
-        left: 0;
-        background: linear-gradient(90deg, rgba(30, 41, 59, 0.9), rgba(30, 41, 59, 0.1));
-        /* Fade effect attempt, or solid */
-        background: rgba(15, 23, 42, 0.8);
-        /* Solid is safer for visibility */
+        left: 8px;
     }
 
     .tab-arrow.right {
-        right: 0;
-        background: rgba(15, 23, 42, 0.8);
+        right: 8px;
     }
 
     .mobile-variant-tab {
         flex: 0 0 auto;
         padding: 12px 0;
-        /* No side padding, rely on gap */
         background: transparent;
         border: none;
         color: var(--text-secondary);
         font-family: 'Inter', sans-serif;
-        font-size: 15px;
-        /* Slightly larger */
+        font-size: 14px;
         font-weight: 600;
         cursor: pointer;
         position: relative;
@@ -1337,36 +1370,241 @@ model-viewer::part(default-ar-button) {
     }
 
     .mobile-variant-tab.active {
-        color: var(--accent-primary);
+        color: var(--text-primary);
         font-weight: 700;
     }
 
-    /* Orange Underline Indicator */
     .mobile-variant-tab.active::after {
         content: '';
         position: absolute;
         bottom: -1px;
-        /* Overlap border */
         left: 0;
         width: 100%;
         height: 3px;
-        /* Thicker line */
-        background: var(--accent-primary);
+        background: var(--accent-color);
         border-radius: 3px 3px 0 0;
-        box-shadow: 0 -2px 10px rgba(212, 165, 116, 0.4);
     }
 
-    /* HIDE Desktop Accordion Headers on Mobile */
     #variant-accordion-container .accordion-header {
         display: none !important;
     }
 
-    /* Hide non-active items */
     #variant-accordion-container .variant-accordion-item:not(.open) {
         display: none;
     }
 
-    /* Clean up active item container */
+    #variant-accordion-container .variant-accordion-item {
+        border: none;
+        background: transparent;
+        margin: 0;
+        padding: 0;
+    }
+
+    #main-layout.mobile-product-active #detail-panel {
+        display: flex;
+    }
+
+    #main-layout.mobile-product-active #detail-panel.show {
+        transform: none;
+    }
+
+    /* Mobile specific adjustments inside panel */
+    #panel-header {
+        text-align: center;
+        padding-bottom: 8px;
+
+
+    }
+
+    #panel-header .product-title-row {
+        justify-content: center;
+        flex-direction: column;
+        gap: 4px;
+
+    }
+
+    #panel-product-name {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .panel-tab {
+        padding: 12px;
+        font-size: 14px;
+        color: var(--text-secondary);
+
+    }
+
+    .panel-tab.active {
+        color: var(--text-primary);
+        border-bottom-color: var(--accent-color);
+    }
+
+    /* Mobile Collapsed State */
+    #detail-panel.collapsed {
+        height: 70px !important;
+        /* Slightly taller for handle visibility */
+        transform: none !important;
+        overflow: hidden;
+        border-radius: 0px;
+
+    }
+
+    #detail-panel.collapsed #panel-close-btn {
+        background: var(--accent-color) !important;
+        color: white !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    }
+
+    #main-layout.panel-open {
+        padding-right: 0 !important;
+    }
+
+    #detail-panel:not(.collapsed) #panel-close-btn {
+        transform: rotate(90deg);
+        background: var(--surface-glass-active);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-sm);
+        border: none;
+        background: var(--accent-color);
+
+    }
+
+    /* Mobile Back Button (In AR View) */
+    #mobile-back-btn {
+        position: absolute;
+        top: 24px;
+        right: 24px;
+        /* Move to right like ar-view if needed, or keep left? Standard is left. */
+        left: 24px;
+        right: auto;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        /* Circle like ar-view */
+        background: var(--surface-glass);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-primary);
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 20;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* --- MOBILE VARIANT TABS (Modern Horizontal) --- */
+    #mobile-variant-tabs {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        padding: 0 16px 12px 16px;
+        margin-bottom: 0;
+        border-bottom: 1px solid var(--border-light);
+        border-top: 1px solid var(--border-light);
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    #mobile-variant-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .mobile-tabs-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        margin-bottom: 0px;
+        width: 100%;
+        background: var(--surface-glass);
+        background-color: transparent;
+        /* Slight bg for tab strip */
+    }
+
+    /* Scroll Arrow Buttons - Glass Style */
+    .tab-arrow {
+        position: absolute;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--surface-glass);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--border-light);
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        padding: 0;
+        transition: all 0.2s;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .tab-arrow:hover {
+        background: var(--surface-glass-hover);
+    }
+
+    .tab-arrow.left {
+        left: 8px;
+    }
+
+    .tab-arrow.right {
+        right: 8px;
+    }
+
+    /* --- MOBILE VARIANT TABS (Modern Glass Boxes) --- */
+    .mobile-variant-tab {
+        flex: 0 0 auto;
+        padding: 10px 16px;
+        background: var(--surface-glass);
+        border: 1px solid var(--border-light);
+        border-radius: 12px;
+        color: var(--text-secondary);
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: var(--shadow-sm);
+        margin-right: 8px;
+    }
+
+    .mobile-variant-tab:last-child {
+        margin-right: 0;
+    }
+
+    .mobile-variant-tab.active {
+        background: var(--primary-dark);
+        color: white;
+        border-color: var(--primary-dark);
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Remove old underline */
+    .mobile-variant-tab.active::after {
+        display: none;
+    }
+
+    #variant-accordion-container .accordion-header {
+        display: none !important;
+    }
+
+    #variant-accordion-container .variant-accordion-item:not(.open) {
+        display: none;
+    }
+
     #variant-accordion-container .variant-accordion-item {
         border: none;
         background: transparent;
@@ -1375,18 +1613,57 @@ model-viewer::part(default-ar-button) {
     }
 
     #variant-accordion-container .accordion-content {
-        padding-top: 4px;
+        padding-top: 16px;
     }
 
     /* Sticky Header Container */
     #panel-sticky-header {
         flex-shrink: 0;
-        background: var(--surface-glass);
+        background: rgba(255, 255, 255, 0.65);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        border-bottom: 2px solid var(--text-secondary);
+
+        /* User Request: Distinct separator lines (Top & Bottom) */
+        border-top: 1px solid var(--border-light);
+        border-bottom: 1px solid var(--border-light);
+
         z-index: 100;
-        border-radius: 16px 16px 0 0;
+        border-radius: 0;
+        /* Flat, no radius */
+    }
+
+    /* Mobile Collapsed State Enhancements */
+    #detail-panel.collapsed #panel-tabs {
+        display: none !important;
+    }
+
+    #detail-panel.collapsed #panel-product-name {
+        margin-bottom: 0 !important;
+        font-size: 16px;
+        /* Slightly smaller when collapsed for neatness */
+    }
+
+    /* Expand header to fill collapsed panel (User Request) */
+    #detail-panel.collapsed #panel-header {
+        padding-bottom: 30px !important;
+
+    }
+
+    /* Variation Headers as Boxes (User Request) */
+    .variant-section-title {
+        background: var(--surface-glass);
+        border: 1px solid var(--border-light);
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: normal;
+        text-transform: none;
+        display: block;
+        box-shadow: var(--shadow-sm);
+        backdrop-filter: blur(10px);
     }
 }
 
@@ -1503,6 +1780,7 @@ model-viewer::part(default-ar-button) {
 #panel-header {
     padding: 20px 20px 16px;
     border-bottom: none;
+    background: rgba(255, 255, 255, 0.8);
 
 
 }
@@ -1956,9 +2234,11 @@ model-viewer::part(default-ar-button) {
     margin: 0;
 }
 
+/* === AR COMPONENTS (Synced from ar-view.html) === */
 .btn-ar {
     width: 100%;
-    background: var(--accent-color);
+    background: var(--text-primary);
+    /* Dark/Black like ar-view */
     color: white;
     border: none;
     padding: 16px 20px;
@@ -1971,13 +2251,19 @@ model-viewer::part(default-ar-button) {
     justify-content: center;
     gap: 10px;
     margin-bottom: 24px;
-    transition: all 0.2s;
+    transition: transform 0.2s;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-ar:active {
+    transform: scale(0.98);
 }
 
 .btn-ar:hover {
-    background: var(--accent-hover);
+    background: black;
+    /* slightly darker or same? ar-view uses text-primary which is usually black/dark gray */
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(212, 165, 116, 0.4);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .ar-steps {
@@ -1988,47 +2274,52 @@ model-viewer::part(default-ar-button) {
     font-family: 'Inter', sans-serif;
     font-size: 11px;
     font-weight: 700;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     letter-spacing: 1px;
     text-transform: uppercase;
     margin: 0 0 12px 0;
+    padding-left: 4px;
 }
 
 .step-card {
     background: var(--surface-glass);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--border-medium);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border-light);
     border-radius: 12px;
-    padding: 16px;
+    padding: 14px;
     display: flex;
     gap: 12px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .step-number {
     width: 32px;
     height: 32px;
-    background: var(--accent-color);
-    color: var(--surface-solid);
+    background: rgba(255, 255, 255, 0.5);
+    /* Light glass */
+    color: var(--accent-color);
+    /* Orange text */
+    border: 1px solid var(--border-light);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
+    font-weight: 800;
     flex-shrink: 0;
+    font-size: 14px;
 }
 
 .step-card h5 {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     margin: 0 0 4px 0;
     color: var(--text-primary);
 }
 
 .step-card p {
-    font-size: 12px;
-    line-height: 1.5;
+    font-size: 11px;
+    line-height: 1.4;
     color: var(--text-secondary);
     margin: 0;
 }
