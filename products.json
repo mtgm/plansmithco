@@ -70,6 +70,18 @@
             "value": "Standard 2x4 Lumber, Plywood, Screw"
           }
         ]
+      },
+      {
+        "id": "prod_1770558899288",
+        "name": "Yeni Ürün",
+        "sku": "1X2V3",
+        "thumbnail": "",
+        "description": "",
+        "listingUrl": "https://www.etsy.com/shop/PlanSmithCo",
+        "masterModel": "/assets-r2/models/1x2_STORAGE_HDX_27_GALLON_Render_With_Scene.glb",
+        "price": 0,
+        "variantGroups": [],
+        "customAttributes": []
       }
     ]
   }
