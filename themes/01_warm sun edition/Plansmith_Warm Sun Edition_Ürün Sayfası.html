@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plansmith | Warm Sun Edition</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@300;500;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+
+    <style>
+        :root {
+            /* WARM SUN PALETTE */
+            --text-main: #2C2520;     /* Sıcak Kömür */
+            --text-muted: #6B6259;    /* Sıcak Taupe/Gri */
+            --accent: #F59E0B;        /* Kehribar / Gün Işığı Sarısı */
+            
+            /* GLASS VARIABLES (WARM TINT) */
+            --glass-bg: rgba(255, 252, 248, 0.7); /* Hafif krem/sıcak tonlu cam */
+            --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+            --glass-blur: blur(30px);
+            --glass-shadow: 0 25px 50px -12px rgba(44, 37, 32, 0.1); /* Gölgeler de ısındı */
+            
+            --radius-outer: 40px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text-main);
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            
+            /* WARM SUNLIGHT BACKGROUND */
+            background-color: #FAF8F5;
+            background-image: 
+                radial-gradient(at 10% 0%, hsla(35, 100%, 96%, 1) 0, transparent 50%), 
+                radial-gradient(at 90% 0%, hsla(50, 100%, 94%, 1) 0, transparent 50%), 
+                radial-gradient(at 50% 100%, hsla(20, 100%, 96%, 1) 0, transparent 50%);
+            
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* --- FLOATING NAV --- */
+        .nav-container {
+            position: fixed; top: 25px; z-index: 100;
+            width: 100%; display: flex; justify-content: center;
+        }
+
+        .glass-nav {
+            background: rgba(255, 252, 248, 0.85); /* Daha sıcak beyaz */
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.5);
+            padding: 12px 32px; border-radius: 100px;
+            box-shadow: 0 10px 25px rgba(44, 37, 32, 0.05);
+            
+            display: flex; align-items: center; gap: 40px;
+        }
+
+        .brand-logo { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-main); }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 600; padding: 8px 16px; transition: color 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--text-main); }
+        .nav-actions { display: flex; gap: 12px; }
+        .icon-btn { width: 40px; height: 40px; background: rgba(255,255,255,0.8); border-radius: 50%; display: grid; place-items: center; cursor: pointer; font-size: 20px; transition: all 0.2s; color: var(--text-main); border: 1px solid rgba(255,255,255,0.5); }
+        .icon-btn:hover { background: white; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(44, 37, 32, 0.05); }
+
+        /* --- UNIFIED CONSOLE (DÜZELTİLMİŞ LAYOUT) --- */
+        .console-wrapper {
+            margin-top: 110px;
+            width: 94%; max-width: 1500px;
+            height: 82vh; /* Sabit yükseklik */
+            
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            border-radius: var(--radius-outer);
+            box-shadow: var(--glass-shadow);
+            
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            overflow: hidden; /* Dışarı taşmaları kes */
+        }
+
+        /* LEFT: VIEWER ZONE */
+        .viewer-zone {
+            position: relative;
+            background: rgba(255, 250, 240, 0.3); /* Çok hafif sıcak ton */
+            border-right: 1px solid rgba(255,255,255,0.4);
+        }
+
+        model-viewer {
+            width: 100%; height: 100%;
+            --poster-color: transparent;
+            filter: drop-shadow(0 40px 60px rgba(44, 37, 32, 0.15)); /* Sıcak gölge */
+        }
+
+        .viewer-controls {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 10px;
+            background: rgba(255,255,255,0.7); padding: 6px; border-radius: 100px;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.5);
+        }
+        .v-btn { width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; cursor: pointer; font-size: 20px; color: var(--text-main); transition: all 0.2s; }
+        .v-btn:hover { background: white; color: var(--accent); box-shadow: 0 4px 10px rgba(44, 37, 32, 0.05); }
+
+        /* RIGHT: CONFIG ZONE (DÜZELTİLDİ) */
+        .config-zone {
+            display: flex; flex-direction: column;
+            background: rgba(255, 250, 245, 0.2);
+            height: 100%; /* Ana çerçeve yüksekliğini doldur */
+            overflow: hidden; /* İçerik taşarsa gizle (scroll yönetecek) */
+        }
+
+        /* Scroll Area (BU KISIM ARTIK DÜZGÜN KAYACAK) */
+        .config-scroll {
+            flex: 1; /* Kalan tüm alanı kapla */
+            overflow-y: auto; /* Sadece bu alan kaydırılabilir */
+            padding: 50px 40px;
+        }
+        .config-scroll::-webkit-scrollbar { width: 6px; }
+        .config-scroll::-webkit-scrollbar-thumb { background: rgba(44, 37, 32, 0.1); border-radius: 10px; }
+
+        /* Content Styles */
+        .p-badge { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); background: rgba(245, 158, 11, 0.1); padding: 8px 12px; border-radius: 8px; display: inline-block; margin-bottom: 16px; }
+        .p-title { font-family: 'Outfit', sans-serif; font-size: 38px; font-weight: 700; line-height: 1.1; margin-bottom: 12px; color: var(--text-main); }
+        .p-price { font-size: 26px; font-weight: 500; color: var(--text-muted); margin-bottom: 40px; display: block; }
+        
+        .section-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; color: var(--text-main); display: block; }
+
+        /* Cards (Warm Style) */
+        .opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 40px; }
+        .opt-card {
+            background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.6);
+            padding: 12px; border-radius: 16px; cursor: pointer; transition: all 0.2s;
+        }
+        .opt-card:hover { background: rgba(255,255,255,0.9); border-color: var(--accent); transform: translateY(-2px); }
+        .opt-card.active { background: white; border-color: var(--accent); box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15); }
+        
+        .opt-img { width: 100%; height: 100px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; background: #f3f3f3; }
+        .opt-name { font-size: 15px; font-weight: 700; display: block; color: var(--text-main); }
+
+        /* Colors (Warm Style) */
+        .color-row { display: flex; gap: 14px; margin-bottom: 40px; }
+        .color-dot {
+            width: 50px; height: 50px; border-radius: 50%; cursor: pointer; position: relative;
+            border: 3px solid rgba(255,255,255,0.5); box-shadow: 0 4px 10px rgba(44, 37, 32, 0.05); transition: transform 0.2s;
+        }
+        .color-dot:hover { transform: scale(1.1); }
+        .color-dot.active { border-color: white; box-shadow: 0 0 0 2px var(--accent), 0 8px 20px rgba(245, 158, 11, 0.2); }
+
+        /* Footer (Sabit) */
+        .config-footer {
+            padding: 30px 40px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            display: flex; gap: 20px; background: rgba(255,255,255,0.2);
+        }
+        .btn-primary {
+            flex: 1; background: var(--accent); color: white; border: none;
+            height: 56px; border-radius: 16px; font-size: 16px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: all 0.2s; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.2);
+        }
+        .btn-primary:hover { background: #D97706; transform: translateY(-2px); box-shadow: 0 12px 25px rgba(245, 158, 11, 0.3); }
+        
+        .btn-sec {
+            width: 56px; height: 56px; border: 1px solid rgba(255,255,255,0.6); background: rgba(255,255,255,0.4); color: var(--text-main);
+            border-radius: 16px; display: grid; place-items: center; font-size: 24px; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-sec:hover { background: white; border-color: var(--accent); color: var(--accent); }
+
+        @media (max-width: 1000px) {
+            .console-wrapper { grid-template-columns: 1fr; grid-template-rows: 45% 55%; height: auto; margin-bottom: 20px; }
+            .viewer-zone { height: auto; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.4); }
+            .nav-links { display: none; }
+            .config-scroll { padding: 30px 25px; }
+            .config-footer { padding: 20px 25px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="nav-container">
+        <nav class="glass-nav">
+            <div class="brand-logo"><i class="ph-fill ph-sun-horizon" style="color:var(--accent)"></i> Plansmith.</div>
+            <div class="nav-links">
+                <a href="#" class="active">Mağaza</a>
+                <a href="#">Projeler</a>
+                <a href="#">Atölye</a>
+            </div>
+            <div class="nav-actions">
+                <div class="icon-btn"><i class="ph ph-magnifying-glass"></i></div>
+                <div class="icon-btn"><i class="ph ph-bag"></i></div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="console-wrapper">
+        
+        <section class="viewer-zone">
+            <model-viewer 
+                id="viewer"
+                src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
+                camera-controls auto-rotate shadow-intensity="1.2" exposure="1" environment-image="neutral"
+            >
+            </model-viewer>
+            <div class="viewer-controls">
+                <button class="v-btn"><i class="ph-fill ph-cube-focus"></i></button>
+                <button class="v-btn"><i class="ph-fill ph-arrows-out-simple"></i></button>
+            </div>
+        </section>
+
+        <section class="config-zone">
+            <div class="config-scroll">
+                
+                <span class="p-badge">Summer Edition</span>
+                <h1 class="p-title">Sun-Drenched Rack System</h1>
+                <span class="p-price">₺ 4,350</span>
+
+                <label class="section-label">İskelet Malzemesi</label>
+                <div class="opt-grid">
+                    <div class="opt-card active" onclick="select(this)">
+                        <img src="https://images.unsplash.com/photo-1517646331032-9e8563c523a1?w=300&q=80" class="opt-img">
+                        <span class="opt-name">Doğal Çam</span>
+                    </div>
+                    <div class="opt-card" onclick="select(this)">
+                        <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=300&q=80" class="opt-img">
+                        <span class="opt-name">Sıcak Meşe</span>
+                    </div>
+                </div>
+
+                <label class="section-label">Aksan Rengi</label>
+                <div class="color-row">
+                    <div class="color-dot active" style="background:#F59E0B"></div> <div class="color-dot" style="background:#2C2520"></div> <div class="color-dot" style="background:#E6D5C3"></div> <div class="color-dot" style="background:#9CA3AF"></div> </div>
+                
+                <label class="section-label">Açıklama</label>
+                <p style="color:var(--text-muted); line-height:1.6; font-size:14px; margin-bottom:30px;">
+                    Bu modüler sistem, gün ışığından ilham alan sıcak tonlarla tasarlandı. Atölyenize hem düzen hem de sıcak bir atmosfer katacak. Dijital planlar anında teslim edilir.
+                </p>
+
+            </div>
+
+            <div class="config-footer">
+                <button class="btn-sec"><i class="ph-fill ph-heart"></i></button>
+                <button class="btn-primary">Sepete Ekle</button>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        function select(el) {
+            document.querySelectorAll('.opt-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+        }
+        // Renk seçimi için basit script
+        document.querySelectorAll('.color-dot').forEach(dot => {
+            dot.addEventListener('click', function() {
+                document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

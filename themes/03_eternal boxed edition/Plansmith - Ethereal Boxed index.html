@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plansmith | Ethereal Boxed Home</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+
+    <style>
+        :root {
+            /* ETHEREAL PALETTE */
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --accent: #6366f1;        /* Indigo */
+            --highlight: #ec4899;     /* Pink */
+            
+            /* GLASS BOX VARIABLES */
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+            --glass-blur: blur(40px);
+            --glass-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.15);
+            
+            --radius-box: 24px;
+            --radius-elem: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text-main);
+            width: 100vw;
+            min-height: 100vh;
+            overflow-x: hidden;
+            
+            /* AURORA BACKGROUND (Aynı) */
+            background-color: #F1F5F9;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,90%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 100%, hsla(330, 60%, 94%, 1) 0, transparent 50%), 
+                radial-gradient(at 50% 50%, hsla(230, 60%, 96%, 1) 0, transparent 50%);
+            background-attachment: fixed;
+            
+            display: flex; justify-content: center;
+            padding: 40px 0; /* Sayfa kenar boşluğu */
+        }
+
+        /* --- THE MAIN APP BOX (HER ŞEY BURADA) --- */
+        .app-box {
+            width: 94%; max-width: 1600px;
+            min-height: 90vh;
+            
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            border-radius: var(--radius-box);
+            box-shadow: var(--glass-shadow);
+            
+            display: flex; flex-direction: column;
+            overflow: hidden; /* Köşeleri korumak için */
+        }
+
+        /* --- HEADER (Aynı) --- */
+        .box-header {
+            height: 80px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 40px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
+        }
+
+        .logo { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; color: var(--text-main); display: flex; gap: 10px; align-items: center; text-decoration: none; }
+        .nav-menu { display: flex; gap: 32px; }
+        .nav-item { font-size: 14px; font-weight: 600; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+        .nav-item:hover, .nav-item.active { color: var(--accent); }
+        .nav-icons { display: flex; gap: 16px; }
+        .icon-btn { width: 40px; height: 40px; border-radius: var(--radius-elem); background: rgba(255,255,255,0.5); display: grid; place-items: center; cursor: pointer; transition: all 0.2s; font-size: 20px; color: var(--text-main); }
+        .icon-btn:hover { background: white; color: var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+        /* --- CONTENT SCROLL AREA --- */
+        .content-scroll {
+            flex: 1; overflow-y: auto;
+        }
+        .content-scroll::-webkit-scrollbar { width: 8px; }
+        .content-scroll::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+
+        /* HERO SECTION */
+        .hero-section {
+            display: grid; grid-template-columns: 1fr 1fr;
+            min-height: 600px;
+            padding: 60px;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .hero-text { padding-right: 40px; }
+        
+        .h-badge { 
+            font-size: 11px; font-weight: 700; color: var(--highlight); 
+            background: rgba(236, 72, 153, 0.1); padding: 6px 12px; border-radius: 6px; 
+            display: inline-block; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;
+        }
+        
+        .h-title { 
+            font-family: 'Outfit', sans-serif; font-size: 56px; font-weight: 800; 
+            line-height: 1.1; margin-bottom: 24px; color: var(--text-main);
+        }
+        .h-desc { font-size: 18px; color: var(--text-muted); line-height: 1.6; margin-bottom: 40px; max-width: 500px; }
+
+        .btn-hero {
+            background: linear-gradient(135deg, var(--accent) 0%, #818cf8 100%);
+            color: white; border: none; padding: 18px 40px; border-radius: var(--radius-elem);
+            font-size: 16px; font-weight: 700; cursor: pointer;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.25);
+            transition: transform 0.2s; display: inline-flex; align-items: center; gap: 10px;
+        }
+        .btn-hero:hover { transform: translateY(-3px); }
+
+        .hero-visual {
+            position: relative; height: 500px;
+            background: rgba(248, 250, 252, 0.5); /* Viewer wrapper ile aynı */
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 24px; overflow: hidden;
+        }
+
+        /* FEATURES GRID */
+        .features-section {
+            padding: 80px 60px;
+        }
+        .section-head { text-align: center; margin-bottom: 60px; }
+        .sh-title { font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 700; margin-bottom: 12px; }
+        
+        .f-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;
+        }
+
+        .f-card {
+            background: white; border: 1px solid #E2E8F0;
+            padding: 40px; border-radius: var(--radius-box);
+            transition: all 0.3s;
+        }
+        .f-card:hover { 
+            transform: translateY(-5px); border-color: var(--accent);
+            box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.1); 
+        }
+
+        .f-icon { 
+            width: 50px; height: 50px; background: #EEF2FF; border-radius: 12px; 
+            display: grid; place-items: center; font-size: 24px; color: var(--accent); 
+            margin-bottom: 20px; 
+        }
+        .f-title { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+        .f-text { font-size: 15px; color: var(--text-muted); line-height: 1.5; }
+
+        /* COLLECTIONS */
+        .collections-section {
+            padding: 0 60px 80px 60px;
+        }
+        .col-grid {
+            display: grid; grid-template-columns: 2fr 1fr; gap: 30px;
+        }
+
+        .col-card {
+            height: 350px; border-radius: var(--radius-box);
+            background-size: cover; background-position: center;
+            position: relative; overflow: hidden; cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .col-card:hover { transform: scale(0.99); }
+        
+        .col-content {
+            position: absolute; bottom: 0; left: 0; width: 100%; padding: 30px;
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.8), transparent);
+            color: white;
+        }
+        .col-tag { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--highlight); margin-bottom: 8px; display: block; letter-spacing: 1px; }
+        .col-title { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 700; }
+
+        /* Responsive */
+        @media (max-width: 1000px) {
+            .hero-section { grid-template-columns: 1fr; padding: 40px; text-align: center; }
+            .hero-text { padding: 0; margin-bottom: 40px; }
+            .btn-hero { margin: 0 auto; }
+            .f-grid, .col-grid { grid-template-columns: 1fr; }
+            .nav-menu { display: none; }
+            .app-box { width: 100%; height: auto; border-radius: 0; margin: 0; border: none; }
+            body { padding: 0; display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-box">
+        
+        <header class="box-header">
+            <a href="#" class="logo">
+                <i class="ph-fill ph-cube-transparent" style="color:var(--accent); font-size:28px;"></i>
+                Plansmith.
+            </a>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active">Ana Sayfa</a>
+                <a href="#" class="nav-item">Mağaza</a>
+                <a href="#" class="nav-item">Özellikler</a>
+                <a href="#" class="nav-item">İletişim</a>
+            </nav>
+
+            <div class="nav-icons">
+                <div class="icon-btn"><i class="ph ph-magnifying-glass"></i></div>
+                <div class="icon-btn"><i class="ph ph-bag"></i></div>
+            </div>
+        </header>
+
+        <div class="content-scroll">
+            
+            <section class="hero-section">
+                <div class="hero-text">
+                    <span class="h-badge">Yeni Koleksiyon</span>
+                    <h1 class="h-title">Atölyeni Dijital Olarak İnşa Et.</h1>
+                    <p class="h-desc">
+                        Modern tasarım ve mühendisliğin buluştuğu nokta. 
+                        Kendi mobilyalarını üretmek için ihtiyacın olan profesyonel planlar burada.
+                    </p>
+                    <button class="btn-hero">
+                        Mağazayı Keşfet <i class="ph-bold ph-arrow-right"></i>
+                    </button>
+                </div>
+
+                <div class="hero-visual">
+                    <model-viewer 
+                        src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
+                        auto-rotate camera-controls shadow-intensity="1.5" 
+                        style="width: 100%; height: 100%;"
+                        disable-zoom>
+                    </model-viewer>
+                </div>
+            </section>
+
+            <section class="features-section">
+                <div class="section-head">
+                    <h2 class="sh-title">Neden Ethereal?</h2>
+                    <p style="color:var(--text-muted);">Sadece bir plan değil, eksiksiz bir üretim sistemi.</p>
+                </div>
+
+                <div class="f-grid">
+                    <div class="f-card">
+                        <div class="f-icon"><i class="ph-duotone ph-pencil-ruler"></i></div>
+                        <h3 class="f-title">Parametrik Tasarım</h3>
+                        <p class="f-text">Ölçüleri mekanınıza göre değiştirin. Her parça birbiriyle mükemmel uyum sağlar.</p>
+                    </div>
+                    <div class="f-card">
+                        <div class="f-icon"><i class="ph-duotone ph-file-dxf"></i></div>
+                        <h3 class="f-title">CNC & Üretim Hazır</h3>
+                        <p class="f-text">DXF ve PDF formatlarında dosyalar. İster CNC tezgahında kes, ister el aletleriyle yap.</p>
+                    </div>
+                    <div class="f-card">
+                        <div class="f-icon"><i class="ph-duotone ph-cube"></i></div>
+                        <h3 class="f-title">3D Önizleme</h3>
+                        <p class="f-text">Satın almadan önce tarayıcınızda 360 derece inceleyin ve malzemeleri değiştirin.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="collections-section">
+                <div class="section-head" style="text-align:left; margin-bottom:30px;">
+                    <h2 class="sh-title">Koleksiyonlar</h2>
+                </div>
+
+                <div class="col-grid">
+                    <div class="col-card" style="background-image: url('https://images.unsplash.com/photo-1595428774223-ef52624120d2?q=80&w=1000&auto=format&fit=crop');">
+                        <div class="col-content">
+                            <span class="col-tag">Popüler</span>
+                            <h3 class="col-title">Depolama Sistemleri</h3>
+                        </div>
+                    </div>
+                    <div class="col-card" style="background-image: url('https://images.unsplash.com/photo-1581092921461-eab62e97a782?q=80&w=1000&auto=format&fit=crop');">
+                        <div class="col-content">
+                            <span class="col-tag">Profesyonel</span>
+                            <h3 class="col-title">Çalışma Tezgahları</h3>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
