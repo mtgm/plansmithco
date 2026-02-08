@@ -14,50 +14,7 @@
         "listingUrl": "https://www.etsy.com/shop/PlanSmithCoDIY",
         "masterModel": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/1x2STR.glb",
         "price": 0,
-        "variantGroups": [
-          {
-            "groupName": "Dikmeler",
-            "items": [
-              {
-                "name": "Default",
-                "value": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
-                "textureConfig": {
-                  "materialName": "texture-1",
-                  "baseColor": "/assets-r2/textures/1x2V3/texture-1_baseColor.png"
-                }
-              },
-              {
-                "name": "Black",
-                "value": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
-                "textureConfig": {
-                  "materialName": "texture-1",
-                  "baseColor": "/assets-r2/textures/1x2V3/dark_grey_low_gloss_plastic_baseColor.png"
-                }
-              }
-            ]
-          },
-          {
-            "groupName": "Shelves",
-            "items": [
-              {
-                "name": "Default",
-                "value": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
-                "textureConfig": {
-                  "materialName": "texture-3",
-                  "baseColor": "/assets-r2/textures/1x2V3/texture-3_baseColor.png"
-                }
-              },
-              {
-                "name": "Black",
-                "value": "/assets-r2/Storage Tote Racks/1x2 Storage Tote Rack/cat-thumbnail_1x2 Storage Tote Rack.png",
-                "textureConfig": {
-                  "materialName": "texture-3",
-                  "baseColor": "/assets-r2/textures/1x2V3/dark_grey_low_gloss_plastic_baseColor.png"
-                }
-              }
-            ]
-          }
-        ],
+        "variantGroups": [],
         "customAttributes": [
           {
             "icon": "📏",
@@ -70,92 +27,6 @@
             "value": "Standard 2x4 Lumber, Plywood, Screw"
           }
         ]
-      },
-      {
-        "id": "prod_1770558899288",
-        "name": "Yeni Ürün",
-        "sku": "1X2V3",
-        "thumbnail": "",
-        "description": "",
-        "listingUrl": "https://www.etsy.com/shop/PlanSmithCo",
-        "masterModel": "/assets-r2/models/1x2_STORAGE_HDX_27_GALLON_Render_With_Scene.glb",
-        "price": 0,
-        "variantGroups": [
-          {
-            "groupName": "texture.001",
-            "items": [
-              {
-                "name": "Orijinal",
-                "value": "texture.001_baseColor.png",
-                "textureConfig": {
-                  "materialName": "texture.001",
-                  "baseColor": "texture.001_baseColor.png"
-                }
-              }
-            ]
-          },
-          {
-            "groupName": "texture-1.001",
-            "items": [
-              {
-                "name": "Orijinal",
-                "value": "texture-1.001_baseColor.png",
-                "textureConfig": {
-                  "materialName": "texture-1.001",
-                  "baseColor": "texture-1.001_baseColor.png"
-                }
-              }
-            ]
-          },
-          {
-            "groupName": "texture-3.001",
-            "items": [
-              {
-                "name": "Orijinal",
-                "value": "texture-3.001_baseColor.png",
-                "textureConfig": {
-                  "materialName": "texture-3.001",
-                  "baseColor": "texture-3.001_baseColor.png"
-                }
-              }
-            ]
-          },
-          {
-            "groupName": "texture-2.001",
-            "items": [
-              {
-                "name": "Orijinal",
-                "value": "texture-2.001_baseColor.png",
-                "textureConfig": {
-                  "materialName": "texture-2.001",
-                  "baseColor": "texture-2.001_baseColor.png"
-                }
-              }
-            ]
-          },
-          {
-            "groupName": "Yeni",
-            "items": [
-              {
-                "name": "Yeni",
-                "value": "",
-                "textureConfig": {
-                  "materialName": "texture-1.002",
-                  "baseColor": "/assets-r2/textures/1x2V3/dark_grey_low_gloss_plastic_normal.png"
-                }
-              },
-              {
-                "name": "Yeni",
-                "value": "",
-                "textureConfig": {
-                  "materialName": "texture-1.002",
-                  "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
-                }
-              }
-            ]
-          }
-        ],
-        "customAttributes": []
       }
     ]
   }
