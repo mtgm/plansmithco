@@ -9,214 +9,13 @@
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@400;600;700;800&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="../../css/theme-warm-sun.css">
 
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
 
-    <style>
-        :root {
-            /* WARM SUN PALETTE */
-            --text-main: #2C2520;
-            --text-muted: #6B6259;
-            --accent: #F59E0B;
-            /* Kehribar */
-            --accent-dark: #C05621;
-            /* Kiremit */
 
-            /* GLASS VARIABLES */
-            --glass-bg: rgba(255, 252, 248, 0.85);
-            --glass-border: 1px solid rgba(255, 255, 255, 0.6);
-            --glass-blur: blur(30px);
-
-            --radius-top: 0 0 32px 32px;
-            --radius-card: 20px;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            color: var(--text-main);
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-
-            /* WARM SUN BACKGROUND */
-            background-color: #FAF8F5;
-            background-image:
-                radial-gradient(at 0% 0%, hsla(35, 100%, 96%, 1) 0, transparent 50%),
-                radial-gradient(at 50% 100%, hsla(20, 100%, 96%, 1) 0, transparent 50%);
-
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- TOP HALF: AR VIEWER --- */
-        .ar-stage {
-            flex: 0 0 55%;
-            /* Ekranın %55'i */
-            background: rgba(255, 255, 255, 0.4);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-            border-radius: var(--radius-top);
-            position: relative;
-            box-shadow: 0 10px 40px -10px rgba(44, 37, 32, 0.08);
-            z-index: 10;
-        }
-
-        /* Back Button */
-        .btn-back {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 20;
-            width: 44px;
-            height: 44px;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border-radius: 50%;
-            border: 1px solid white;
-            display: grid;
-            place-items: center;
-            font-size: 22px;
-            color: var(--text-main);
-            box-shadow: 0 4px 10px rgba(44, 37, 32, 0.05);
-        }
-
-        model-viewer {
-            width: 100%;
-            height: 100%;
-            --poster-color: transparent;
-            /* Sıcak gölge efekti */
-            filter: drop-shadow(0 30px 60px rgba(192, 86, 33, 0.15));
-        }
-
-        /* ÖZEL AR BUTONU (Slot ile yerleşir) */
-        .custom-ar-btn {
-            position: absolute;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 100px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 16px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
-            cursor: pointer;
-            transition: transform 0.2s;
-            white-space: nowrap;
-        }
-
-        .custom-ar-btn:active {
-            transform: translateX(-50%) scale(0.95);
-            background: var(--accent-dark);
-        }
-
-        /* --- BOTTOM HALF: INSTRUCTIONS --- */
-        .guide-section {
-            flex: 1;
-            padding: 30px 24px;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        .guide-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .g-tag {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--accent-dark);
-            background: rgba(245, 158, 11, 0.1);
-            padding: 6px 12px;
-            border-radius: 8px;
-            display: inline-block;
-            margin-bottom: 12px;
-        }
-
-        .g-title {
-            font-family: 'Outfit', sans-serif;
-            font-size: 28px;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-bottom: 8px;
-        }
-
-        .g-desc {
-            font-size: 14px;
-            color: var(--text-muted);
-        }
-
-        /* Steps Card */
-        .steps-box {
-            background: var(--glass-bg);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            border: var(--glass-border);
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-        }
-
-        .step-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .step-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .step-num {
-            width: 32px;
-            height: 32px;
-            flex-shrink: 0;
-            background: white;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 700;
-            color: var(--accent);
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);
-        }
-
-        .step-content h4 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 4px;
-            color: var(--text-main);
-        }
-
-        .step-content p {
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.4;
-            margin: 0;
-        }
-    </style>
 </head>
 
 <body>
@@ -273,6 +72,12 @@
         </div>
     </section>
 
+    <!-- Core Scripts -->
+    <script src="../../js/core/utils.js"></script>
+    <script src="../../js/core/DataManager.js"></script>
+
+    <!-- Page Script -->
+    <script src="../../js/pages/productCard.js"></script>
 </body>
 
 </html>

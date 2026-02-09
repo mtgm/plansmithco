@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plansmith | Ürün Detay</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@300;500;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../../css/theme-warm-sun.css">
+
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+</head>
+
+<body>
+
+    <header class="nav-container">
+        <nav class="glass-nav">
+            <a href="Warm Sun Edition_Product_List.html" class="brand-logo"><i class="ph-fill ph-sun-horizon"
+                    style="color:var(--accent)"></i> Plansmith.</a>
+            <div class="nav-links">
+                <a href="Warm Sun Edition_Product_List.html">Mağaza</a>
+                <a href="#">Projeler</a>
+                <a href="#">Atölye</a>
+            </div>
+            <div class="nav-actions">
+                <div class="icon-btn"><i class="ph ph-magnifying-glass"></i></div>
+                <div class="icon-btn"><i class="ph ph-bag"></i></div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="console-wrapper">
+
+        <section class="viewer-zone">
+            <model-viewer id="viewer" src="" camera-controls auto-rotate shadow-intensity="1.2" exposure="1"
+                environment-image="neutral">
+            </model-viewer>
+            <div class="viewer-controls">
+                <button class="v-btn"><i class="ph-fill ph-cube-focus"></i></button>
+                <button class="v-btn"><i class="ph-fill ph-arrows-out-simple"></i></button>
+            </div>
+        </section>
+
+        <section class="config-zone">
+            <div class="config-scroll">
+
+                <span class="p-badge">Warm Sun Edition</span>
+                <h1 class="p-title">Yükleniyor...</h1>
+                <span class="p-price">---</span>
+
+                <!-- Sadeleştirilmiş İçerik -->
+                <label class="section-label">Açıklama</label>
+                <p id="product-description"
+                    style="color:var(--text-muted); line-height:1.6; font-size:14px; margin-bottom:30px;">
+                    Ürün bilgileri yükleniyor...
+                </p>
+
+                <!-- Dinamik QR Kod Alanı -->
+                <div id="qr-container"></div>
+
+            </div>
+
+            <div class="config-footer">
+                <button class="btn-sec"><i class="ph-fill ph-heart"></i></button>
+                <button class="btn-primary">Sepete Ekle</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Core Scripts -->
+    <script src="../../js/core/utils.js"></script>
+    <script src="../../js/core/DataManager.js"></script>
+
+    <!-- Page Script -->
+    <script src="../../js/pages/productDetail.js"></script>
+</body>
+
+</html>
