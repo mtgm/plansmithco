@@ -23,6 +23,8 @@ export interface MaterialVariantManagerProps {
     productId?: string; // For R2 path structure
     initialVariants?: MaterialVariant[];
     onChange?: (variants: MaterialVariant[]) => void;
+    bucketName?: string;
+    customDomain?: string;
 }
 
 export const MaterialVariantManager: React.FC<MaterialVariantManagerProps> = ({
@@ -31,7 +33,9 @@ export const MaterialVariantManager: React.FC<MaterialVariantManagerProps> = ({
     companyName,
     productId = 'temp',
     initialVariants = [],
-    onChange
+    onChange,
+    bucketName,
+    customDomain
 }) => {
     const [variants, setVariants] = useState<MaterialVariant[]>(
         initialVariants.length > 0
@@ -89,7 +93,7 @@ export const MaterialVariantManager: React.FC<MaterialVariantManagerProps> = ({
 
             // R2 path: company-{name}/products/{productId}/materials/{materialId}/variants/{index}/{fieldType}.jpg
             const folder = `products/${productId}/materials/${materialId}/variants/${index}`;
-            const url = await uploadToR2(file, folder, companyName);
+            const url = await uploadToR2(file, folder, companyName, bucketName, customDomain);
 
             const updated = [...variants];
 

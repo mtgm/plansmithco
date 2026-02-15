@@ -26,6 +26,7 @@ import { useTable } from '@refinedev/antd';
 import { useCreate, useUpdate, useDelete } from '@refinedev/core';
 import { uploadToR2 } from '../../utility/uploadToR2';
 import { deleteFromR2 } from '../../utility/deleteFromR2';
+import { supabaseClient } from '../../utility/supabaseClient';
 
 interface SetCategory {
     id: string;
@@ -58,6 +59,26 @@ export const SetCategoryPanel: React.FC<SetCategoryPanelProps> = ({
     const [uploading, setUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+    // Company storage config
+    const [companyBucket, setCompanyBucket] = useState<string | undefined>();
+    const [companyDomain, setCompanyDomain] = useState<string | undefined>();
+
+    React.useEffect(() => {
+        if (companyId) {
+            supabaseClient
+                .from('companies')
+                .select('storage_bucket, storage_domain')
+                .eq('id', companyId)
+                .single()
+                .then(({ data }) => {
+                    if (data) {
+                        setCompanyBucket(data.storage_bucket);
+                        setCompanyDomain(data.storage_domain);
+                    }
+                });
+        }
+    }, [companyId]);
 
     // Table with filters
     const { tableProps, tableQueryResult, current, setCurrent, pageSize } = useTable<SetCategory>({
@@ -133,7 +154,13 @@ export const SetCategoryPanel: React.FC<SetCategoryPanelProps> = ({
             if (selectedFile) {
                 try {
                     console.log('Uploading file...', selectedFile.name);
-                    finalThumbnailUrl = await uploadToR2(selectedFile, 'categories/sets', companyName);
+                    finalThumbnailUrl = await uploadToR2(
+                        selectedFile,
+                        'categories/sets',
+                        companyName,
+                        companyBucket,
+                        companyDomain
+                    );
                     console.log('Upload success, url:', finalThumbnailUrl);
                 } catch (error: any) {
                     console.error('Upload error details:', error);

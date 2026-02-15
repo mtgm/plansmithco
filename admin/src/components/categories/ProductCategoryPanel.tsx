@@ -26,6 +26,7 @@ import { useTable } from '@refinedev/antd';
 import { useCreate, useUpdate, useDelete } from '@refinedev/core';
 import { uploadToR2 } from '../../utility/uploadToR2';
 import { deleteFromR2 } from '../../utility/deleteFromR2';
+import { supabaseClient } from '../../utility/supabaseClient';
 
 interface ProductCategory {
     id: string;
@@ -58,6 +59,26 @@ export const ProductCategoryPanel: React.FC<ProductCategoryPanelProps> = ({
     const [uploading, setUploading] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+    // Company storage config
+    const [companyBucket, setCompanyBucket] = useState<string | undefined>();
+    const [companyDomain, setCompanyDomain] = useState<string | undefined>();
+
+    React.useEffect(() => {
+        if (companyId) {
+            supabaseClient
+                .from('companies')
+                .select('storage_bucket, storage_domain')
+                .eq('id', companyId)
+                .single()
+                .then(({ data }) => {
+                    if (data) {
+                        setCompanyBucket(data.storage_bucket);
+                        setCompanyDomain(data.storage_domain);
+                    }
+                });
+        }
+    }, [companyId]);
 
     // Table with filters
     const { tableProps, tableQueryResult, current, setCurrent, pageSize } = useTable<ProductCategory>({
@@ -137,7 +158,13 @@ export const ProductCategoryPanel: React.FC<ProductCategoryPanelProps> = ({
                     if (!companyName) {
                         console.warn('⚠️ No companyName provided to ProductCategoryPanel');
                     }
-                    finalThumbnailUrl = await uploadToR2(selectedFile, 'categories/products', companyName);
+                    finalThumbnailUrl = await uploadToR2(
+                        selectedFile,
+                        'categories/products',
+                        companyName,
+                        companyBucket,
+                        companyDomain
+                    );
                     console.log('Upload success, url:', finalThumbnailUrl);
                 } catch (error: any) {
                     console.error('Product Category Upload Error:', error);

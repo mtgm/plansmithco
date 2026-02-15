@@ -65,6 +65,10 @@ export const ProductEdit = () => {
     const [previewThumbnail, setPreviewThumbnail] = useState<string | null>(null);
     const [previewModelUrl, setPreviewModelUrl] = useState<string | null>(null);
 
+    // Company storage config
+    const [companyBucket, setCompanyBucket] = useState<string | undefined>();
+    const [companyDomain, setCompanyDomain] = useState<string | undefined>();
+
     // GLB parsed materials
     const [parsedMaterials, setParsedMaterials] = useState<MaterialInfo[]>([]);
     const [materialsWithVariants, setMaterialsWithVariants] = useState<MaterialWithVariants[]>([]);
@@ -95,6 +99,21 @@ export const ProductEdit = () => {
             }
             if (productData.model_url) {
                 setPreviewModelUrl(productData.model_url);
+            }
+
+            // Fetch company storage config
+            if (productData.company_id) {
+                supabaseClient
+                    .from('companies')
+                    .select('storage_bucket, storage_domain')
+                    .eq('id', productData.company_id)
+                    .single()
+                    .then(({ data }) => {
+                        if (data) {
+                            setCompanyBucket(data.storage_bucket);
+                            setCompanyDomain(data.storage_domain);
+                        }
+                    });
             }
         }
     }, [productData]);
@@ -216,7 +235,9 @@ export const ProductEdit = () => {
                 thumbnailUrl = await uploadToR2(
                     selectedThumbnailFile,
                     `products/${productData?.id}`,
-                    companyName
+                    companyName,
+                    companyBucket,
+                    companyDomain
                 );
             }
 
@@ -225,7 +246,9 @@ export const ProductEdit = () => {
                 modelUrl = await uploadToR2(
                     selectedModelFile,
                     `products/${productData?.id}`,
-                    companyName
+                    companyName,
+                    companyBucket,
+                    companyDomain
                 );
             }
 
@@ -483,6 +506,8 @@ export const ProductEdit = () => {
                                     productId={productData?.id?.toString() || ''}
                                     initialVariants={materialsWithVariants[selectedMaterialIndex].variants}
                                     onChange={(variants) => handleVariantChange(selectedMaterialIndex, variants)}
+                                    bucketName={companyBucket}
+                                    customDomain={companyDomain}
                                 />
                             </TabPane>
                         </Tabs>

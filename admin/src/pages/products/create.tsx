@@ -20,7 +20,9 @@ import {
     Space,
     Popconfirm,
     Spin,
-    Image
+    Image,
+    Checkbox,
+    Tooltip
 } from "antd";
 import {
     UploadOutlined,
@@ -29,7 +31,8 @@ import {
     ArrowRightOutlined,
     ArrowLeftOutlined,
     SaveOutlined,
-    EditOutlined
+    EditOutlined,
+    CheckCircleOutlined
 } from "@ant-design/icons";
 import { uploadToR2 } from "../../utility/uploadToR2";
 import { parseGLB, MaterialInfo } from "../../utility/glbParser";
@@ -58,6 +61,7 @@ interface VariantData {
 interface MaterialWithVariants {
     material: MaterialInfo;
     displayName: string;             // editable name
+    isManaged: boolean;              // true = moved to variant management panel
     variants: VariantData[];
 }
 
@@ -79,11 +83,26 @@ export const ProductCreate = () => {
     // ── Company state ──
     const [selectedCompanyId, setSelectedCompanyId] = useState<string | undefined>();
     const [selectedCompanyName, setSelectedCompanyName] = useState<string>('');
+    const [selectedCompanyBucket, setSelectedCompanyBucket] = useState<string | undefined>();
+    const [selectedCompanyDomain, setSelectedCompanyDomain] = useState<string | undefined>();
 
     useEffect(() => {
         if (identity && !isSuperAdmin && userCompanyId) {
             setSelectedCompanyId(userCompanyId);
             setSelectedCompanyName(companyName);
+            // Fetch company storage config for company admin
+            supabaseClient
+                .from('companies')
+                .select('storage_bucket, storage_domain')
+                .eq('id', userCompanyId)
+                .single()
+                .then(({ data }) => {
+                    if (data) {
+                        setSelectedCompanyBucket(data.storage_bucket);
+                        setSelectedCompanyDomain(data.storage_domain);
+                        console.log('Loaded company storage config:', data);
+                    }
+                });
         }
     }, [identity, isSuperAdmin, userCompanyId, companyName]);
 
@@ -138,11 +157,27 @@ export const ProductCreate = () => {
 
     // ── Handlers ──
 
-    const handleCompanyChange = (value: string) => {
+    const handleCompanyChange = async (value: string) => {
         setSelectedCompanyId(value);
         const company = companiesQuery.data?.data.find((c: any) => c.id === value);
         setSelectedCompanyName(company?.company_name || '');
         formProps.form?.setFieldValue('product_category_id', undefined);
+
+        // Fetch storage config for selected company
+        const { data } = await supabaseClient
+            .from('companies')
+            .select('storage_bucket, storage_domain')
+            .eq('id', value)
+            .single();
+
+        if (data) {
+            setSelectedCompanyBucket(data.storage_bucket);
+            setSelectedCompanyDomain(data.storage_domain);
+            console.log('Selected company storage config:', data);
+        } else {
+            setSelectedCompanyBucket(undefined);
+            setSelectedCompanyDomain(undefined);
+        }
     };
 
     const handleThumbnailSelect = (file: File) => {
@@ -165,6 +200,7 @@ export const ProductCreate = () => {
             const initialized: MaterialWithVariants[] = parsed.materials.map(mat => ({
                 material: mat,
                 displayName: mat.name,
+                isManaged: false, // Default: not in variant management panel
                 variants: [{
                     variantName: 'Orijinal',
                     isOriginal: true,
@@ -191,7 +227,13 @@ export const ProductCreate = () => {
         return false;
     };
 
-    // ── Material name editing ──
+    // ── Material management ──
+    const toggleMaterialManaged = (index: number) => {
+        const updated = [...materialsWithVariants];
+        updated[index].isManaged = !updated[index].isManaged;
+        setMaterialsWithVariants(updated);
+    };
+
     const updateMaterialDisplayName = (matIdx: number, name: string) => {
         const updated = [...materialsWithVariants];
         updated[matIdx].displayName = name;
@@ -292,7 +334,9 @@ export const ProductCreate = () => {
                 thumbnailUrl = await uploadToR2(
                     selectedThumbnailFile,
                     'products/thumbnails',
-                    effectiveCompanyName
+                    effectiveCompanyName,
+                    selectedCompanyBucket,
+                    selectedCompanyDomain
                 );
             }
 
@@ -300,7 +344,9 @@ export const ProductCreate = () => {
                 modelUrl = await uploadToR2(
                     selectedModelFile,
                     'products/models',
-                    effectiveCompanyName
+                    effectiveCompanyName,
+                    selectedCompanyBucket,
+                    selectedCompanyDomain
                 );
             }
 
@@ -335,7 +381,13 @@ export const ProductCreate = () => {
     };
 
     const saveMaterialsAndVariants = async (productId: string) => {
-        for (const { material, displayName, variants } of materialsWithVariants) {
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const { material, displayName, variants, isManaged } of materialsWithVariants) {
+            // Only save materials that are explicitly managed by the user
+            if (!isManaged) continue;
+
             // Insert product_materials
             const { data: matData, error: matErr } = await supabaseClient
                 .from('product_materials')
@@ -349,6 +401,8 @@ export const ProductCreate = () => {
 
             if (matErr) {
                 console.error('Material insert error:', matErr);
+                message.error(`Materyal kaydedilemedi (${displayName}): ${matErr.message}`);
+                failCount++;
                 continue;
             }
 
@@ -361,53 +415,97 @@ export const ProductCreate = () => {
 
                 const folder = `products/${productId}/materials/${material.id}`;
 
-                if (variant.swatchFile) {
-                    swatchUrl = await uploadToR2(variant.swatchFile, `${folder}/swatch`, effectiveCompanyName);
-                }
-
-                // For original variant, textures come from GLB (stored as data URLs)
-                // For new variants, upload files to R2
-                if (!variant.isOriginal) {
-                    if (variant.baseColorFile) {
-                        baseColorUrl = await uploadToR2(variant.baseColorFile, `${folder}/basecolor`, effectiveCompanyName);
+                try {
+                    if (variant.swatchFile) {
+                        swatchUrl = await uploadToR2(
+                            variant.swatchFile,
+                            `${folder}/swatch`,
+                            effectiveCompanyName,
+                            selectedCompanyBucket,
+                            selectedCompanyDomain
+                        );
                     }
-                    if (variant.normalFile) {
-                        normalUrl = await uploadToR2(variant.normalFile, `${folder}/normal`, effectiveCompanyName);
+
+                    // For original variant, textures come from GLB (stored as data URLs)
+                    // For new variants, upload files to R2
+                    if (!variant.isOriginal) {
+                        if (variant.baseColorFile) {
+                            baseColorUrl = await uploadToR2(
+                                variant.baseColorFile,
+                                `${folder}/basecolor`,
+                                effectiveCompanyName,
+                                selectedCompanyBucket,
+                                selectedCompanyDomain
+                            );
+                        }
+                        if (variant.normalFile) {
+                            normalUrl = await uploadToR2(
+                                variant.normalFile,
+                                `${folder}/normal`,
+                                effectiveCompanyName,
+                                selectedCompanyBucket,
+                                selectedCompanyDomain
+                            );
+                        }
+                        if (variant.ormFile) {
+                            ormUrl = await uploadToR2(
+                                variant.ormFile,
+                                `${folder}/orm`,
+                                effectiveCompanyName,
+                                selectedCompanyBucket,
+                                selectedCompanyDomain
+                            );
+                        }
+                    } else {
+                        // Original textures: store the preview data URLs
+                        baseColorUrl = variant.baseColorPreview;
+                        normalUrl = variant.normalPreview;
+                        ormUrl = variant.ormPreview;
                     }
-                    if (variant.ormFile) {
-                        ormUrl = await uploadToR2(variant.ormFile, `${folder}/orm`, effectiveCompanyName);
+
+                    // Insert product_variants
+                    const { data: varData, error: varErr } = await supabaseClient
+                        .from('product_variants')
+                        .insert({
+                            material_id: matData.id,
+                            variant_name: variant.variantName,
+                            swatch_url: swatchUrl,
+                        })
+                        .select()
+                        .single();
+
+                    if (varErr) {
+                        console.error('Variant insert error:', varErr);
+                        message.error(`Varyasyon kaydedilemedi (${variant.variantName}): ${varErr.message}`);
+                        failCount++;
+                        continue;
                     }
-                } else {
-                    // Original textures: store the preview data URLs
-                    baseColorUrl = variant.baseColorPreview;
-                    normalUrl = variant.normalPreview;
-                    ormUrl = variant.ormPreview;
+
+                    // Insert variant_textures
+                    const { error: texErr } = await supabaseClient.from('variant_textures').insert({
+                        variant_id: varData.id,
+                        base_color_url: baseColorUrl,
+                        normal_url: normalUrl,
+                        orm_url: ormUrl,
+                    });
+
+                    if (texErr) {
+                        console.error('Texture insert error:', texErr);
+                        message.error(`Texture kaydedilemedi: ${texErr.message}`);
+                    }
+
+                    successCount++;
+
+                } catch (err: any) {
+                    console.error('Upload error:', err);
+                    message.error(`Dosya yükleme hatası: ${err.message}`);
+                    failCount++;
                 }
-
-                // Insert product_variants
-                const { data: varData, error: varErr } = await supabaseClient
-                    .from('product_variants')
-                    .insert({
-                        material_id: matData.id,
-                        variant_name: variant.variantName,
-                        swatch_url: swatchUrl,
-                    })
-                    .select()
-                    .single();
-
-                if (varErr) {
-                    console.error('Variant insert error:', varErr);
-                    continue;
-                }
-
-                // Insert variant_textures
-                await supabaseClient.from('variant_textures').insert({
-                    variant_id: varData.id,
-                    base_color_url: baseColorUrl,
-                    normal_url: normalUrl,
-                    orm_url: ormUrl,
-                });
             }
+        }
+
+        if (failCount > 0) {
+            message.warning(`${successCount} işlem başarılı, ${failCount} işlem hatalı.`);
         }
     };
 
@@ -445,9 +543,30 @@ export const ProductCreate = () => {
         );
     };
 
+    const renderSmallThumb = (url: string | null, label: string) => {
+        if (!url) return <div style={{ width: 24, height: 24, background: '#f0f0f0', borderRadius: 2 }} />;
+        return (
+            <Tooltip title={label}>
+                <img
+                    src={url}
+                    alt={label}
+                    style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: 2,
+                        objectFit: 'cover',
+                        border: '1px solid #d9d9d9'
+                    }}
+                />
+            </Tooltip>
+        );
+    };
+
     // ══════════════════════════════════════════════════════════════════════════
     // RENDER
     // ══════════════════════════════════════════════════════════════════════════
+
+    const managedMaterials = materialsWithVariants.filter(m => m.isManaged);
 
     return (
         <Create
@@ -461,7 +580,7 @@ export const ProductCreate = () => {
                 style={{ marginBottom: 24 }}
                 items={[
                     { title: 'Temel Bilgiler' },
-                    { title: 'Varyasyonlar' },
+                    { title: 'Model & Varyasyon' },
                 ]}
             />
 
@@ -626,9 +745,9 @@ export const ProductCreate = () => {
                                 )}
                             </Card>
 
-                            {/* Materials List */}
+                            {/* Materials List Preview */}
                             {parsedMaterials.length > 0 && (
-                                <Card title="MODEL MATERYALLERİ (SEÇMEK İÇİN TIKLAYIN)">
+                                <Card title={`${parsedMaterials.length} Materyal Bulundu`}>
                                     <List
                                         size="small"
                                         dataSource={parsedMaterials}
@@ -689,246 +808,304 @@ export const ProductCreate = () => {
                 </div>
 
                 {/* ═══════════════════════════════════════════════════════════ */}
-                {/* STEP 2: VARYASYONLAR                                      */}
+                {/* STEP 2: MODEL BİLGİLERİ & VARYASYON YÖNETİMİ               */}
                 {/* ═══════════════════════════════════════════════════════════ */}
                 <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
-                    <Card title="Varyasyon Yönetimi">
-                        <Typography.Paragraph type="secondary" style={{ marginBottom: 16 }}>
-                            Her material için "Orijinal" varyasyon GLB dosyasından gelen texture'ları içerir (değiştirilemez).
-                            Yeni varyasyonlar ekleyerek masaüstünden farklı texture dosyaları yükleyebilirsiniz.
+
+                    {/* Panel 1: Model Bilgileri (Material Selection) */}
+                    <Card title="Model Bilgileri" style={{ marginBottom: 24 }}>
+                        <Typography.Paragraph type="secondary">
+                            Varyasyon oluşturmak istediğiniz materyalleri aşağıdaki listeden seçerek "Varyasyon Yönetimi" paneline ekleyiniz.
                         </Typography.Paragraph>
 
-                        <Collapse
-                            defaultActiveKey={materialsWithVariants.map((_, i) => i.toString())}
-                            accordion={false}
-                        >
-                            {materialsWithVariants.map((matItem, matIdx) => (
-                                <Panel
-                                    header={
-                                        <Space onClick={(e) => e.stopPropagation()}>
-                                            <EditOutlined style={{ color: '#1890ff', fontSize: 12 }} />
-                                            <Input
-                                                value={matItem.displayName}
-                                                onChange={(e) => updateMaterialDisplayName(matIdx, e.target.value)}
-                                                onClick={(e) => e.stopPropagation()}
-                                                style={{
-                                                    fontWeight: 600,
-                                                    border: '1px dashed #d9d9d9',
-                                                    borderRadius: 4,
-                                                    padding: '2px 8px',
-                                                    width: 280
-                                                }}
-                                            />
-                                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                                ({matItem.variants.length} varyasyon)
-                                            </Typography.Text>
-                                        </Space>
-                                    }
-                                    key={matIdx.toString()}
-                                >
-                                    <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                                        {matItem.variants.map((variant, varIdx) => (
-                                            <Card
-                                                key={varIdx}
-                                                size="small"
-                                                title={
-                                                    <Space>
-                                                        <Typography.Text>
-                                                            {variant.isOriginal ? '🔒 Orijinal' : `Varyasyon ${varIdx + 1}`}
-                                                        </Typography.Text>
-                                                        <Typography.Text type="secondary" style={{ fontSize: 11 }}>
-                                                            GLB Mat ID: {matItem.material.id}
-                                                        </Typography.Text>
-                                                        {variant.isOriginal && (
-                                                            <Typography.Text type="warning" style={{ fontSize: 11 }}>
-                                                                (GLB texture'ları — salt okunur)
-                                                            </Typography.Text>
-                                                        )}
-                                                    </Space>
-                                                }
-                                                extra={
-                                                    !variant.isOriginal && (
-                                                        <Popconfirm
-                                                            title="Bu varyasyonu silmek istediğinize emin misiniz?"
-                                                            onConfirm={() => removeVariant(matIdx, varIdx)}
-                                                            okText="Evet"
-                                                            cancelText="İptal"
-                                                        >
-                                                            <Button danger size="small" icon={<DeleteOutlined />} />
-                                                        </Popconfirm>
-                                                    )
-                                                }
-                                                style={{
-                                                    backgroundColor: variant.isOriginal ? '#f6ffed' : '#fff',
-                                                    border: variant.isOriginal ? '1px solid #b7eb8f' : '1px solid #f0f0f0'
-                                                }}
-                                            >
-                                                <Row gutter={[12, 12]} align="top">
-                                                    {/* Varyasyon Adı */}
-                                                    <Col xs={24} sm={6} md={4}>
-                                                        <div style={{ marginBottom: 4, fontWeight: 500, fontSize: 12 }}>
-                                                            Varyasyon Adı
-                                                        </div>
-                                                        <Input
-                                                            value={variant.variantName}
-                                                            onChange={(e) =>
-                                                                updateVariantName(matIdx, varIdx, e.target.value)
-                                                            }
-                                                            placeholder="Örn: Parlak Altın"
-                                                            disabled={variant.isOriginal}
-                                                        />
-                                                    </Col>
-
-                                                    {/* Swatch */}
-                                                    <Col xs={12} sm={4} md={4}>
-                                                        <div style={{ marginBottom: 4, fontWeight: 500, fontSize: 12 }}>
-                                                            Swatch
-                                                        </div>
-                                                        <Upload
-                                                            accept="image/*"
-                                                            showUploadList={false}
-                                                            beforeUpload={(f) =>
-                                                                handleVariantFile(matIdx, varIdx, 'swatch', f)
-                                                            }
-                                                        >
-                                                            <Button size="small" icon={<UploadOutlined />}>
-                                                                {variant.swatchPreview ? 'Değiştir' : 'Yükle'}
-                                                            </Button>
-                                                        </Upload>
-                                                        {renderTextureThumb(variant.swatchPreview, 'Swatch')}
-                                                    </Col>
-
-                                                    {/* BaseColor */}
-                                                    <Col xs={12} sm={5} md={5}>
-                                                        <div style={{ marginBottom: 4, fontWeight: 500, fontSize: 12 }}>
-                                                            BaseColor
-                                                        </div>
-                                                        {variant.isOriginal ? (
-                                                            <div>
-                                                                {variant.baseColorPreview ? (
-                                                                    <>
-                                                                        {renderTextureThumb(variant.baseColorPreview, 'BaseColor')}
-                                                                        <div style={{ fontSize: 11, color: '#52c41a', marginTop: 4 }}>
-                                                                            🔒 GLB'den
-                                                                        </div>
-                                                                    </>
-                                                                ) : (
-                                                                    <Typography.Text type="secondary" style={{ fontSize: 11 }}>
-                                                                        Texture bulunamadı
-                                                                    </Typography.Text>
-                                                                )}
-                                                            </div>
-                                                        ) : (
-                                                            <>
-                                                                <Upload
-                                                                    accept="image/*"
-                                                                    showUploadList={false}
-                                                                    beforeUpload={(f) =>
-                                                                        handleVariantFile(matIdx, varIdx, 'baseColor', f)
-                                                                    }
-                                                                >
-                                                                    <Button size="small" icon={<UploadOutlined />}>
-                                                                        {variant.baseColorPreview ? 'Değiştir' : 'Yükle'}
-                                                                    </Button>
-                                                                </Upload>
-                                                                {renderTextureThumb(variant.baseColorPreview, 'BaseColor')}
-                                                            </>
-                                                        )}
-                                                    </Col>
-
-                                                    {/* Normal */}
-                                                    <Col xs={12} sm={5} md={5}>
-                                                        <div style={{ marginBottom: 4, fontWeight: 500, fontSize: 12 }}>
-                                                            Normal Map
-                                                        </div>
-                                                        {variant.isOriginal ? (
-                                                            <div>
-                                                                {variant.normalPreview ? (
-                                                                    <>
-                                                                        {renderTextureThumb(variant.normalPreview, 'Normal')}
-                                                                        <div style={{ fontSize: 11, color: '#52c41a', marginTop: 4 }}>
-                                                                            🔒 GLB'den
-                                                                        </div>
-                                                                    </>
-                                                                ) : (
-                                                                    <Typography.Text type="secondary" style={{ fontSize: 11 }}>
-                                                                        Texture bulunamadı
-                                                                    </Typography.Text>
-                                                                )}
-                                                            </div>
-                                                        ) : (
-                                                            <>
-                                                                <Upload
-                                                                    accept="image/*"
-                                                                    showUploadList={false}
-                                                                    beforeUpload={(f) =>
-                                                                        handleVariantFile(matIdx, varIdx, 'normal', f)
-                                                                    }
-                                                                >
-                                                                    <Button size="small" icon={<UploadOutlined />}>
-                                                                        {variant.normalPreview ? 'Değiştir' : 'Yükle'}
-                                                                    </Button>
-                                                                </Upload>
-                                                                {renderTextureThumb(variant.normalPreview, 'Normal')}
-                                                            </>
-                                                        )}
-                                                    </Col>
-
-                                                    {/* ORM */}
-                                                    <Col xs={12} sm={4} md={5}>
-                                                        <div style={{ marginBottom: 4, fontWeight: 500, fontSize: 12 }}>
-                                                            ORM Map
-                                                        </div>
-                                                        {variant.isOriginal ? (
-                                                            <div>
-                                                                {variant.ormPreview ? (
-                                                                    <>
-                                                                        {renderTextureThumb(variant.ormPreview, 'ORM')}
-                                                                        <div style={{ fontSize: 11, color: '#52c41a', marginTop: 4 }}>
-                                                                            🔒 GLB'den
-                                                                        </div>
-                                                                    </>
-                                                                ) : (
-                                                                    <Typography.Text type="secondary" style={{ fontSize: 11 }}>
-                                                                        Texture bulunamadı
-                                                                    </Typography.Text>
-                                                                )}
-                                                            </div>
-                                                        ) : (
-                                                            <>
-                                                                <Upload
-                                                                    accept="image/*"
-                                                                    showUploadList={false}
-                                                                    beforeUpload={(f) =>
-                                                                        handleVariantFile(matIdx, varIdx, 'orm', f)
-                                                                    }
-                                                                >
-                                                                    <Button size="small" icon={<UploadOutlined />}>
-                                                                        {variant.ormPreview ? 'Değiştir' : 'Yükle'}
-                                                                    </Button>
-                                                                </Upload>
-                                                                {renderTextureThumb(variant.ormPreview, 'ORM')}
-                                                            </>
-                                                        )}
-                                                    </Col>
-                                                </Row>
-                                            </Card>
-                                        ))}
-
-                                        {/* Add Variant Button */}
-                                        <Button
-                                            type="dashed"
-                                            onClick={() => addVariant(matIdx)}
-                                            icon={<PlusOutlined />}
-                                            block
+                        <List
+                            itemLayout="horizontal"
+                            dataSource={materialsWithVariants}
+                            renderItem={(item, index) => (
+                                <List.Item
+                                    actions={[
+                                        <Checkbox
+                                            checked={item.isManaged}
+                                            onChange={() => toggleMaterialManaged(index)}
                                         >
-                                            + Varyasyon Ekle
-                                        </Button>
-                                    </Space>
-                                </Panel>
-                            ))}
-                        </Collapse>
+                                            {item.isManaged ? 'Varyasyon Yönetimi Açık' : 'Varyasyon Ekle'}
+                                        </Checkbox>
+                                    ]}
+                                    style={{
+                                        backgroundColor: item.isManaged ? '#f6ffed' : 'transparent',
+                                        transition: 'background-color 0.3s'
+                                    }}
+                                >
+                                    <List.Item.Meta
+                                        title={<Typography.Text strong>{item.material.name}</Typography.Text>}
+                                        description={
+                                            <Space size="large">
+                                                <Space>
+                                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>Base:</Typography.Text>
+                                                    {renderSmallThumb(item.variants[0].baseColorPreview, 'BaseColor')}
+                                                </Space>
+                                                <Space>
+                                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>Normal:</Typography.Text>
+                                                    {renderSmallThumb(item.variants[0].normalPreview, 'Normal')}
+                                                </Space>
+                                                <Space>
+                                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>ORM:</Typography.Text>
+                                                    {renderSmallThumb(item.variants[0].ormPreview, 'ORM')}
+                                                </Space>
+                                                {item.isManaged && <Typography.Text type="success" style={{ fontSize: 12 }}>
+                                                    <CheckCircleOutlined /> Panele Eklendi
+                                                </Typography.Text>}
+                                            </Space>
+                                        }
+                                    />
+                                </List.Item>
+                            )}
+                        />
                     </Card>
+
+                    {/* Panel 2: Varyasyon Yönetimi (Managed Materials) */}
+                    {managedMaterials.length > 0 && (
+                        <Card title="Varyasyon Yönetimi" style={{ marginBottom: 24, border: '1px solid #1890ff' }}>
+                            <Typography.Paragraph type="secondary" style={{ marginBottom: 16 }}>
+                                Seçilen materyaller için yeni varyasyonlar tanımlayabilirsiniz.
+                            </Typography.Paragraph>
+
+                            <Collapse
+                                defaultActiveKey={managedMaterials.map(m => m.material.id)}
+                            >
+                                {materialsWithVariants.map((matItem, matIdx) => {
+                                    // Only show managed items
+                                    if (!matItem.isManaged) return null;
+
+                                    return (
+                                        <Panel
+                                            header={
+                                                <Space onClick={(e) => e.stopPropagation()}>
+                                                    <EditOutlined style={{ color: '#1890ff', fontSize: 12 }} />
+                                                    <Input
+                                                        value={matItem.displayName}
+                                                        onChange={(e) => updateMaterialDisplayName(matIdx, e.target.value)}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        style={{
+                                                            fontWeight: 600,
+                                                            border: '1px dashed #d9d9d9',
+                                                            borderRadius: 4,
+                                                            padding: '2px 8px',
+                                                            width: 280
+                                                        }}
+                                                    />
+                                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                        ({matItem.variants.length} varyasyon)
+                                                    </Typography.Text>
+                                                </Space>
+                                            }
+                                            key={matItem.material.id}
+                                        >
+                                            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                                                {matItem.variants.map((variant, varIdx) => (
+                                                    <Card
+                                                        key={varIdx}
+                                                        size="small"
+                                                        title={
+                                                            <Space>
+                                                                <Typography.Text>
+                                                                    {variant.isOriginal ? '🔒 Orijinal' : `Varyasyon ${varIdx + 1}`}
+                                                                </Typography.Text>
+                                                                <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                                                                    GLB Mat ID: {matItem.material.id}
+                                                                </Typography.Text>
+                                                                {variant.isOriginal && (
+                                                                    <Typography.Text type="warning" style={{ fontSize: 11 }}>
+                                                                        (GLB texture'ları — salt okunur)
+                                                                    </Typography.Text>
+                                                                )}
+                                                            </Space>
+                                                        }
+                                                        extra={
+                                                            !variant.isOriginal && (
+                                                                <Popconfirm
+                                                                    title="Bu varyasyonu silmek istediğinize emin misiniz?"
+                                                                    onConfirm={() => removeVariant(matIdx, varIdx)}
+                                                                    okText="Evet"
+                                                                    cancelText="İptal"
+                                                                >
+                                                                    <Button danger size="small" icon={<DeleteOutlined />} />
+                                                                </Popconfirm>
+                                                            )
+                                                        }
+                                                        style={{
+                                                            backgroundColor: variant.isOriginal ? '#fbfbfb' : '#fff', // Slightly different bg for original
+                                                            border: variant.isOriginal ? '1px dashed #d9d9d9' : '1px solid #f0f0f0'
+                                                        }}
+                                                    >
+                                                        <Row gutter={[12, 12]} align="top">
+                                                            {/* Varyasyon Adı */}
+                                                            <Col xs={24} sm={6} md={4}>
+                                                                <div style={{ marginBottom: 4, fontWeight: 500, fontSize: 12 }}>
+                                                                    Varyasyon Adı
+                                                                </div>
+                                                                <Input
+                                                                    value={variant.variantName}
+                                                                    onChange={(e) =>
+                                                                        updateVariantName(matIdx, varIdx, e.target.value)
+                                                                    }
+                                                                    placeholder="Örn: Parlak Altın"
+                                                                    disabled={variant.isOriginal}
+                                                                />
+                                                            </Col>
+
+                                                            {/* Swatch */}
+                                                            <Col xs={12} sm={4} md={4}>
+                                                                <div style={{ marginBottom: 4, fontWeight: 500, fontSize: 12 }}>
+                                                                    Swatch
+                                                                </div>
+                                                                <Upload
+                                                                    accept="image/*"
+                                                                    showUploadList={false}
+                                                                    beforeUpload={(f) =>
+                                                                        handleVariantFile(matIdx, varIdx, 'swatch', f)
+                                                                    }
+                                                                >
+                                                                    <Button size="small" icon={<UploadOutlined />}>
+                                                                        {variant.swatchPreview ? 'Değiştir' : 'Yükle'}
+                                                                    </Button>
+                                                                </Upload>
+                                                                {renderTextureThumb(variant.swatchPreview, 'Swatch')}
+                                                            </Col>
+
+                                                            {/* BaseColor */}
+                                                            <Col xs={12} sm={5} md={5}>
+                                                                <div style={{ marginBottom: 4, fontWeight: 500, fontSize: 12 }}>
+                                                                    BaseColor
+                                                                </div>
+                                                                {variant.isOriginal ? (
+                                                                    <div>
+                                                                        {variant.baseColorPreview ? (
+                                                                            <>
+                                                                                {renderTextureThumb(variant.baseColorPreview, 'BaseColor')}
+                                                                                <div style={{ fontSize: 11, color: '#52c41a', marginTop: 4 }}>
+                                                                                    🔒 GLB'den
+                                                                                </div>
+                                                                            </>
+                                                                        ) : (
+                                                                            <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                                                                                Texture bulunamadı
+                                                                            </Typography.Text>
+                                                                        )}
+                                                                    </div>
+                                                                ) : (
+                                                                    <>
+                                                                        <Upload
+                                                                            accept="image/*"
+                                                                            showUploadList={false}
+                                                                            beforeUpload={(f) =>
+                                                                                handleVariantFile(matIdx, varIdx, 'baseColor', f)
+                                                                            }
+                                                                        >
+                                                                            <Button size="small" icon={<UploadOutlined />}>
+                                                                                {variant.baseColorPreview ? 'Değiştir' : 'Yükle'}
+                                                                            </Button>
+                                                                        </Upload>
+                                                                        {renderTextureThumb(variant.baseColorPreview, 'BaseColor')}
+                                                                    </>
+                                                                )}
+                                                            </Col>
+
+                                                            {/* Normal */}
+                                                            <Col xs={12} sm={5} md={5}>
+                                                                <div style={{ marginBottom: 4, fontWeight: 500, fontSize: 12 }}>
+                                                                    Normal Map
+                                                                </div>
+                                                                {variant.isOriginal ? (
+                                                                    <div>
+                                                                        {variant.normalPreview ? (
+                                                                            <>
+                                                                                {renderTextureThumb(variant.normalPreview, 'Normal')}
+                                                                                <div style={{ fontSize: 11, color: '#52c41a', marginTop: 4 }}>
+                                                                                    🔒 GLB'den
+                                                                                </div>
+                                                                            </>
+                                                                        ) : (
+                                                                            <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                                                                                Texture bulunamadı
+                                                                            </Typography.Text>
+                                                                        )}
+                                                                    </div>
+                                                                ) : (
+                                                                    <>
+                                                                        <Upload
+                                                                            accept="image/*"
+                                                                            showUploadList={false}
+                                                                            beforeUpload={(f) =>
+                                                                                handleVariantFile(matIdx, varIdx, 'normal', f)
+                                                                            }
+                                                                        >
+                                                                            <Button size="small" icon={<UploadOutlined />}>
+                                                                                {variant.normalPreview ? 'Değiştir' : 'Yükle'}
+                                                                            </Button>
+                                                                        </Upload>
+                                                                        {renderTextureThumb(variant.normalPreview, 'Normal')}
+                                                                    </>
+                                                                )}
+                                                            </Col>
+
+                                                            {/* ORM */}
+                                                            <Col xs={12} sm={4} md={5}>
+                                                                <div style={{ marginBottom: 4, fontWeight: 500, fontSize: 12 }}>
+                                                                    ORM Map
+                                                                </div>
+                                                                {variant.isOriginal ? (
+                                                                    <div>
+                                                                        {variant.ormPreview ? (
+                                                                            <>
+                                                                                {renderTextureThumb(variant.ormPreview, 'ORM')}
+                                                                                <div style={{ fontSize: 11, color: '#52c41a', marginTop: 4 }}>
+                                                                                    🔒 GLB'den
+                                                                                </div>
+                                                                            </>
+                                                                        ) : (
+                                                                            <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                                                                                Texture bulunamadı
+                                                                            </Typography.Text>
+                                                                        )}
+                                                                    </div>
+                                                                ) : (
+                                                                    <>
+                                                                        <Upload
+                                                                            accept="image/*"
+                                                                            showUploadList={false}
+                                                                            beforeUpload={(f) =>
+                                                                                handleVariantFile(matIdx, varIdx, 'orm', f)
+                                                                            }
+                                                                        >
+                                                                            <Button size="small" icon={<UploadOutlined />}>
+                                                                                {variant.ormPreview ? 'Değiştir' : 'Yükle'}
+                                                                            </Button>
+                                                                        </Upload>
+                                                                        {renderTextureThumb(variant.ormPreview, 'ORM')}
+                                                                    </>
+                                                                )}
+                                                            </Col>
+                                                        </Row>
+                                                    </Card>
+                                                ))}
+
+                                                {/* Add Variant Button */}
+                                                <Button
+                                                    type="dashed"
+                                                    onClick={() => addVariant(matIdx)}
+                                                    icon={<PlusOutlined />}
+                                                    block
+                                                >
+                                                    + Varyasyon Ekle
+                                                </Button>
+                                            </Space>
+                                        </Panel>
+                                    );
+                                })}
+                            </Collapse>
+                        </Card>
+                    )}
 
                     {/* Navigation buttons */}
                     <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between' }}>
