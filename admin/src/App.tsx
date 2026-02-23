@@ -24,6 +24,7 @@ import { DashboardPage } from "./pages/dashboard";
 import { ProductList, ProductCreate, ProductEdit } from "./pages/products";
 import { CategoryManager } from "./pages/categories";
 import { SetList, SetCreate, SetEdit } from "./pages/sets";
+import { MediaPage } from "./pages/media";
 
 // Icons
 import {
@@ -33,6 +34,8 @@ import {
   QrcodeOutlined,
   TeamOutlined,
   BlockOutlined,
+  FileImageOutlined,
+  FolderOpenOutlined
 } from "@ant-design/icons";
 
 function App() {
@@ -112,6 +115,14 @@ function App() {
                   meta: {
                     label: "Companies",
                     icon: <TeamOutlined />,
+                  },
+                },
+                {
+                  name: "media",
+                  list: "/media",
+                  meta: {
+                    label: "R2 Dosya Yöneticisi",
+                    icon: <FolderOpenOutlined />,
                   },
                 },
               ]}
@@ -227,6 +238,11 @@ function App() {
                         </div>
                       }
                     />
+                  </Route>
+
+                  {/* Media Library */}
+                  <Route path="/media">
+                    <Route index element={<MediaPage />} />
                   </Route>
 
                   {/* 404 */}

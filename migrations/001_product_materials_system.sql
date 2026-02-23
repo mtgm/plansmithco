@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS product_variants (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     material_id UUID NOT NULL REFERENCES product_materials(id) ON DELETE CASCADE,
     variant_name TEXT NOT NULL, -- e.g., "Orijinal", "Yeni Seçenek"
+    is_original BOOLEAN DEFAULT FALSE, -- Whether this is the GLB default
     swatch_url TEXT, -- R2 URL for the variant preview image
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

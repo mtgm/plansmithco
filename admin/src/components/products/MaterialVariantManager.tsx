@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Card, Form, Input, Upload, Button, Row, Col, Space, message, Popconfirm } from 'antd';
-import { PlusOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons';
+import { Card, Form, Input, Upload, Button, Row, Col, Space, message, Popconfirm, Modal } from 'antd';
+import { PlusOutlined, DeleteOutlined, UploadOutlined, FolderOpenOutlined } from '@ant-design/icons';
 import { uploadToR2 } from '../../utility/uploadToR2';
+import { FileManager } from '../file-manager/FileManager';
+import { R2File } from '../../utility/storageOperations';
 
 export interface MaterialVariant {
     id?: string; // Database ID (if editing existing)
@@ -50,6 +52,13 @@ export const MaterialVariantManager: React.FC<MaterialVariantManagerProps> = ({
     );
 
     const [uploadingStates, setUploadingStates] = useState<{ [key: string]: boolean }>({});
+
+    // R2 File Picker state
+    const [r2PickerVisible, setR2PickerVisible] = useState(false);
+    const [r2PickerTarget, setR2PickerTarget] = useState<{
+        index: number;
+        fieldType: 'swatch' | 'baseColor' | 'normal' | 'orm';
+    } | null>(null);
 
     const handleAddVariant = () => {
         const newVariant: MaterialVariant = {
@@ -128,6 +137,88 @@ export const MaterialVariantManager: React.FC<MaterialVariantManagerProps> = ({
         return false; // Prevent default upload behavior
     };
 
+    // Handle R2 file picker selection
+    const openR2Picker = (index: number, fieldType: 'swatch' | 'baseColor' | 'normal' | 'orm') => {
+        setR2PickerTarget({ index, fieldType });
+        setR2PickerVisible(true);
+    };
+
+    const handleR2FileSelect = (file: R2File) => {
+        if (!r2PickerTarget) return;
+        const { index, fieldType } = r2PickerTarget;
+        const url = file.url;
+
+        const updated = [...variants];
+        switch (fieldType) {
+            case 'swatch':
+                updated[index].swatchUrl = url;
+                break;
+            case 'baseColor':
+                updated[index].baseColorUrl = url;
+                break;
+            case 'normal':
+                updated[index].normalUrl = url;
+                break;
+            case 'orm':
+                updated[index].ormUrl = url;
+                break;
+        }
+
+        setVariants(updated);
+        onChange?.(updated);
+        setR2PickerVisible(false);
+        setR2PickerTarget(null);
+        message.success('Dosya seçildi');
+    };
+
+    const renderTextureField = (
+        index: number,
+        fieldType: 'swatch' | 'baseColor' | 'normal' | 'orm',
+        label: string,
+        urlValue: string | null,
+        showPreview: boolean = false
+    ) => (
+        <Col span={4}>
+            <Form.Item label={label}>
+                <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                    <Space>
+                        <Upload
+                            accept="image/*"
+                            showUploadList={false}
+                            beforeUpload={(file) => handleFileUpload(index, file, fieldType)}
+                        >
+                            <Button
+                                icon={<UploadOutlined />}
+                                loading={uploadingStates[`${index}-${fieldType}`]}
+                                size="small"
+                            >
+                                {urlValue ? 'Değiştir' : 'Yükle'}
+                            </Button>
+                        </Upload>
+                        <Button
+                            icon={<FolderOpenOutlined />}
+                            size="small"
+                            onClick={() => openR2Picker(index, fieldType)}
+                            title="R2'den seç"
+                        >
+                            R2
+                        </Button>
+                    </Space>
+                    {urlValue && showPreview && (
+                        <img
+                            src={urlValue}
+                            alt={label}
+                            style={{ width: 50, height: 50, marginTop: 4, objectFit: 'cover', borderRadius: 4 }}
+                        />
+                    )}
+                    {urlValue && !showPreview && (
+                        <div style={{ fontSize: '12px', color: 'green', marginTop: 4 }}>✓ Yüklenmiş</div>
+                    )}
+                </Space>
+            </Form.Item>
+        </Col>
+    );
+
     return (
         <div>
             <h4>Varyasyon: {materialName}</h4>
@@ -153,7 +244,7 @@ export const MaterialVariantManager: React.FC<MaterialVariantManagerProps> = ({
                         }
                     >
                         <Row gutter={[16, 16]}>
-                            <Col span={8}>
+                            <Col span={4}>
                                 <Form.Item label="Varyasyon Adı" required>
                                     <Input
                                         value={variant.variantName}
@@ -163,89 +254,10 @@ export const MaterialVariantManager: React.FC<MaterialVariantManagerProps> = ({
                                 </Form.Item>
                             </Col>
 
-                            <Col span={8}>
-                                <Form.Item label="Resim (Swatch)">
-                                    <Upload
-                                        accept="image/*"
-                                        showUploadList={false}
-                                        beforeUpload={(file) => handleFileUpload(index, file, 'swatch')}
-                                    >
-                                        <Button
-                                            icon={<UploadOutlined />}
-                                            loading={uploadingStates[`${index}-swatch`]}
-                                        >
-                                            {variant.swatchUrl ? 'Değiştir' : 'Yükle'}
-                                        </Button>
-                                    </Upload>
-                                    {variant.swatchUrl && (
-                                        <img
-                                            src={variant.swatchUrl}
-                                            alt="Swatch"
-                                            style={{ width: 50, height: 50, marginTop: 8, objectFit: 'cover' }}
-                                        />
-                                    )}
-                                </Form.Item>
-                            </Col>
-
-                            <Col span={8}>
-                                <Form.Item label="BaseColor">
-                                    <Upload
-                                        accept="image/*"
-                                        showUploadList={false}
-                                        beforeUpload={(file) => handleFileUpload(index, file, 'baseColor')}
-                                    >
-                                        <Button
-                                            icon={<UploadOutlined />}
-                                            loading={uploadingStates[`${index}-baseColor`]}
-                                        >
-                                            {variant.baseColorUrl ? 'Değiştir' : 'Yükle'}
-                                        </Button>
-                                    </Upload>
-                                    {variant.baseColorUrl && (
-                                        <div style={{ fontSize: '12px', color: 'green', marginTop: 4 }}>✓ Yüklenmiş</div>
-                                    )}
-                                </Form.Item>
-                            </Col>
-
-                            <Col span={8}>
-                                <Form.Item label="Normal Map">
-                                    <Upload
-                                        accept="image/*"
-                                        showUploadList={false}
-                                        beforeUpload={(file) => handleFileUpload(index, file, 'normal')}
-                                    >
-                                        <Button
-                                            icon={<UploadOutlined />}
-                                            loading={uploadingStates[`${index}-normal`]}
-                                        >
-                                            {variant.normalUrl ? 'Değiştir' : 'Yükle'}
-                                        </Button>
-                                    </Upload>
-                                    {variant.normalUrl && (
-                                        <div style={{ fontSize: '12px', color: 'green', marginTop: 4 }}>✓ Yüklenmiş</div>
-                                    )}
-                                </Form.Item>
-                            </Col>
-
-                            <Col span={8}>
-                                <Form.Item label="ORM Map">
-                                    <Upload
-                                        accept="image/*"
-                                        showUploadList={false}
-                                        beforeUpload={(file) => handleFileUpload(index, file, 'orm')}
-                                    >
-                                        <Button
-                                            icon={<UploadOutlined />}
-                                            loading={uploadingStates[`${index}-orm`]}
-                                        >
-                                            {variant.ormUrl ? 'Değiştir' : 'Yükle'}
-                                        </Button>
-                                    </Upload>
-                                    {variant.ormUrl && (
-                                        <div style={{ fontSize: '12px', color: 'green', marginTop: 4 }}>✓ Yüklenmiş</div>
-                                    )}
-                                </Form.Item>
-                            </Col>
+                            {renderTextureField(index, 'swatch', 'Swatch', variant.swatchUrl, true)}
+                            {renderTextureField(index, 'baseColor', 'BaseColor', variant.baseColorUrl)}
+                            {renderTextureField(index, 'normal', 'Normal Map', variant.normalUrl)}
+                            {renderTextureField(index, 'orm', 'ORM Map', variant.ormUrl)}
                         </Row>
                     </Card>
                 ))}
@@ -256,9 +268,31 @@ export const MaterialVariantManager: React.FC<MaterialVariantManagerProps> = ({
                     icon={<PlusOutlined />}
                     block
                 >
-                    Varyasyon Ekle
+                    + Varyasyon Ekle
                 </Button>
             </Space>
+
+            {/* R2 File Picker Modal */}
+            <Modal
+                title="R2 Deposundan Dosya Seç"
+                open={r2PickerVisible}
+                onCancel={() => {
+                    setR2PickerVisible(false);
+                    setR2PickerTarget(null);
+                }}
+                footer={null}
+                width={900}
+                destroyOnClose
+            >
+                <FileManager
+                    bucketName={bucketName}
+                    customDomain={customDomain}
+                    companyName={companyName}
+                    mode="select"
+                    onSelect={handleR2FileSelect}
+                    height="60vh"
+                />
+            </Modal>
         </div>
     );
 };

@@ -12,7 +12,34 @@ interface ThreeModelViewerProps {
     height?: string;
 }
 
+interface ErrorBoundaryState {
+    hasError: boolean;
+}
+
+class ErrorBoundary extends React.Component<{ fallback: React.ReactNode, children: React.ReactNode }, ErrorBoundaryState> {
+    constructor(props: any) {
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError(_error: any) {
+        return { hasError: true };
+    }
+
+    componentDidCatch(error: any, errorInfo: any) {
+        console.error("ThreeModelViewer Error:", error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return this.props.fallback;
+        }
+        return this.props.children;
+    }
+}
+
 const Model = ({ url, onLoaded, highlightMaterial }: { url: string, onLoaded?: (scene: any) => void, highlightMaterial?: string | null }) => {
+    // ... same content ...
     const { scene } = useGLTF(url);
 
     useEffect(() => {
@@ -48,15 +75,22 @@ export const ThreeModelViewer: React.FC<ThreeModelViewerProps> = ({ modelUrl, im
     // 1. If we have a Model URL, show the 3D Canvas
     if (modelUrl) {
         return (
-            <div style={{ width, height, borderRadius: "8px", overflow: "hidden", backgroundColor: "#222" }}>
-                <Canvas shadows dpr={[1, 2]} camera={{ fov: 50 }}>
-                    <Suspense fallback={null}>
-                        <Stage environment="city" intensity={0.6}>
-                            <Model url={modelUrl} onLoaded={onLoaded} highlightMaterial={highlightMaterial} />
-                        </Stage>
-                    </Suspense>
-                    <OrbitControls makeDefault />
-                </Canvas>
+            <div style={{ width, height, borderRadius: "8px", overflow: "hidden", backgroundColor: "#222", position: 'relative' }}>
+                <ErrorBoundary fallback={
+                    <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#ff4d4f', flexDirection: 'column' }}>
+                        <span style={{ fontSize: 24, marginBottom: 8 }}>⚠️</span>
+                        <div style={{ textAlign: 'center' }}>Model Görüntülenemedi<br />(CORS/Ağ Hatası)</div>
+                    </div>
+                }>
+                    <Canvas shadows dpr={[1, 2]} camera={{ fov: 50 }}>
+                        <Suspense fallback={null}>
+                            <Stage environment="city" intensity={0.6}>
+                                <Model url={modelUrl} onLoaded={onLoaded} highlightMaterial={highlightMaterial} />
+                            </Stage>
+                        </Suspense>
+                        <OrbitControls makeDefault />
+                    </Canvas>
+                </ErrorBoundary>
             </div>
         );
     }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Create, useForm, useSelect } from "@refinedev/antd";
-import { useGetIdentity } from "@refinedev/core";
+import { useGetIdentity, useGo, useInvalidate } from "@refinedev/core";
 import {
     Form,
     Input,
@@ -22,7 +22,8 @@ import {
     Spin,
     Image,
     Checkbox,
-    Tooltip
+    Tooltip,
+    Modal
 } from "antd";
 import {
     UploadOutlined,
@@ -32,13 +33,18 @@ import {
     ArrowLeftOutlined,
     SaveOutlined,
     EditOutlined,
-    CheckCircleOutlined
+    CheckCircleOutlined,
+    FolderOpenOutlined
 } from "@ant-design/icons";
-import { uploadToR2 } from "../../utility/uploadToR2";
+import { slugify, uploadToR2 } from "../../utility/uploadToR2"; // Added slugify
 import { parseGLB, MaterialInfo } from "../../utility/glbParser";
 import { CustomAttributesManager, CustomAttribute } from "../../components/products/CustomAttributesManager";
 import { ThreeModelViewer } from "../../components/products/ThreeModelViewer";
 import { supabaseClient } from "../../utility/supabaseClient";
+
+import { FileManager } from "../../components/file-manager/FileManager";
+import { R2File } from "../../utility/storageOperations";
+import { downloadR2FileAsBlob } from "../../utility/r2Download";
 
 const { TextArea } = Input;
 const { Panel } = Collapse;
@@ -87,9 +93,10 @@ export const ProductCreate = () => {
     const [selectedCompanyDomain, setSelectedCompanyDomain] = useState<string | undefined>();
 
     useEffect(() => {
-        if (identity && !isSuperAdmin && userCompanyId) {
+        if (!isSuperAdmin && userCompanyId) {
             setSelectedCompanyId(userCompanyId);
-            setSelectedCompanyName(companyName);
+            setSelectedCompanyName(companyName || '');
+
             // Fetch company storage config for company admin
             supabaseClient
                 .from('companies')
@@ -109,11 +116,14 @@ export const ProductCreate = () => {
     const effectiveCompanyId = isSuperAdmin ? selectedCompanyId : userCompanyId;
     const effectiveCompanyName = isSuperAdmin ? selectedCompanyName : companyName;
 
+    const go = useGo();
+    const invalidate = useInvalidate();
+
     // ── Form ──
     const { formProps, saveButtonProps, onFinish } = useForm({
         resource: "products",
+        redirect: false,
     });
-
     // ── Selects ──
     const { selectProps: companySelectProps, queryResult: companiesQuery } = useSelect({
         resource: "companies",
@@ -142,6 +152,20 @@ export const ProductCreate = () => {
     const [selectedModelFile, setSelectedModelFile] = useState<File | null>(null);
     const [previewThumbnail, setPreviewThumbnail] = useState<string | null>(null);
     const [previewModelUrl, setPreviewModelUrl] = useState<string | null>(null);
+
+    // ── Media Picker State ──
+    const [mediaModalVisible, setMediaModalVisible] = useState(false);
+    const [mediaModalTarget, setMediaModalTarget] = useState<'thumbnail' | 'model' | null>(null);
+    const [selectedR2Thumbnail, setSelectedR2Thumbnail] = useState<string | null>(null); // URL
+    const [selectedR2Model, setSelectedR2Model] = useState<string | null>(null); // URL
+
+    // ── Variant R2 Picker State ──
+    const [variantR2PickerVisible, setVariantR2PickerVisible] = useState(false);
+    const [variantR2PickerTarget, setVariantR2PickerTarget] = useState<{
+        matIdx: number;
+        varIdx: number;
+        field: 'swatch' | 'baseColor' | 'normal' | 'orm';
+    } | null>(null);
 
     // ── GLB Materials ──
     const [parsedMaterials, setParsedMaterials] = useState<MaterialInfo[]>([]);
@@ -242,20 +266,24 @@ export const ProductCreate = () => {
 
     // ── Variant handlers ──
     const addVariant = (materialIndex: number) => {
-        const updated = [...materialsWithVariants];
-        updated[materialIndex].variants.push({
-            variantName: `Varyasyon ${updated[materialIndex].variants.length + 1}`,
-            isOriginal: false,
-            swatchFile: null,
-            swatchPreview: null,
-            baseColorFile: null,
-            baseColorPreview: null,
-            normalFile: null,
-            normalPreview: null,
-            ormFile: null,
-            ormPreview: null,
+        setMaterialsWithVariants(prev => {
+            const updated = [...prev];
+            const mat = { ...updated[materialIndex] };
+            mat.variants = [...mat.variants, {
+                variantName: `Varyasyon ${mat.variants.length + 1}`,
+                isOriginal: false,
+                swatchFile: null,
+                swatchPreview: null,
+                baseColorFile: null,
+                baseColorPreview: null,
+                normalFile: null,
+                normalPreview: null,
+                ormFile: null,
+                ormPreview: null,
+            }];
+            updated[materialIndex] = mat;
+            return updated;
         });
-        setMaterialsWithVariants(updated);
     };
 
     const removeVariant = (materialIndex: number, variantIndex: number) => {
@@ -315,6 +343,131 @@ export const ProductCreate = () => {
         return false;
     };
 
+    const openVariantR2Picker = (matIdx: number, varIdx: number, field: 'swatch' | 'baseColor' | 'normal' | 'orm') => {
+        setVariantR2PickerTarget({ matIdx, varIdx, field });
+        setVariantR2PickerVisible(true);
+    };
+
+    const handleVariantR2Select = async (file: R2File) => {
+        if (!variantR2PickerTarget) return;
+        const { matIdx, varIdx, field } = variantR2PickerTarget;
+
+        setVariantR2PickerVisible(false);
+        setVariantR2PickerTarget(null);
+
+        try {
+            // Download via S3 SDK to get a local blob URL for preview
+            const blobUrl = await downloadR2FileAsBlob(
+                file.url,
+                selectedCompanyBucket || import.meta.env.VITE_R2_BUCKET_NAME,
+                selectedCompanyDomain || import.meta.env.VITE_R2_PUBLIC_URL
+            );
+
+            // Fetch as blob so we also have a File object for later upload
+            const resp = await fetch(blobUrl);
+            const blob = await resp.blob();
+            const fileObj = new File([blob], file.name, { type: blob.type });
+
+            const updated = [...materialsWithVariants];
+            const variant = updated[matIdx].variants[varIdx];
+
+            switch (field) {
+                case 'swatch':
+                    variant.swatchFile = fileObj;
+                    variant.swatchPreview = blobUrl;
+                    break;
+                case 'baseColor':
+                    variant.baseColorFile = fileObj;
+                    variant.baseColorPreview = blobUrl;
+                    break;
+                case 'normal':
+                    variant.normalFile = fileObj;
+                    variant.normalPreview = blobUrl;
+                    break;
+                case 'orm':
+                    variant.ormFile = fileObj;
+                    variant.ormPreview = blobUrl;
+                    break;
+            }
+
+            setMaterialsWithVariants(updated);
+            message.success(`R2'den dosya seçildi: ${file.name}`);
+        } catch (error: any) {
+            console.error('R2 file select error:', error);
+            message.error('Dosya seçilemedi: ' + error.message);
+        }
+    };
+
+    const handleMediaSelect = async (file: R2File) => {
+        setMediaModalVisible(false);
+        const target = mediaModalTarget;
+        setMediaModalTarget(null);
+
+        if (target === 'thumbnail') {
+            setSelectedR2Thumbnail(file.url);
+            setSelectedThumbnailFile(null); // Clear local file
+            setPreviewThumbnail(file.url);
+            message.success('Thumbnail seçildi');
+        } else if (target === 'model') {
+            const url = file.url;
+            setSelectedR2Model(url); // Keep the original R2 URL for saving
+            setSelectedModelFile(null); // Clear local file
+
+            // Fetch and parse remote GLB via S3 SDK (bypasses CORS)
+            try {
+                setParsingGLB(true);
+                message.loading({ content: 'Model indiriliyor...', key: 'model-download' });
+
+                // Download via S3 SDK to get a local blob URL
+                const blobUrl = await downloadR2FileAsBlob(
+                    url,
+                    selectedCompanyBucket || import.meta.env.VITE_R2_BUCKET_NAME,
+                    selectedCompanyDomain || import.meta.env.VITE_R2_PUBLIC_URL
+                );
+
+                // Use the blob URL for preview (this works with useGLTF since it's same-origin)
+                setPreviewModelUrl(blobUrl);
+
+                // Also parse materials from the blob
+                const response = await fetch(blobUrl);
+                const blob = await response.blob();
+                const fileObj = new File([blob], file.name, { type: 'model/gltf-binary' });
+
+                const parsed = await parseGLB(fileObj);
+                setParsedMaterials(parsed.materials);
+
+                // Initialize each material with a default "Orijinal" variant
+                const initialized: MaterialWithVariants[] = parsed.materials.map(mat => ({
+                    material: mat,
+                    displayName: mat.name,
+                    isManaged: false,
+                    variants: [{
+                        variantName: 'Orijinal',
+                        isOriginal: true,
+                        swatchFile: null,
+                        swatchPreview: mat.baseColorTexture?.url || null,
+                        baseColorFile: null,
+                        baseColorPreview: mat.baseColorTexture?.url || null,
+                        normalFile: null,
+                        normalPreview: mat.normalTexture?.url || null,
+                        ormFile: null,
+                        ormPreview: mat.ormTexture?.url || null,
+                    }]
+                }));
+                setMaterialsWithVariants(initialized);
+
+                message.success({ content: `GLB yüklendi: ${parsed.materials.length} material bulundu`, key: 'model-download' });
+            } catch (error: any) {
+                console.error('Remote GLB download/parse error:', error);
+                setParsedMaterials([]);
+                setMaterialsWithVariants([]);
+                message.error({ content: 'Model indirilemedi: ' + error.message, key: 'model-download' });
+            } finally {
+                setParsingGLB(false);
+            }
+        }
+    };
+
     // ── Submit ──
 
     const handleSubmit = async (values: any) => {
@@ -326,187 +479,201 @@ export const ProductCreate = () => {
 
             setSaving(true);
 
-            // 1. Upload thumbnail and model to R2
-            let thumbnailUrl: string | null = null;
-            let modelUrl: string | null = null;
-
-            if (selectedThumbnailFile) {
-                thumbnailUrl = await uploadToR2(
-                    selectedThumbnailFile,
-                    'products/thumbnails',
-                    effectiveCompanyName,
-                    selectedCompanyBucket,
-                    selectedCompanyDomain
-                );
-            }
-
-            if (selectedModelFile) {
-                modelUrl = await uploadToR2(
-                    selectedModelFile,
-                    'products/models',
-                    effectiveCompanyName,
-                    selectedCompanyBucket,
-                    selectedCompanyDomain
-                );
-            }
-
-            // 2. Save product to Supabase
-            const productData = {
+            // 1. Save product to Supabase FIRST to get the ID
+            // We save with null URLs initially
+            const initialProductData = {
                 ...values,
                 company_id: effectiveCompanyId,
-                thumbnail_url: thumbnailUrl,
-                model_url: modelUrl,
+                thumbnail_url: null,
+                model_url: null,
                 custom_attributes: customAttributes.length > 0
                     ? JSON.stringify(customAttributes)
                     : null,
             };
 
-            const result = await onFinish(productData);
+            const result = await onFinish(initialProductData);
             const productId = (result as any)?.data?.id;
 
             if (!productId) {
-                message.warning('Ürün kaydedildi fakat material/varyasyon kaydı yapılamadı (ID bulunamadı)');
-                return;
+                throw new Error('Ürün ID alınamadı');
             }
 
-            // 3. Save materials, variants, textures
+            // 2. Upload thumbnail and model to R2 using the STABLE ID
+            let thumbnailUrl: string | null = null;
+            let modelUrl: string | null = null;
+            const productFolder = `products/${productId}`;
+
+            const uploadTasks: Promise<any>[] = [];
+
+            if (selectedThumbnailFile) {
+                uploadTasks.push(uploadToR2(
+                    selectedThumbnailFile,
+                    productFolder,
+                    effectiveCompanyName,
+                    selectedCompanyBucket,
+                    selectedCompanyDomain
+                ).then(url => thumbnailUrl = url));
+            } else if (selectedR2Thumbnail) {
+                thumbnailUrl = selectedR2Thumbnail;
+            }
+
+            if (selectedModelFile) {
+                uploadTasks.push(uploadToR2(
+                    selectedModelFile,
+                    productFolder,
+                    effectiveCompanyName,
+                    selectedCompanyBucket,
+                    selectedCompanyDomain
+                ).then(url => modelUrl = url));
+            } else if (selectedR2Model) {
+                modelUrl = selectedR2Model;
+            }
+
+            await Promise.all(uploadTasks);
+
+            // 3. Update the product record with actual URLs
+            const { error: patchError } = await supabaseClient
+                .from('products')
+                .update({
+                    thumbnail_url: thumbnailUrl,
+                    model_url: modelUrl
+                })
+                .eq('id', productId);
+
+            if (patchError) {
+                console.error("Error updating product URLs:", patchError);
+                // We don't throw here to allow material saving to continue, 
+                // but it's a critical state.
+            }
+
+            // 4. Save materials, variants, textures
             await saveMaterialsAndVariants(productId);
 
+            // 🔥 Make sure next screens never see stale data
+            await invalidate({ resource: "products", invalidates: ["list", "many", "detail"] });
+            await invalidate({ resource: "product_materials", invalidates: ["list", "many", "detail"] });
+            await invalidate({ resource: "product_variants", invalidates: ["list", "many", "detail"] });
+
             message.success('Ürün başarıyla oluşturuldu!');
+
+            // ✅ Go to edit AFTER everything (uploads + DB inserts) is finished
+            go({ to: { resource: "products", action: "list", id: productId } });
         } catch (error: any) {
+            console.error(error);
             message.error('Hata: ' + error.message);
         } finally {
             setSaving(false);
         }
     };
 
-    const saveMaterialsAndVariants = async (productId: string) => {
+    async function saveMaterialsAndVariants(productId: string) {
         let successCount = 0;
         let failCount = 0;
+        const baseProductFolder = `products/${productId}`;
 
-        for (const { material, displayName, variants, isManaged } of materialsWithVariants) {
-            // Only save materials that are explicitly managed by the user
-            if (!isManaged) continue;
+        console.log("Starting Robust Save Process (Create) for Product:", productId);
 
-            // Insert product_materials
+        // Parallel Material Processing
+        await Promise.all(materialsWithVariants.map(async ({ material, displayName, variants, isManaged }) => {
+            if (!isManaged) return;
+
+            console.log(`Processing Material: ${material.id} (${displayName})`);
+            const sanitizedMatId = slugify(material.id);
+
+            // Upsert Material
             const { data: matData, error: matErr } = await supabaseClient
                 .from('product_materials')
-                .insert({
+                .upsert({
                     product_id: productId,
                     material_id: material.id,
                     name: displayName,
-                })
+                }, { onConflict: 'product_id,material_id' })
                 .select()
                 .single();
 
             if (matErr) {
-                console.error('Material insert error:', matErr);
+                console.error('Material upsert error:', matErr);
                 message.error(`Materyal kaydedilemedi (${displayName}): ${matErr.message}`);
                 failCount++;
-                continue;
+                return;
             }
 
-            for (const variant of variants) {
-                // Upload variant files to R2
-                let swatchUrl: string | null = null;
-                let baseColorUrl: string | null = null;
-                let normalUrl: string | null = null;
-                let ormUrl: string | null = null;
-
-                const folder = `products/${productId}/materials/${material.id}`;
+            // Parallel Variant Processing
+            await Promise.all(variants.map(async (variant) => {
+                console.log(`  - Processing Variant: ${variant.variantName}`);
+                const sanitizedVariantName = slugify(variant.variantName);
+                const variantFolder = `${baseProductFolder}/materials/${sanitizedMatId}/${sanitizedVariantName}`;
 
                 try {
-                    if (variant.swatchFile) {
-                        swatchUrl = await uploadToR2(
-                            variant.swatchFile,
-                            `${folder}/swatch`,
-                            effectiveCompanyName,
-                            selectedCompanyBucket,
-                            selectedCompanyDomain
-                        );
-                    }
+                    // Refined uploadOrKeep for Upsert
+                    const uploadOrKeep = async (file: File | null | undefined, preview: string | null | undefined, fileName: string) => {
+                        if (file) {
+                            return await uploadToR2(file, variantFolder, effectiveCompanyName, selectedCompanyBucket, selectedCompanyDomain);
+                        }
+                        if (preview?.startsWith('data:') || preview?.startsWith('blob:')) {
+                            try {
+                                const res = await fetch(preview);
+                                if (!res.ok) throw new Error("Fetch failed");
+                                const blob = await res.blob();
+                                const f = new File([blob], fileName, { type: blob.type });
+                                return await uploadToR2(f, variantFolder, effectiveCompanyName, selectedCompanyBucket, selectedCompanyDomain);
+                            } catch (e) {
+                                console.error(`Failed to upload data/blob URL for ${fileName}:`, e);
+                                return null;
+                            }
+                        }
 
-                    // For original variant, textures come from GLB (stored as data URLs)
-                    // For new variants, upload files to R2
-                    if (!variant.isOriginal) {
-                        if (variant.baseColorFile) {
-                            baseColorUrl = await uploadToR2(
-                                variant.baseColorFile,
-                                `${folder}/basecolor`,
-                                effectiveCompanyName,
-                                selectedCompanyBucket,
-                                selectedCompanyDomain
-                            );
-                        }
-                        if (variant.normalFile) {
-                            normalUrl = await uploadToR2(
-                                variant.normalFile,
-                                `${folder}/normal`,
-                                effectiveCompanyName,
-                                selectedCompanyBucket,
-                                selectedCompanyDomain
-                            );
-                        }
-                        if (variant.ormFile) {
-                            ormUrl = await uploadToR2(
-                                variant.ormFile,
-                                `${folder}/orm`,
-                                effectiveCompanyName,
-                                selectedCompanyBucket,
-                                selectedCompanyDomain
-                            );
-                        }
-                    } else {
-                        // Original textures: store the preview data URLs
-                        baseColorUrl = variant.baseColorPreview;
-                        normalUrl = variant.normalPreview;
-                        ormUrl = variant.ormPreview;
-                    }
+                        // If it's already an HTTP URL or a simple path, keep it
+                        if (preview && preview.startsWith('http')) return preview;
+                        if (preview && !preview.startsWith('data:') && !preview.startsWith('blob:')) return preview;
 
-                    // Insert product_variants
+                        return null;
+                    };
+
+                    const [swatchUrl, baseColorUrl, normalUrl, ormUrl] = await Promise.all([
+                        uploadOrKeep(variant.swatchFile, variant.swatchPreview, 'swatch.png'),
+                        uploadOrKeep(variant.baseColorFile, variant.baseColorPreview, 'baseColor.png'),
+                        uploadOrKeep(variant.normalFile, variant.normalPreview, 'normal.png'),
+                        uploadOrKeep(variant.ormFile, variant.ormPreview, 'orm.png')
+                    ]);
+
+                    // Upsert Variant
                     const { data: varData, error: varErr } = await supabaseClient
                         .from('product_variants')
-                        .insert({
+                        .upsert({
                             material_id: matData.id,
                             variant_name: variant.variantName,
-                            swatch_url: swatchUrl,
-                        })
+                            is_original: variant.isOriginal,
+                            swatch_url: swatchUrl
+                        }, { onConflict: 'material_id,variant_name' })
                         .select()
                         .single();
 
-                    if (varErr) {
-                        console.error('Variant insert error:', varErr);
-                        message.error(`Varyasyon kaydedilemedi (${variant.variantName}): ${varErr.message}`);
-                        failCount++;
-                        continue;
-                    }
+                    if (varErr) throw varErr;
 
-                    // Insert variant_textures
-                    const { error: texErr } = await supabaseClient.from('variant_textures').insert({
-                        variant_id: varData.id,
-                        base_color_url: baseColorUrl,
-                        normal_url: normalUrl,
-                        orm_url: ormUrl,
-                    });
+                    // Upsert Textures
+                    const { error: texErr } = await supabaseClient
+                        .from('variant_textures')
+                        .upsert({
+                            variant_id: varData.id,
+                            base_color_url: baseColorUrl,
+                            normal_url: normalUrl,
+                            orm_url: ormUrl
+                        }, { onConflict: 'variant_id' });
 
-                    if (texErr) {
-                        console.error('Texture insert error:', texErr);
-                        message.error(`Texture kaydedilemedi: ${texErr.message}`);
-                    }
-
+                    if (texErr) throw texErr;
                     successCount++;
-
-                } catch (err: any) {
-                    console.error('Upload error:', err);
-                    message.error(`Dosya yükleme hatası: ${err.message}`);
+                } catch (e: any) {
+                    console.error(`Variant processing error:`, e);
                     failCount++;
                 }
-            }
-        }
+            }));
+        }));
 
         if (failCount > 0) {
             message.warning(`${successCount} işlem başarılı, ${failCount} işlem hatalı.`);
         }
+        console.log("Robust Save Process Completed successfully.");
     };
 
     // ── Navigation ──
@@ -661,36 +828,66 @@ export const ProductCreate = () => {
                                 </Form.Item>
 
                                 {/* Thumbnail */}
+
                                 <Form.Item label="Ürün Görseli">
-                                    <Upload
-                                        accept="image/*"
-                                        showUploadList={false}
-                                        beforeUpload={handleThumbnailSelect}
-                                    >
-                                        <Button icon={<UploadOutlined />}>
-                                            {previewThumbnail ? 'Görseli Değiştir' : 'Görsel Yükle'}
-                                        </Button>
-                                    </Upload>
-                                    {previewThumbnail && (
-                                        <img
-                                            src={previewThumbnail}
-                                            alt="Thumbnail"
-                                            style={{ width: '100%', maxWidth: 200, marginTop: 8, borderRadius: 4 }}
-                                        />
-                                    )}
+                                    <Space direction="vertical" style={{ width: '100%' }}>
+                                        <Space>
+                                            <Upload
+                                                accept="image/*"
+                                                showUploadList={false}
+                                                beforeUpload={handleThumbnailSelect}
+                                            >
+                                                <Button icon={<UploadOutlined />}>
+                                                    {previewThumbnail ? 'Görseli Değiştir' : 'Bilgisayardan Yükle'}
+                                                </Button>
+                                            </Upload>
+                                            <Button
+                                                icon={<PlusOutlined />}
+                                                onClick={() => {
+                                                    setMediaModalTarget('thumbnail');
+                                                    setMediaModalVisible(true);
+                                                }}
+                                            >
+                                                Kütüphaneden Seç
+                                            </Button>
+                                        </Space>
+                                        {previewThumbnail && (
+                                            <div style={{ position: 'relative', maxWidth: 200 }}>
+                                                <img
+                                                    src={previewThumbnail}
+                                                    alt="Thumbnail"
+                                                    style={{ width: '100%', borderRadius: 4 }}
+                                                />
+                                                {selectedR2Thumbnail && <div style={{ position: 'absolute', top: 5, right: 5, background: 'rgba(0,0,0,0.5)', color: '#fff', padding: '2px 5px', borderRadius: 4, fontSize: 10 }}>R2</div>}
+                                            </div>
+                                        )}
+                                    </Space>
                                 </Form.Item>
 
                                 {/* GLB Model */}
+
                                 <Form.Item label="3D Model (GLB)">
-                                    <Upload
-                                        accept=".glb"
-                                        showUploadList={false}
-                                        beforeUpload={handleModelSelect}
-                                    >
-                                        <Button icon={<UploadOutlined />} loading={parsingGLB}>
-                                            {selectedModelFile ? selectedModelFile.name : 'GLB Yükle'}
+                                    <Space>
+                                        <Upload
+                                            accept=".glb"
+                                            showUploadList={false}
+                                            beforeUpload={handleModelSelect}
+                                        >
+                                            <Button icon={<UploadOutlined />} loading={parsingGLB}>
+                                                {selectedModelFile ? selectedModelFile.name : 'GLB Yükle'}
+                                            </Button>
+                                        </Upload>
+                                        <Button
+                                            icon={<PlusOutlined />}
+                                            onClick={() => {
+                                                setMediaModalTarget('model');
+                                                setMediaModalVisible(true);
+                                            }}
+                                        >
+                                            Kütüphaneden Seç
                                         </Button>
-                                    </Upload>
+                                    </Space>
+                                    {selectedR2Model && <div style={{ marginTop: 8, fontSize: 12, color: 'green' }}><CheckCircleOutlined /> R2 Modeli Seçildi</div>}
                                 </Form.Item>
 
                                 {/* Etsy Link */}
@@ -882,18 +1079,21 @@ export const ProductCreate = () => {
                                             header={
                                                 <Space onClick={(e) => e.stopPropagation()}>
                                                     <EditOutlined style={{ color: '#1890ff', fontSize: 12 }} />
-                                                    <Input
-                                                        value={matItem.displayName}
-                                                        onChange={(e) => updateMaterialDisplayName(matIdx, e.target.value)}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        style={{
-                                                            fontWeight: 600,
-                                                            border: '1px dashed #d9d9d9',
-                                                            borderRadius: 4,
-                                                            padding: '2px 8px',
-                                                            width: 280
-                                                        }}
-                                                    />
+                                                    <div style={{ marginRight: 8 }}>
+                                                        <Typography.Text type="secondary" style={{ marginRight: 8 }}>ID:</Typography.Text>
+                                                        <Input
+                                                            value={matItem.displayName}
+                                                            onChange={(e) => updateMaterialDisplayName(matIdx, e.target.value)}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            style={{
+                                                                fontWeight: 600,
+                                                                border: '1px dashed #d9d9d9',
+                                                                borderRadius: 4,
+                                                                padding: '2px 8px',
+                                                                width: 280
+                                                            }}
+                                                        />
+                                                    </div>
                                                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                                                         ({matItem.variants.length} varyasyon)
                                                     </Typography.Text>
@@ -959,17 +1159,20 @@ export const ProductCreate = () => {
                                                                 <div style={{ marginBottom: 4, fontWeight: 500, fontSize: 12 }}>
                                                                     Swatch
                                                                 </div>
-                                                                <Upload
-                                                                    accept="image/*"
-                                                                    showUploadList={false}
-                                                                    beforeUpload={(f) =>
-                                                                        handleVariantFile(matIdx, varIdx, 'swatch', f)
-                                                                    }
-                                                                >
-                                                                    <Button size="small" icon={<UploadOutlined />}>
-                                                                        {variant.swatchPreview ? 'Değiştir' : 'Yükle'}
-                                                                    </Button>
-                                                                </Upload>
+                                                                <Space>
+                                                                    <Upload
+                                                                        accept="image/*"
+                                                                        showUploadList={false}
+                                                                        beforeUpload={(f) =>
+                                                                            handleVariantFile(matIdx, varIdx, 'swatch', f)
+                                                                        }
+                                                                    >
+                                                                        <Button size="small" icon={<UploadOutlined />}>
+                                                                            {variant.swatchPreview ? 'Değiştir' : 'Yükle'}
+                                                                        </Button>
+                                                                    </Upload>
+                                                                    <Button size="small" icon={<FolderOpenOutlined />} onClick={() => openVariantR2Picker(matIdx, varIdx, 'swatch')} title="R2'den seç">R2</Button>
+                                                                </Space>
                                                                 {renderTextureThumb(variant.swatchPreview, 'Swatch')}
                                                             </Col>
 
@@ -995,17 +1198,20 @@ export const ProductCreate = () => {
                                                                     </div>
                                                                 ) : (
                                                                     <>
-                                                                        <Upload
-                                                                            accept="image/*"
-                                                                            showUploadList={false}
-                                                                            beforeUpload={(f) =>
-                                                                                handleVariantFile(matIdx, varIdx, 'baseColor', f)
-                                                                            }
-                                                                        >
-                                                                            <Button size="small" icon={<UploadOutlined />}>
-                                                                                {variant.baseColorPreview ? 'Değiştir' : 'Yükle'}
-                                                                            </Button>
-                                                                        </Upload>
+                                                                        <Space>
+                                                                            <Upload
+                                                                                accept="image/*"
+                                                                                showUploadList={false}
+                                                                                beforeUpload={(f) =>
+                                                                                    handleVariantFile(matIdx, varIdx, 'baseColor', f)
+                                                                                }
+                                                                            >
+                                                                                <Button size="small" icon={<UploadOutlined />}>
+                                                                                    {variant.baseColorPreview ? 'Değiştir' : 'Yükle'}
+                                                                                </Button>
+                                                                            </Upload>
+                                                                            <Button size="small" icon={<FolderOpenOutlined />} onClick={() => openVariantR2Picker(matIdx, varIdx, 'baseColor')} title="R2'den seç">R2</Button>
+                                                                        </Space>
                                                                         {renderTextureThumb(variant.baseColorPreview, 'BaseColor')}
                                                                     </>
                                                                 )}
@@ -1033,17 +1239,20 @@ export const ProductCreate = () => {
                                                                     </div>
                                                                 ) : (
                                                                     <>
-                                                                        <Upload
-                                                                            accept="image/*"
-                                                                            showUploadList={false}
-                                                                            beforeUpload={(f) =>
-                                                                                handleVariantFile(matIdx, varIdx, 'normal', f)
-                                                                            }
-                                                                        >
-                                                                            <Button size="small" icon={<UploadOutlined />}>
-                                                                                {variant.normalPreview ? 'Değiştir' : 'Yükle'}
-                                                                            </Button>
-                                                                        </Upload>
+                                                                        <Space>
+                                                                            <Upload
+                                                                                accept="image/*"
+                                                                                showUploadList={false}
+                                                                                beforeUpload={(f) =>
+                                                                                    handleVariantFile(matIdx, varIdx, 'normal', f)
+                                                                                }
+                                                                            >
+                                                                                <Button size="small" icon={<UploadOutlined />}>
+                                                                                    {variant.normalPreview ? 'Değiştir' : 'Yükle'}
+                                                                                </Button>
+                                                                            </Upload>
+                                                                            <Button size="small" icon={<FolderOpenOutlined />} onClick={() => openVariantR2Picker(matIdx, varIdx, 'normal')} title="R2'den seç">R2</Button>
+                                                                        </Space>
                                                                         {renderTextureThumb(variant.normalPreview, 'Normal')}
                                                                     </>
                                                                 )}
@@ -1071,17 +1280,20 @@ export const ProductCreate = () => {
                                                                     </div>
                                                                 ) : (
                                                                     <>
-                                                                        <Upload
-                                                                            accept="image/*"
-                                                                            showUploadList={false}
-                                                                            beforeUpload={(f) =>
-                                                                                handleVariantFile(matIdx, varIdx, 'orm', f)
-                                                                            }
-                                                                        >
-                                                                            <Button size="small" icon={<UploadOutlined />}>
-                                                                                {variant.ormPreview ? 'Değiştir' : 'Yükle'}
-                                                                            </Button>
-                                                                        </Upload>
+                                                                        <Space>
+                                                                            <Upload
+                                                                                accept="image/*"
+                                                                                showUploadList={false}
+                                                                                beforeUpload={(f) =>
+                                                                                    handleVariantFile(matIdx, varIdx, 'orm', f)
+                                                                                }
+                                                                            >
+                                                                                <Button size="small" icon={<UploadOutlined />}>
+                                                                                    {variant.ormPreview ? 'Değiştir' : 'Yükle'}
+                                                                                </Button>
+                                                                            </Upload>
+                                                                            <Button size="small" icon={<FolderOpenOutlined />} onClick={() => openVariantR2Picker(matIdx, varIdx, 'orm')} title="R2'den seç">R2</Button>
+                                                                        </Space>
                                                                         {renderTextureThumb(variant.ormPreview, 'ORM')}
                                                                     </>
                                                                 )}
@@ -1129,6 +1341,48 @@ export const ProductCreate = () => {
                     </div>
                 </div>
             </Form>
+
+            {/* Media Modal */}
+            <Modal
+                title="Medyadan Seç"
+                open={mediaModalVisible}
+                onCancel={() => setMediaModalVisible(false)}
+                width={1000}
+                footer={null}
+                destroyOnClose
+            >
+                <FileManager
+                    bucketName={selectedCompanyBucket}
+                    customDomain={selectedCompanyDomain}
+                    companyName={effectiveCompanyName}
+                    mode='select'
+                    onSelect={handleMediaSelect}
+                    height="60vh"
+                />
+            </Modal>
+
+            {/* Variant R2 Picker Modal */}
+            <Modal
+                title="Varyasyon İçin Dosya Seç"
+                open={variantR2PickerVisible}
+                onCancel={() => {
+                    setVariantR2PickerVisible(false);
+                    setVariantR2PickerTarget(null);
+                }}
+                width={1000}
+                footer={null}
+                destroyOnClose
+            >
+                <FileManager
+                    bucketName={selectedCompanyBucket}
+                    customDomain={selectedCompanyDomain}
+                    companyName={effectiveCompanyName}
+                    mode='select'
+                    onSelect={handleVariantR2Select}
+                    height="60vh"
+                />
+            </Modal>
+
         </Create>
     );
 };

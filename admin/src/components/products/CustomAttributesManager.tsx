@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Form, Input, Button, Space, Popconfirm } from 'antd';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 
@@ -17,6 +17,13 @@ export const CustomAttributesManager: React.FC<CustomAttributesManagerProps> = (
     onChange
 }) => {
     const [attributes, setAttributes] = useState<CustomAttribute[]>(initialAttributes);
+
+    // Sync with props when they change (during async loading)
+    useEffect(() => {
+        if (initialAttributes && initialAttributes.length > 0) {
+            setAttributes(initialAttributes);
+        }
+    }, [initialAttributes]);
 
     const handleAdd = () => {
         const newAttr: CustomAttribute = {
