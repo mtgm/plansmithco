@@ -20,7 +20,7 @@ type IUser = {
   avatar: string;
 };
 
-export const Header: React.FC<RefineThemedLayoutHeaderProps> = ({
+export const Header: React.FC<RefineThemedLayoutHeaderProps & { sticky?: boolean }> = ({
   sticky = true,
 }) => {
   const { token } = useToken();

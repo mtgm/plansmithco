@@ -31,7 +31,7 @@ export const ProductList = () => {
     const { tableProps, tableQueryResult, sorters, filters } = useTable({
         syncWithLocation: true,
         meta: {
-            select: "*, product_categories(id, name)", // Fixed join alias
+            select: "*, product_categories(id, name), sets(id, name)",
         },
         sorters: {
             initial: [
@@ -180,10 +180,16 @@ export const ProductList = () => {
                     )}
                 />
 
-                {/* SKU */}
                 <Table.Column
                     dataIndex="sku"
                     title="SKU"
+                />
+
+                {/* Takım */}
+                <Table.Column
+                    dataIndex={["sets", "name"]}
+                    title="Takım"
+                    render={(value: string | undefined) => value || "-"}
                 />
 
                 {/* Category - Filterable */}
