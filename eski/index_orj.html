@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PlanSmithCo Showroom</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+    /* --- TASARIM SİSTEMİ (DESIGN SYSTEM) --- */
+    :root {
+        --bg-color: #f4f6f9; /* Çok açık gri-mavi tonu */
+        --glass-white: rgba(255, 255, 255, 0.75);
+        --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+        --glass-blur: blur(20px);
+        
+        --text-dark: #1a1a1a;
+        --text-grey: #888888;
+        --accent-color: #dfa364; /* Ahşap/Altın tonu - Premium his */
+        --accent-hover: #c48b4e;
+        
+        --radius-xl: 32px;
+        --radius-lg: 20px;
+        --radius-md: 14px;
+        
+        --shadow-soft: 0 20px 40px rgba(0,0,0,0.04);
+        --shadow-float: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body { 
+        margin: 0; 
+        height: 100vh; height: 100dvh; 
+        overflow: hidden; 
+        font-family: 'DM Sans', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-dark);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Ana Sahne Düzeni */
+    #main-layout { 
+        display: flex; 
+        width: 100%; height: 100%; 
+        max-width: 1600px; /* Çok geniş ekranlarda dağılmasın */
+        padding: 20px; 
+        gap: 20px;
+    }
+
+    /* --- SOL PANEL (BİLGİ & KATALOG) --- */
+    #sidebar {
+        width: 400px;
+        min-width: 320px;
+        background: var(--glass-white);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        border: var(--glass-border);
+        border-radius: var(--radius-xl);
+        display: flex; flex-direction: column;
+        box-shadow: var(--shadow-soft);
+        z-index: 10;
+        transition: transform 0.3s ease;
+    }
+
+    /* Header: Logo ve Marka */
+    #brand-header {
+        padding: 30px;
+        padding-bottom: 20px;
+        display: flex;
+        justify-content: space-between; /* Sağa logo, sola yazı */
+        align-items: center;
+        border-bottom: 1px solid rgba(0,0,0,0.03);
+    }
+    
+    .brand-group { display: flex; flex-direction: column; }
+    .brand-name { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--text-dark); }
+    .brand-tag { font-size: 11px; font-weight: 500; color: var(--accent-color); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; }
+    
+    .brand-logo-slot {
+        width: 48px; height: 48px;
+        background: #fff;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .brand-logo-slot img { width: 60%; height: auto; opacity: 0.8; }
+
+    /* Ürün Detay Alanı (Dinamik) */
+    #product-detail-area {
+        padding: 0 30px 20px 30px;
+        margin-top: 20px;
+    }
+    #p-title { font-size: 28px; font-weight: 700; line-height: 1.2; margin: 0 0 10px 0; }
+    #p-desc { font-size: 14px; color: var(--text-grey); line-height: 1.6; margin: 0 0 15px 0; min-height: 40px;}
+    #p-price { font-size: 20px; font-weight: 700; color: var(--text-dark); display: inline-block; background: white; padding: 6px 12px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+    /* Katalog Başlığı */
+    .section-title { padding: 0 30px; font-size: 12px; font-weight: 700; color: #aaa; text-transform: uppercase; margin-bottom: 10px; margin-top: 10px; }
+
+    /* Liste */
+    #catalog-list { 
+        flex: 1; 
+        overflow-y: auto; 
+        padding: 0 20px 20px 20px;
+        /* Scrollbar gizleme */
+        scrollbar-width: thin;
+        scrollbar-color: #ddd transparent;
+    }
+
+    /* Ürün Kartı */
+    .product-card {
+        display: flex; align-items: center; gap: 15px; padding: 12px;
+        background: rgba(255,255,255,0.4);
+        border: 1px solid transparent;
+        border-radius: var(--radius-md);
+        margin-bottom: 10px; cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .product-card:hover { background: white; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+    .product-card.active { 
+        background: white; 
+        border-color: var(--accent-color); 
+        box-shadow: 0 0 0 1px var(--accent-color); /* Glow efekti */
+    }
+    .product-thumb { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; background: #f0f0f0; }
+    .card-info h3 { margin: 0; font-size: 15px; font-weight: 600; }
+    .card-info p { margin: 2px 0 0 0; font-size: 12px; color: #888; }
+
+
+    /* --- SAĞ PANEL (3D SAHNE) --- */
+    #stage-wrapper {
+        flex: 1;
+        position: relative;
+        background: white;
+        border-radius: var(--radius-xl);
+        overflow: hidden; /* Köşeleri yuvarlat */
+        box-shadow: var(--shadow-soft);
+        display: flex;
+        flex-direction: column;
+    }
+
+    #stage {
+        width: 100%; height: 100%;
+        position: relative;
+        /* Güzel bir degrade arka plan */
+        background: radial-gradient(circle at 50% 60%, #ffffff 10%, #eaeff5 90%);
+    }
+
+    model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
+
+    /* --- KONTROL BARI (Yüzen Kapsül) --- */
+    #controls-container {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 10px 15px;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255,255,255,0.8);
+        border-radius: 24px;
+        box-shadow: var(--shadow-float);
+        z-index: 20;
+        transition: all 0.3s ease;
+    }
+    
+    .hidden-controls { opacity: 0; pointer-events: none; transform: translate(-50%, 20px); }
+
+    /* Kare Renk Butonları (Squircle) */
+    .v-btn {
+        width: 42px; height: 42px;
+        border-radius: 12px; /* Daire değil, yumuşak kare */
+        border: 2px solid rgba(0,0,0,0.05);
+        cursor: pointer;
+        background-size: cover; background-position: center;
+        transition: transform 0.2s, border-color 0.2s;
+        position: relative;
+    }
+    .v-btn::after {
+        content: ''; position: absolute; top:0; left:0; right:0; bottom:0;
+        border-radius: 10px; border: 2px solid white; opacity: 0; transition: opacity 0.2s;
+    }
+    .v-btn:hover { transform: translateY(-3px); }
+    .v-btn.selected { 
+        border-color: var(--text-dark); 
+        transform: scale(1.1); 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    /* Dikey Çizgi */
+    .separator { width: 1px; height: 24px; background: #ddd; margin: 0 5px; }
+
+    /* AR Butonu */
+    #ar-trigger-btn {
+        background: var(--text-dark);
+        color: white;
+        border: none;
+        height: 42px;
+        padding: 0 20px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 13px;
+        display: flex; align-items: center; gap: 8px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    #ar-trigger-btn:hover { background: #000; }
+
+    /* Loader */
+    #loader-overlay {
+        position: absolute; inset: 0;
+        background: rgba(255,255,255,0.8);
+        backdrop-filter: blur(5px);
+        z-index: 5;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        pointer-events: none;
+        transition: opacity 0.3s;
+    }
+    
+    /* --- MOBİL UYUMLULUK (Furniture App Style) --- */
+    @media (max-width: 900px) {
+        body { background: #fff; }
+        #main-layout { 
+            flex-direction: column; 
+            padding: 0; 
+            gap: 0;
+        }
+
+        /* 1. Üst Kısım: MODEL (%55) */
+        #stage-wrapper {
+            width: 100%;
+            height: 55vh; /* Ekranın yarısından biraz fazla */
+            border-radius: 0 0 30px 30px; /* Sadece alt köşeler yuvarlak */
+            box-shadow: 0 5px 30px rgba(0,0,0,0.05);
+            z-index: 5;
+            flex: none; /* Boyut sabitlensin */
+            background: radial-gradient(circle at 50% 50%, #fff 0%, #f2f4f8 100%);
+        }
+
+        /* Mobilde Kontroller Modelin Üstüne Binmesin */
+        /* Kontrol Barını modelin içine ama en altına koyuyoruz */
+        #controls-container {
+            bottom: 20px;
+            padding: 8px 12px;
+            width: auto;
+            max-width: 90%;
+            border-radius: 18px;
+        }
+        
+        /* 2. Alt Kısım: INFO PANEL (%45) */
+        #sidebar {
+            width: 100%;
+            height: 45vh; /* Kalan alan */
+            border-radius: 0; /* Köşe yok, düz panel */
+            border: none;
+            background: white;
+            box-shadow: none;
+            overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+
+        /* Mobilde Header'ı küçült */
+        #brand-header { padding: 15px 20px; }
+        .brand-name { font-size: 18px; }
+        .brand-logo-slot { width: 36px; height: 36px; }
+
+        /* Ürün Detayı Mobilde */
+        #product-detail-area { padding: 0 20px 10px 20px; }
+        #p-title { font-size: 22px; margin-bottom: 5px; }
+        #p-desc { font-size: 13px; line-height: 1.4; margin-bottom: 10px; max-height: 60px; overflow: hidden; text-overflow: ellipsis; }
+        
+        #catalog-list { padding: 0 15px 80px 15px; } /* Alttan boşluk bırak (iOS bar için) */
+        
+        .section-title { padding-left: 20px; margin-top: 5px; }
+    }
+    </style>
+</head>
+<body>
+
+    <div id="main-layout">
+      
+      <aside id="sidebar">
+          <div id="brand-header">
+              <div class="brand-group">
+                  <div class="brand-name">PlanSmithCo.</div>
+                  <div class="brand-tag">Furniture & DIY</div>
+              </div>
+              <div class="brand-logo-slot">
+                  <img src="/poster.webp" alt="Logo">
+              </div>
+          </div>
+
+          <div id="product-detail-area">
+              <h1 id="p-title">Yükleniyor...</h1>
+              <p id="p-desc">Ürün detayları buraya gelecek.</p>
+              <div id="p-price">$ --.--</div>
+          </div>
+
+          <div class="section-title">KOLEKSİYON</div>
+          
+          <div id="catalog-list">
+              </div>
+      </aside>
+
+
+      <main id="stage-wrapper">
+          <div id="stage">
+              <div id="loader-overlay">
+                  <div style="font-weight:700; color:#ccc; letter-spacing:1px;">MODEL YÜKLENİYOR</div>
+              </div>
+
+              <model-viewer id="mv"
+                  src=""
+                  ar      
+                  ar-modes="webxr scene-viewer quick-look"
+                  ar-scale="fixed"
+                  ar-placement="floor"
+                  camera-controls
+                  disable-zoom 
+                  interaction-prompt="none"
+                  
+                  environment-image="/studio.hdr"
+                  shadow-intensity="1"
+                  exposure="1.5"
+                  tone-mapping="neutral"
+                  
+                  loading="eager"
+                  poster="/poster.webp">
+              </model-viewer>
+
+              <div id="controls-container" class="hidden-controls">
+                  <div id="variant-container" style="display:flex; gap:10px;"></div>
+                  
+                  <div class="separator"></div>
+                  
+                  <button id="ar-trigger-btn" onclick="activateAR()">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                      AR View
+                  </button>
+              </div>
+          </div>
+      </main>
+
+    </div>
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+
+    <script>
+      const viewer = document.getElementById('mv');
+      const catalogList = document.getElementById('catalog-list');
+      const controlsContainer = document.getElementById('controls-container');
+      const variantContainer = document.getElementById('variant-container');
+      const loader = document.getElementById('loader-overlay');
+      
+      // Detay Elementleri
+      const pTitle = document.getElementById('p-title');
+      const pDesc = document.getElementById('p-desc');
+      const pPrice = document.getElementById('p-price');
+
+      function activateAR() {
+          if(viewer.canActivateAR) viewer.activateAR();
+          else alert("AR desteklenmiyor.");
+      }
+
+      // --- ÜRÜN VERİLERİNİ ÇEK ---
+      fetch('products.json')
+        .then(res => res.json())
+        .then(products => {
+          renderCatalog(products);
+          if(products.length > 0) selectProduct(products[0]);
+        })
+        .catch(err => console.error("Veri hatası:", err));
+
+      function renderCatalog(products) {
+        catalogList.innerHTML = '';
+        products.forEach(product => {
+          const card = document.createElement('div');
+          card.className = 'product-card';
+          const thumbSrc = product.thumbnail || '/poster.webp';
+          
+          card.innerHTML = `
+            <img src="${thumbSrc}" class="product-thumb">
+            <div class="card-info">
+              <h3>${product.name}</h3>
+              <p>${product.category || 'Collection'}</p>
+            </div>
+          `;
+          
+          card.onclick = () => {
+             document.querySelectorAll('.product-card').forEach(c => c.classList.remove('active'));
+             card.classList.add('active');
+             selectProduct(product);
+          };
+          catalogList.appendChild(card);
+        });
+      }
+
+      function selectProduct(product) {
+        // 1. Bilgileri Güncelle
+        pTitle.textContent = product.name;
+        // Eğer JSON'da 'description' varsa onu yaz, yoksa varsayılan metni yaz
+        pDesc.textContent = product.description || "Bu ürün için henüz detaylı açıklama girilmemiştir. Yüksek kaliteli malzemeden üretilmiştir.";
+        // Fiyat (Mock data - JSON'a price eklersen buraya gelir)
+        pPrice.textContent = product.price ? `$${product.price}` : "$129.00";
+
+        // 2. Varyasyonları Yönet
+        if (!product.variants || product.variants.length === 0) {
+          controlsContainer.classList.add('hidden-controls');
+          return;
+        }
+        
+        controlsContainer.classList.remove('hidden-controls');
+        variantContainer.innerHTML = '';
+
+        product.variants.forEach((variant, index) => {
+          const btn = document.createElement('div');
+          btn.className = 'v-btn';
+          btn.title = variant.name;
+
+          if (variant.type === 'color') btn.style.backgroundColor = variant.value;
+          else if (variant.type === 'image') btn.style.backgroundImage = `url(${variant.value})`;
+
+          btn.onclick = () => {
+            loadModel(variant.sku);
+            document.querySelectorAll('.v-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+          };
+          variantContainer.appendChild(btn);
+          
+          if (index === 0) btn.click();
+        });
+      }
+
+      async function loadModel(sku) {
+        loader.style.opacity = '1'; 
+        try {
+          const response = await fetch(`/api/engine?sku=${sku}`);
+          const data = await response.json();
+
+          if (data.ok) {
+            viewer.src = data.url;
+          } else {
+            console.error("Model yok:", sku);
+          }
+        } catch (error) {
+          console.error("Hata:", error);
+        }
+      }
+
+      viewer.addEventListener('load', () => {
+        loader.style.opacity = '0'; // Soft geçişle gizle
+      });
+    </script>
+</body>
+</html>

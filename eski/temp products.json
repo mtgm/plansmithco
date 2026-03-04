@@ -1,0 +1,46 @@
+[
+  {
+    "id": "cat_storage",
+    "name": "Storage Systems",
+    "products": [
+      {
+        "sku": "1X2V3",
+        "name": "1x2 Storage Tote Rack V3",
+        "price": 129.00,
+        "masterModel": "/assets-r2/models/1x2V3.glb", 
+        "thumbnail": "/poster.webp",        
+        
+        "variantGroups": [
+          {
+            "groupName": "Dikmeler",
+            "items": [
+              {
+                "name": "Orijinal (Çam)",
+                "type": "texture",
+                "sku": "1X2V3",
+                "value": "/assets-r2/textures/1x2V3/texture-1_baseColor.png",
+                "textureConfig": {
+                   "materialName": "texture-1",
+                   "baseColor": "/assets-r2/textures/1x2V3/texture-1_baseColor.png",
+                   "normal": "/assets-r2/textures/1x2V3/texture-1_normal.png",
+                   "orm": "/assets-r2/textures/1x2V3/texture-1_occlusionRoughnessMetallic.png"
+                }
+              },
+              {
+                "name": "Antrasit Gri",
+                "type": "color",
+                "sku": "1X2V3",
+                "value": "#374151",
+                "textureConfig": {
+                   "materialName": "texture-1",
+                   "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
+
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
