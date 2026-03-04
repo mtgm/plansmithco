@@ -496,7 +496,7 @@ export const SetCreate = () => {
             const url = file.url;
             setSelectedR2Model(url);
             setSelectedModelFile(null);
-
+            //aaa
             try {
                 setParsingGLB(true);
                 message.loading({ content: 'Model indiriliyor...', key: 'model-download' });
@@ -2177,6 +2177,7 @@ export const SetCreate = () => {
                 footer={null}
                 destroyOnClose
             >
+
                 <FileManager
                     bucketName={selectedCompanyBucket}
                     customDomain={selectedCompanyDomain}
