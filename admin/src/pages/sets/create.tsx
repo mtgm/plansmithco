@@ -175,9 +175,9 @@ export const SetCreate = () => {
         resource: "products",
         optionLabel: "name",
         optionValue: "id",
+        meta: { select: "id, name, thumbnail_url, product_category_id, product_categories(id, name)" },
         filters: effectiveCompanyId ? [
             { field: "company_id", operator: "eq", value: effectiveCompanyId },
-            { field: "set_id", operator: "null", value: null } // Optional: only show products not in a set, but user might want to move it. Let's just fetch all company products for now.
         ] : [],
         queryOptions: { enabled: !!effectiveCompanyId },
     });
@@ -217,6 +217,8 @@ export const SetCreate = () => {
     // ── Set Products (inline product creation) ──
     const [setProducts, setSetProducts] = useState<SetProductItem[]>([]);
     const [includeProducts, setIncludeProducts] = useState(false);
+    const [productCategoryFilters, setProductCategoryFilters] = useState<Record<number, string | undefined>>({});
+    const [loadingProductVariants, setLoadingProductVariants] = useState<Record<number, boolean>>({});
 
     const addSetProduct = () => {
         setSetProducts(prev => [...prev, {
@@ -774,7 +776,7 @@ export const SetCreate = () => {
                 const variantFolder = `${baseFolder}/materials/${sanitizedMatId}/${sanitizedVariantName}`;
 
                 try {
-                    const uploadOrKeep = async (file: File | null | undefined, preview: string | null | undefined, fileName: string) => {
+                    const uploadOrKeep = async (file: File | null | undefined, preview: string | null | undefined, fileName: string): Promise<string | null> => {
                         if (file) {
                             return await uploadToR2(file, variantFolder, effectiveCompanyName, selectedCompanyBucket, selectedCompanyDomain);
                         }
@@ -790,9 +792,9 @@ export const SetCreate = () => {
                                 return null;
                             }
                         }
-                        if (preview && preview.startsWith('http')) return preview;
-                        if (preview && !preview.startsWith('data:') && !preview.startsWith('blob:')) return preview;
-                        return null;
+                        if (!preview) return null;
+                        // HTTPS URL: cachebust timestamp'ini temizleyerek kaydet
+                        return preview.replace(/[?&]v=\d+(&|$)/, '$1').replace(/[?&]$/, '');
                     };
 
                     const [swatchUrl, baseColorUrl, normalUrl, ormUrl] = await Promise.all([
@@ -871,7 +873,7 @@ export const SetCreate = () => {
                 const variantFolder = `${baseFolder}/materials/${sanitizedMatId}/${sanitizedVariantName}`;
 
                 try {
-                    const uploadOrKeep = async (file: File | null | undefined, preview: string | null | undefined, fileName: string) => {
+                    const uploadOrKeep = async (file: File | null | undefined, preview: string | null | undefined, fileName: string): Promise<string | null> => {
                         if (file) {
                             return await uploadToR2(file, variantFolder, effectiveCompanyName, selectedCompanyBucket, selectedCompanyDomain);
                         }
@@ -887,7 +889,9 @@ export const SetCreate = () => {
                                 return null;
                             }
                         }
-                        return preview;
+                        if (!preview) return null;
+                        // HTTPS URL: cachebust timestamp'ini temizleyerek kaydet
+                        return preview.replace(/[?&]v=\d+(&|$)/, '$1').replace(/[?&]$/, '');
                     };
 
                     const [swatchUrl, baseColorUrl, normalUrl, ormUrl] = await Promise.all([
@@ -930,51 +934,234 @@ export const SetCreate = () => {
 
     // ── Navigation ──
 
+    // Step 1 → Step 2 (Ürün Seçme): temel bilgileri doğrula
     const goToStep2 = () => {
         formProps.form?.validateFields().then(() => {
-            if (parsedMaterials.length === 0) {
-                message.warning('Lütfen önce bir GLB dosyası yükleyiniz');
-                return;
-            }
             setCurrentStep(1);
         }).catch(() => {
             message.error('Lütfen zorunlu alanları doldurunuz');
         });
     };
 
+    // Step 2 → Step 3 (Varyasyon): mevcut ürün seçildiyse varyasyonlarını yükle
+    const goToStep3 = async () => {
+        const existingProductItem = setProducts.find(sp => sp.isExisting && sp.existingProductId);
+        if (existingProductItem?.existingProductId) {
+            await loadVariantsFromProduct(existingProductItem.existingProductId);
+        } else if (parsedMaterials.length === 0 && materialsWithVariants.length === 0) {
+            message.warning('Lütfen önce ürün GLB dosyasını yükleyiniz veya mevcut ürün seçiniz');
+            return;
+        }
+        setCurrentStep(2);
+    };
+
+    // Mevcut ürünün varyasyonlarını DB'den çekip yükle
+    const loadVariantsFromProduct = async (productId: string) => {
+        try {
+            // Domain'i state veya env'dan al, https:// prefix'ini garantile
+            const rawDomain = (selectedCompanyDomain || import.meta.env.VITE_R2_PUBLIC_URL || '').trim().replace(/\/$/, '');
+            const safeDomain = rawDomain
+                ? (rawDomain.startsWith('http') ? rawDomain : `https://${rawDomain}`)
+                : '';
+
+            /**
+             * Herhangi bir ham URL'yi tam HTTPS URL'ye dönüştürür.
+             * Desteklenen formatlar:
+             *   "https://domain/path"    → olduğu gibi
+             *   "domain.com/path"        → "https://domain.com/path"
+             *   "path/file.png"          → safeDomain + "/path/file.png"
+             *   blob: / null             → null (session blob geçersiz)
+             */
+            const buildUrl = (url: string | null | undefined): string | null => {
+                if (!url || typeof url !== 'string') return null;
+                const s = url.trim();
+                if (!s || s === 'null' || s === 'undefined') return null;
+                if (s.startsWith('blob:') || s.startsWith('data:')) return null;
+                const c = s.replace(/[?&]v=\d+(&|$)/g, '$1').replace(/[?&]$/g, '');
+                if (c.startsWith('http://') || c.startsWith('https://')) return c;
+                // Protokolsüz tam URL: "pub-xxx.r2.dev/path/file.png" → "https://pub-xxx.r2.dev/path/file.png"
+                const firstSlash = c.indexOf('/');
+                const head = firstSlash > 0 ? c.substring(0, firstSlash) : c;
+                if (head.includes('.')) return `https://${c}`;
+                // Relative path: domain ekle
+                if (safeDomain) return `${safeDomain}/${c.replace(/^\/+/, '')}`;
+                return null;
+            };
+
+            message.loading({ content: 'Ürün varyasyonları yükleniyor...', key: 'load-variants' });
+
+            // Step 1: materials + variants (swatch_url doğrudan bu tabloda)
+            const { data: prodMaterials, error } = await supabaseClient
+                .from('product_materials')
+                .select('id, material_id, name, product_variants(id, variant_name, is_original, swatch_url)')
+                .eq('product_id', productId);
+
+            if (error) throw error;
+
+            if (!prodMaterials || prodMaterials.length === 0) {
+                message.warning({ content: 'Bu ürüne ait varyasyon bulunamadı. Yeni varyasyonlar tanımlayabilirsiniz.', key: 'load-variants' });
+                return;
+            }
+
+            // Step 2: tüm variant ID'lerini topla → variant_textures'ı ayrı sorgula (nested join'e güvenme)
+            const allVariantIds: string[] = prodMaterials.flatMap((m: any) =>
+                (m.product_variants || []).map((v: any) => v.id)
+            );
+
+            let texMap: Record<string, any> = {};
+            if (allVariantIds.length > 0) {
+                const { data: texRows } = await supabaseClient
+                    .from('variant_textures')
+                    .select('variant_id, base_color_url, normal_url, orm_url')
+                    .in('variant_id', allVariantIds);
+                texMap = Object.fromEntries((texRows || []).map((t: any) => [t.variant_id, t]));
+            }
+
+            const mapped: MaterialWithVariants[] = prodMaterials.map((mat: any) => {
+                // Orijinal varyantın texture'larını bul
+                const allVariantsForMat = (mat.product_variants || []).map((v: any) => {
+                    const tex = texMap[v.id] || {};
+                    const isOriginal = v.is_original === true || v.variant_name === 'Orijinal' || v.variant_name === 'Original';
+                    return {
+                        variantName: v.variant_name,
+                        isOriginal,
+                        swatchFile: null, swatchPreview: buildUrl(v.swatch_url),
+                        baseColorFile: null, baseColorPreview: buildUrl(tex.base_color_url),
+                        normalFile: null, normalPreview: buildUrl(tex.normal_url),
+                        ormFile: null, ormPreview: buildUrl(tex.orm_url),
+                    };
+                });
+
+                // GLB'den parse edilmiş materyal varsa Orijinal variant'ın eksik texture'larını doldur
+                const glbMat = parsedMaterials.find(p =>
+                    p.id?.toLowerCase() === mat.material_id?.toLowerCase() ||
+                    p.name?.toLowerCase() === mat.name?.toLowerCase()
+                );
+
+                const enrichedVariants = allVariantsForMat.map((v: any) => {
+                    if (v.isOriginal && glbMat) {
+                        return {
+                            ...v,
+                            baseColorPreview: v.baseColorPreview || glbMat.baseColorTexture?.url || null,
+                            normalPreview: v.normalPreview || glbMat.normalTexture?.url || null,
+                            ormPreview: v.ormPreview || glbMat.ormTexture?.url || null,
+                            swatchPreview: v.swatchPreview || glbMat.baseColorTexture?.url || null,
+                        };
+                    }
+                    return v;
+                });
+
+                // Eğer hiç varyasyon yoksa orijinal GLB texture'larından oluştur
+                const finalVariants = enrichedVariants.length > 0 ? enrichedVariants : (glbMat ? [{
+                    variantName: 'Orijinal',
+                    isOriginal: true,
+                    swatchFile: null, swatchPreview: glbMat.baseColorTexture?.url || null,
+                    baseColorFile: null, baseColorPreview: glbMat.baseColorTexture?.url || null,
+                    normalFile: null, normalPreview: glbMat.normalTexture?.url || null,
+                    ormFile: null, ormPreview: glbMat.ormTexture?.url || null,
+                }] : [{
+                    variantName: 'Orijinal', isOriginal: true,
+                    swatchFile: null, swatchPreview: null,
+                    baseColorFile: null, baseColorPreview: null,
+                    normalFile: null, normalPreview: null,
+                    ormFile: null, ormPreview: null,
+                }]);
+
+                return {
+                    material: {
+                        id: mat.material_id,
+                        name: mat.name,
+                        index: 0,
+                        // GLB texture'larını koru — render'da fallback olarak kullanılır
+                        baseColorTexture: glbMat?.baseColorTexture || null,
+                        normalTexture: glbMat?.normalTexture || null,
+                        ormTexture: glbMat?.ormTexture || null,
+                    },
+                    displayName: mat.name,
+                    isManaged: true,
+                    variants: finalVariants,
+                };
+            });
+
+            // Eğer GLB parse edilmişse ama product_materials'da olmayan materyaller varsa ekle
+            const mappedIds = new Set(mapped.map(m => m.material.id?.toLowerCase()));
+            const extraFromGlb: MaterialWithVariants[] = parsedMaterials
+                .filter(glbMat => !mappedIds.has(glbMat.id?.toLowerCase()) && !mappedIds.has(glbMat.name?.toLowerCase()))
+                .map(glbMat => ({
+                    material: glbMat,
+                    displayName: glbMat.name,
+                    isManaged: false,
+                    variants: [{
+                        variantName: 'Orijinal', isOriginal: true,
+                        swatchFile: null, swatchPreview: glbMat.baseColorTexture?.url || null,
+                        baseColorFile: null, baseColorPreview: glbMat.baseColorTexture?.url || null,
+                        normalFile: null, normalPreview: glbMat.normalTexture?.url || null,
+                        ormFile: null, ormPreview: glbMat.ormTexture?.url || null,
+                    }],
+                }));
+
+            setMaterialsWithVariants([...mapped, ...extraFromGlb]);
+            message.success({ content: `${prodMaterials.length} materyal ve varyasyonlar yüklendi`, key: 'load-variants' });
+        } catch (e: any) {
+            message.error({ content: 'Varyasyonlar yüklenirken hata: ' + e.message, key: 'load-variants' });
+        }
+    };
+
     // ── Thumbnail preview helper ──
-    const renderTextureThumb = (url: string | null, label: string) => {
-        if (!url) return null;
+    // fallbackUrl: GLB blob URL — eğer primary URL (R2) yüklenemezse bunu dene
+    const renderTextureThumb = (url: string | null, label: string, fallbackUrl?: string | null) => {
+        if (!url && !fallbackUrl) return null;
+        const src = url || fallbackUrl!;
         return (
-            <Image
-                src={url}
-                alt={label}
-                width={48}
-                height={48}
-                style={{
-                    objectFit: 'cover',
-                    borderRadius: 4,
-                    border: '1px solid #d9d9d9',
-                    marginTop: 4
-                }}
-                preview={{ mask: 'Büyüt' }}
-            />
+            <Tooltip title={label}>
+                <img
+                    src={src}
+                    alt={label}
+                    style={{
+                        width: 48,
+                        height: 48,
+                        objectFit: 'cover',
+                        borderRadius: 4,
+                        border: '1px solid #d9d9d9',
+                        marginTop: 4,
+                        display: 'inline-block',
+                        cursor: 'zoom-in',
+                    }}
+                    onClick={() => window.open(src, '_blank')}
+                    onError={(e: any) => {
+                        const target = e.target as HTMLImageElement;
+                        // Eğer fallback varsa ve henüz denenmemişse, önce onu dene
+                        if (fallbackUrl && target.src !== fallbackUrl && !target.dataset.triedFallback) {
+                            target.dataset.triedFallback = '1';
+                            target.src = fallbackUrl;
+                            return;
+                        }
+                        // Tüm kaynaklar başarısız → uyarı göster
+                        target.style.display = 'none';
+                        const fb = document.createElement('div');
+                        fb.style.cssText = 'width:48px;height:48px;background:#fff1f0;border:1px solid #ffccc7;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#ff4d4f;margin-top:4px;flex-direction:column;gap:2px;';
+                        fb.innerHTML = `<span style="font-size:16px">⚠</span><span>${label}</span>`;
+                        target.parentNode?.insertBefore(fb, target.nextSibling);
+                    }}
+                />
+            </Tooltip>
         );
     };
 
     const renderSmallThumb = (url: string | null, label: string) => {
-        if (!url) return <div style={{ width: 24, height: 24, background: '#f0f0f0', borderRadius: 2 }} />;
+        if (!url) return <div style={{ width: 24, height: 24, background: '#f0f0f0', borderRadius: 2, display: 'inline-block' }} />;
         return (
             <Tooltip title={label}>
                 <img
                     src={url}
                     alt={label}
-                    style={{
-                        width: 24,
-                        height: 24,
-                        borderRadius: 2,
-                        objectFit: 'cover',
-                        border: '1px solid #d9d9d9'
+                    style={{ width: 24, height: 24, borderRadius: 2, objectFit: 'cover', border: '1px solid #d9d9d9', display: 'inline-block' }}
+                    onError={(e: any) => {
+                        e.target.style.display = 'none';
+                        const fb = document.createElement('div');
+                        fb.style.cssText = 'width:24px;height:24px;background:#ffe7e7;border-radius:2px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#ff4d4f;';
+                        fb.textContent = '!';
+                        e.target.parentNode?.insertBefore(fb, e.target.nextSibling);
                     }}
                 />
             </Tooltip>
@@ -999,8 +1186,8 @@ export const SetCreate = () => {
                 style={{ marginBottom: 24 }}
                 items={[
                     { title: 'Temel Bilgiler' },
+                    { title: 'Ürün Seçme' },
                     { title: 'Model & Varyasyon' },
-                    { title: 'Takıma Ait Ürünler' },
                 ]}
             />
 
@@ -1243,17 +1430,363 @@ export const SetCreate = () => {
                             icon={<ArrowRightOutlined />}
                             onClick={goToStep2}
                             size="large"
-                            disabled={parsedMaterials.length === 0}
                         >
-                            Sonraki: Varyasyonlar
+                            Sonraki: Ürün Seçme
                         </Button>
                     </div>
                 </div>
 
                 {/* ═══════════════════════════════════════════════════════════ */}
-                {/* STEP 2: MODEL BİLGİLERİ & VARYASYON YÖNETİMİ               */}
+                {/* STEP 2: ÜRÜN SEÇME                                */}
                 {/* ═══════════════════════════════════════════════════════════ */}
                 <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
+                    {/* Product opt-in toggle card */}
+                    {!includeProducts ? (
+                        <Card
+                            style={{
+                                marginBottom: 24,
+                                border: '2px dashed #d9d9d9',
+                                borderRadius: 12,
+                                background: '#fafafa',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                            }}
+                            bodyStyle={{ padding: '40px 32px' }}
+                            hoverable
+                            onClick={() => setIncludeProducts(true)}
+                        >
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{
+                                    width: 64,
+                                    height: 64,
+                                    borderRadius: '50%',
+                                    background: 'linear-gradient(135deg, #f5f0ff 0%, #fff7e6 100%)',
+                                    border: '2px solid #d9d9d9',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    margin: '0 auto 16px',
+                                    fontSize: 28,
+                                }}>
+                                    📦
+                                </div>
+                                <Typography.Title level={5} style={{ marginBottom: 8, color: '#262626' }}>
+                                    Takıma Özel Ürün Ekle
+                                </Typography.Title>
+                                <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 20, fontSize: 14 }}>
+                                    Bu takıma bağlı özel ürünler ekleyebilirsiniz. Varyasyonlar ürünlere otomatik uygulanır.
+                                </Typography.Text>
+                                <Button type="primary" icon={<PlusOutlined />} size="large">
+                                    Evet, Ürün Eklemek İstiyorum
+                                </Button>
+                                <div style={{ marginTop: 12 }}>
+                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                        İstemiyorsanız bu adımı atlayabilirsiniz — varyasyonlar takım üzerinde kaydedilecektir.
+                                    </Typography.Text>
+                                </div>
+                            </div>
+                        </Card>
+                    ) : (
+                        <Card
+                            title={
+                                <Space>
+                                    <span>Takıma Ait Ürünler</span>
+                                    <Button
+                                        size="small"
+                                        onClick={() => { setIncludeProducts(false); setSetProducts([]); }}
+                                        style={{ fontSize: 12, color: '#8c8c8c', borderColor: '#d9d9d9' }}
+                                    >
+                                        Ürün Ekleme
+                                    </Button>
+                                </Space>
+                            }
+                            extra={
+                                <Button type="primary" icon={<PlusOutlined />} onClick={addSetProduct}>
+                                    Ürün Ekle
+                                </Button>
+                            }
+                            style={{ marginBottom: 24 }}
+                        >
+                            <>
+                                {setProducts.length === 0 && (
+                                    <div style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>
+                                        <Typography.Text type="secondary">
+                                            Henüz ürün eklenmedi. "Ürün Ekle" butonuna tıklayarak takıma ait ürünleri ekleyin.
+                                        </Typography.Text>
+                                    </div>
+                                )}
+
+                                <Collapse accordion>
+                                    {setProducts.map((sp, idx) => (
+                                        <Panel
+                                            key={idx}
+                                            header={
+                                                <Space>
+                                                    <Typography.Text strong>
+                                                        {sp.name || `Ürün ${idx + 1}`}
+                                                    </Typography.Text>
+                                                    {sp.sku && (
+                                                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                            SKU: {sp.sku}
+                                                        </Typography.Text>
+                                                    )}
+                                                    {sp.parsedMaterials.length > 0 && (
+                                                        <Typography.Text type="success" style={{ fontSize: 12 }}>
+                                                            ({sp.parsedMaterials.length} materyal)
+                                                        </Typography.Text>
+                                                    )}
+                                                </Space>
+                                            }
+                                            extra={
+                                                <Popconfirm
+                                                    title="Bu ürünü kaldırmak istediğinize emin misiniz?"
+                                                    onConfirm={(e) => { e?.stopPropagation(); removeSetProduct(idx); }}
+                                                    onCancel={(e) => e?.stopPropagation()}
+                                                >
+                                                    <Button
+                                                        type="text"
+                                                        danger
+                                                        icon={<DeleteOutlined />}
+                                                        size="small"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    />
+                                                </Popconfirm>
+                                            }
+                                        >
+                                            <Radio.Group
+                                                options={[
+                                                    { label: 'Yeni Ürün Oluştur', value: false },
+                                                    { label: 'Mevcut Ürün Seç', value: true }
+                                                ]}
+                                                value={sp.isExisting}
+                                                onChange={(e: any) => updateSetProduct(idx, 'isExisting', e.target.value)}
+                                                style={{ marginBottom: 16 }}
+                                                optionType="button"
+                                                buttonStyle="solid"
+                                            />
+
+                                            {sp.isExisting ? (
+                                                <div style={{ marginBottom: 16 }}>
+                                                    <Typography.Text strong>Mevcut Ürün Seç *</Typography.Text>
+                                                    {/* Kategori filtresi */}
+                                                    <div style={{ display: 'flex', gap: 8, marginTop: 8, marginBottom: 8, alignItems: 'center' }}>
+                                                        <Typography.Text type="secondary" style={{ whiteSpace: 'nowrap', fontSize: 12 }}>Kategoriye göre filtrele:</Typography.Text>
+                                                        <Select
+                                                            allowClear
+                                                            placeholder="Tüm kategoriler"
+                                                            style={{ width: 220 }}
+                                                            value={productCategoryFilters[idx]}
+                                                            onChange={(val) => setProductCategoryFilters(prev => ({ ...prev, [idx]: val }))}
+                                                            options={
+                                                                Array.from(
+                                                                    new Map(
+                                                                        ((existingProductsQuery?.data?.data as any[]) || [])
+                                                                            .filter((p: any) => p.product_categories?.id)
+                                                                            .map((p: any) => [p.product_categories.id, p.product_categories.name])
+                                                                    ).entries()
+                                                                ).map(([id, name]) => ({ value: id, label: name }))
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <Select
+                                                        value={sp.existingProductId as any}
+                                                        onChange={(val) => {
+                                                            const prod = ((existingProductsQuery?.data?.data as any[]) || []).find((p: any) => p.id === val);
+                                                            updateSetProduct(idx, 'existingProductId', val);
+                                                            updateSetProduct(idx, 'name', prod?.name || '');
+                                                        }}
+                                                        style={{ width: '100%', display: 'block' }}
+                                                        placeholder="Sistemdeki ürünlerden seçiniz"
+                                                        showSearch
+                                                        filterOption={(input, option: any) =>
+                                                            (option?.productName ?? '').toLowerCase().includes(input.toLowerCase())
+                                                        }
+                                                        optionLabelProp="label"
+                                                    >
+                                                        {((existingProductsQuery?.data?.data as any[]) || [])
+                                                            .filter((p: any) =>
+                                                                !productCategoryFilters[idx] ||
+                                                                p.product_category_id === productCategoryFilters[idx]
+                                                            )
+                                                            .map((p: any) => (
+                                                                <Select.Option key={p.id} value={p.id} productName={p.name} label={p.name}>
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                                                        {p.thumbnail_url ? (
+                                                                            <img
+                                                                                src={p.thumbnail_url}
+                                                                                alt={p.name}
+                                                                                style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 4, flexShrink: 0, border: '1px solid #f0f0f0' }}
+                                                                                onError={(e: any) => { e.target.style.display = 'none'; }}
+                                                                            />
+                                                                        ) : (
+                                                                            <div style={{ width: 36, height: 36, borderRadius: 4, background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 10, color: '#aaa' }}>
+                                                                                Yok
+                                                                            </div>
+                                                                        )}
+                                                                        <div>
+                                                                            <div style={{ fontWeight: 500, fontSize: 13 }}>{p.name}</div>
+                                                                            {p.product_categories?.name && (
+                                                                                <div style={{ fontSize: 11, color: '#888' }}>{p.product_categories.name}</div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </Select.Option>
+                                                            ))
+                                                        }
+                                                    </Select>
+                                                    <Typography.Text type="secondary" style={{ display: 'block', marginTop: 8, fontSize: 12 }}>
+                                                        ✓ Sonraki adımda bu ürünün mevcut varyasyonları otomatik yüklenecek.
+                                                    </Typography.Text>
+                                                </div>
+                                            ) : (
+                                                <Row gutter={24}>
+                                                    <Col xs={24} md={12}>
+                                                        <div style={{ marginBottom: 16 }}>
+                                                            <Typography.Text strong>Ürün Adı *</Typography.Text>
+                                                            <Input
+                                                                value={sp.name}
+                                                                onChange={(e) => updateSetProduct(idx, 'name', e.target.value)}
+                                                                placeholder="Ürün adı giriniz"
+                                                                style={{ marginTop: 4 }}
+                                                            />
+                                                        </div>
+                                                        <div style={{ marginBottom: 16 }}>
+                                                            <Typography.Text strong>SKU</Typography.Text>
+                                                            <Input
+                                                                value={sp.sku}
+                                                                onChange={(e) => updateSetProduct(idx, 'sku', e.target.value)}
+                                                                placeholder="Ürün SKU giriniz"
+                                                                style={{ marginTop: 4 }}
+                                                            />
+                                                        </div>
+                                                        <div style={{ marginBottom: 16 }}>
+                                                            <Typography.Text strong>Kategori</Typography.Text>
+                                                            <Select
+                                                                {...productCategorySelectProps}
+                                                                value={sp.categoryId as any}
+                                                                onChange={(val) => updateSetProduct(idx, 'categoryId', val)}
+                                                                style={{ width: '100%', marginTop: 4 }}
+                                                                placeholder="Kategori seçiniz"
+                                                                showSearch
+                                                                filterOption={(input, option) =>
+                                                                    (option?.label?.toString() ?? '').toLowerCase().includes(input.toLowerCase())
+                                                                }
+                                                            />
+                                                        </div>
+                                                        <div style={{ marginBottom: 16 }}>
+                                                            <Typography.Text strong>Açıklama</Typography.Text>
+                                                            <TextArea
+                                                                value={sp.description}
+                                                                onChange={(e) => updateSetProduct(idx, 'description', e.target.value)}
+                                                                placeholder="Ürün açıklaması"
+                                                                rows={3}
+                                                                style={{ marginTop: 4 }}
+                                                            />
+                                                        </div>
+                                                    </Col>
+                                                    <Col xs={24} md={12}>
+                                                        <div style={{ marginBottom: 16 }}>
+                                                            <Typography.Text strong>Ürün GLB Dosyası</Typography.Text>
+                                                            <Upload
+                                                                accept=".glb,.gltf"
+                                                                maxCount={1}
+                                                                showUploadList={false}
+                                                                beforeUpload={(file) => {
+                                                                    handleSetProductModel(idx, file);
+                                                                    return false;
+                                                                }}
+                                                            >
+                                                                <Button icon={<UploadOutlined />} style={{ marginTop: 4, width: '100%' }} loading={sp.parsingGLB}>
+                                                                    {sp.modelFile ? sp.modelFile.name : 'GLB Dosyası Seç'}
+                                                                </Button>
+                                                            </Upload>
+                                                            {sp.parsingGLB && (
+                                                                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                                    GLB ayrıştırılıyor...
+                                                                </Typography.Text>
+                                                            )}
+                                                        </div>
+                                                        <div style={{ marginBottom: 16 }}>
+                                                            <Typography.Text strong>Ürün Görseli</Typography.Text>
+                                                            <Upload
+                                                                accept="image/*"
+                                                                maxCount={1}
+                                                                showUploadList={false}
+                                                                beforeUpload={(file) => {
+                                                                    handleSetProductThumbnail(idx, file);
+                                                                    return false;
+                                                                }}
+                                                            >
+                                                                <Button icon={<UploadOutlined />} style={{ marginTop: 4, width: '100%' }}>
+                                                                    {sp.thumbnailFile ? sp.thumbnailFile.name : 'Görsel Seç'}
+                                                                </Button>
+                                                            </Upload>
+                                                            {sp.thumbnailPreview && (
+                                                                <img
+                                                                    src={sp.thumbnailPreview}
+                                                                    alt="preview"
+                                                                    style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, marginTop: 8, border: '1px solid #d9d9d9' }}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                        {sp.parsedMaterials.length > 0 && (
+                                                            <div>
+                                                                <Typography.Text strong>Bulunan Materyaller</Typography.Text>
+                                                                <div style={{ marginTop: 4 }}>
+                                                                    {sp.parsedMaterials.map((mat, mIdx) => (
+                                                                        <Typography.Text
+                                                                            key={mIdx}
+                                                                            style={{ display: 'block', fontSize: 12, color: '#595959' }}
+                                                                        >
+                                                                            • {mat.name} ({mat.id})
+                                                                        </Typography.Text>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </Col>
+                                                </Row>
+                                            )}
+
+                                            {/* Shared variants info */}
+                                            {managedMaterials.length > 0 && (
+                                                <Card size="small" style={{ marginTop: 16, background: '#f6ffed', border: '1px solid #b7eb8f' }}>
+                                                    <Typography.Text type="success">
+                                                        <CheckCircleOutlined style={{ marginRight: 8 }} />
+                                                        Takımda tanımlanan {managedMaterials.length} materyalin varyasyonları bu ürüne otomatik uygulanacak.
+                                                    </Typography.Text>
+                                                </Card>
+                                            )}
+                                        </Panel>
+                                    ))}
+                                </Collapse>
+                            </>
+                        </Card>
+                    )}
+
+                    {/* Navigation buttons */}
+                    <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between' }}>
+                        <Button
+                            icon={<ArrowLeftOutlined />}
+                            onClick={() => setCurrentStep(0)}
+                            size="large"
+                        >
+                            Geri: Temel Bilgiler
+                        </Button>
+
+                        <Button
+                            type="primary"
+                            icon={<ArrowRightOutlined />}
+                            onClick={goToStep3}
+                            size="large"
+                        >
+                            Sonraki: Model & Varyasyon
+                        </Button>
+                    </div>
+                </div>
+                {/* STEP 3: MODEL BİLGİLERİ & VARYASYON YÖNETİMİ               */}
+                {/* ═══════════════════════════════════════════════════════════ */}
+                <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
 
                     {/* Panel 1: Model Bilgileri (Material Selection) */}
                     <Card title="Model Bilgileri" style={{ marginBottom: 24 }}>
@@ -1418,7 +1951,7 @@ export const SetCreate = () => {
                                                                     </Upload>
                                                                     <Button size="small" icon={<FolderOpenOutlined />} onClick={() => openVariantR2Picker(matIdx, varIdx, 'swatch')} title="R2'den seç">R2</Button>
                                                                 </Space>
-                                                                {renderTextureThumb(variant.swatchPreview, 'Swatch')}
+                                                                {renderTextureThumb(variant.swatchPreview, 'Swatch', matItem.material.baseColorTexture?.url)}
                                                             </Col>
 
                                                             {/* BaseColor */}
@@ -1428,9 +1961,13 @@ export const SetCreate = () => {
                                                                 </div>
                                                                 {variant.isOriginal ? (
                                                                     <div>
-                                                                        {variant.baseColorPreview ? (
+                                                                        {(variant.baseColorPreview || matItem.material.baseColorTexture?.url) ? (
                                                                             <>
-                                                                                {renderTextureThumb(variant.baseColorPreview, 'BaseColor')}
+                                                                                {renderTextureThumb(
+                                                                                    variant.baseColorPreview,
+                                                                                    'BaseColor',
+                                                                                    matItem.material.baseColorTexture?.url
+                                                                                )}
                                                                                 <div style={{ fontSize: 11, color: '#52c41a', marginTop: 4 }}>
                                                                                     🔒 GLB'den
                                                                                 </div>
@@ -1457,7 +1994,11 @@ export const SetCreate = () => {
                                                                             </Upload>
                                                                             <Button size="small" icon={<FolderOpenOutlined />} onClick={() => openVariantR2Picker(matIdx, varIdx, 'baseColor')} title="R2'den seç">R2</Button>
                                                                         </Space>
-                                                                        {renderTextureThumb(variant.baseColorPreview, 'BaseColor')}
+                                                                        {renderTextureThumb(
+                                                                            variant.baseColorPreview,
+                                                                            'BaseColor',
+                                                                            matItem.material.baseColorTexture?.url
+                                                                        )}
                                                                     </>
                                                                 )}
                                                             </Col>
@@ -1469,9 +2010,13 @@ export const SetCreate = () => {
                                                                 </div>
                                                                 {variant.isOriginal ? (
                                                                     <div>
-                                                                        {variant.normalPreview ? (
+                                                                        {(variant.normalPreview || matItem.material.normalTexture?.url) ? (
                                                                             <>
-                                                                                {renderTextureThumb(variant.normalPreview, 'Normal')}
+                                                                                {renderTextureThumb(
+                                                                                    variant.normalPreview,
+                                                                                    'Normal',
+                                                                                    matItem.material.normalTexture?.url
+                                                                                )}
                                                                                 <div style={{ fontSize: 11, color: '#52c41a', marginTop: 4 }}>
                                                                                     🔒 GLB'den
                                                                                 </div>
@@ -1498,7 +2043,11 @@ export const SetCreate = () => {
                                                                             </Upload>
                                                                             <Button size="small" icon={<FolderOpenOutlined />} onClick={() => openVariantR2Picker(matIdx, varIdx, 'normal')} title="R2'den seç">R2</Button>
                                                                         </Space>
-                                                                        {renderTextureThumb(variant.normalPreview, 'Normal')}
+                                                                        {renderTextureThumb(
+                                                                            variant.normalPreview,
+                                                                            'Normal',
+                                                                            matItem.material.normalTexture?.url
+                                                                        )}
                                                                     </>
                                                                 )}
                                                             </Col>
@@ -1510,9 +2059,13 @@ export const SetCreate = () => {
                                                                 </div>
                                                                 {variant.isOriginal ? (
                                                                     <div>
-                                                                        {variant.ormPreview ? (
+                                                                        {(variant.ormPreview || matItem.material.ormTexture?.url) ? (
                                                                             <>
-                                                                                {renderTextureThumb(variant.ormPreview, 'ORM')}
+                                                                                {renderTextureThumb(
+                                                                                    variant.ormPreview,
+                                                                                    'ORM',
+                                                                                    matItem.material.ormTexture?.url
+                                                                                )}
                                                                                 <div style={{ fontSize: 11, color: '#52c41a', marginTop: 4 }}>
                                                                                     🔒 GLB'den
                                                                                 </div>
@@ -1539,7 +2092,11 @@ export const SetCreate = () => {
                                                                             </Upload>
                                                                             <Button size="small" icon={<FolderOpenOutlined />} onClick={() => openVariantR2Picker(matIdx, varIdx, 'orm')} title="R2'den seç">R2</Button>
                                                                         </Space>
-                                                                        {renderTextureThumb(variant.ormPreview, 'ORM')}
+                                                                        {renderTextureThumb(
+                                                                            variant.ormPreview,
+                                                                            'ORM',
+                                                                            matItem.material.ormTexture?.url
+                                                                        )}
                                                                     </>
                                                                 )}
                                                             </Col>
@@ -1568,307 +2125,10 @@ export const SetCreate = () => {
                     <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between' }}>
                         <Button
                             icon={<ArrowLeftOutlined />}
-                            onClick={() => setCurrentStep(0)}
-                            size="large"
-                        >
-                            Geri: Temel Bilgiler
-                        </Button>
-
-                        <Button
-                            type="primary"
-                            icon={<ArrowRightOutlined />}
-                            onClick={() => setCurrentStep(2)}
-                            size="large"
-                        >
-                            Sonraki: Takıma Ait Ürünler
-                        </Button>
-                    </div>
-                </div>
-
-                {/* ═══════════════════════════════════════════════════════════ */}
-                {/* STEP 3: TAKIMA AİT ÜRÜNLER                                */}
-                {/* ═══════════════════════════════════════════════════════════ */}
-                <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
-                    {/* Product opt-in toggle card */}
-                    {!includeProducts ? (
-                        <Card
-                            style={{
-                                marginBottom: 24,
-                                border: '2px dashed #d9d9d9',
-                                borderRadius: 12,
-                                background: '#fafafa',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s',
-                            }}
-                            bodyStyle={{ padding: '40px 32px' }}
-                            hoverable
-                            onClick={() => setIncludeProducts(true)}
-                        >
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{
-                                    width: 64,
-                                    height: 64,
-                                    borderRadius: '50%',
-                                    background: 'linear-gradient(135deg, #f5f0ff 0%, #fff7e6 100%)',
-                                    border: '2px solid #d9d9d9',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    margin: '0 auto 16px',
-                                    fontSize: 28,
-                                }}>
-                                    📦
-                                </div>
-                                <Typography.Title level={5} style={{ marginBottom: 8, color: '#262626' }}>
-                                    Takıma Özel Ürün Ekle
-                                </Typography.Title>
-                                <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 20, fontSize: 14 }}>
-                                    Bu takıma bağlı özel ürünler ekleyebilirsiniz. Varyasyonlar ürünlere otomatik uygulanır.
-                                </Typography.Text>
-                                <Button type="primary" icon={<PlusOutlined />} size="large">
-                                    Evet, Ürün Eklemek İstiyorum
-                                </Button>
-                                <div style={{ marginTop: 12 }}>
-                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                        İstemiyorsanız bu adımı atlayabilirsiniz — varyasyonlar takım üzerinde kaydedilecektir.
-                                    </Typography.Text>
-                                </div>
-                            </div>
-                        </Card>
-                    ) : (
-                        <Card
-                            title={
-                                <Space>
-                                    <span>Takıma Ait Ürünler</span>
-                                    <Button
-                                        size="small"
-                                        onClick={() => { setIncludeProducts(false); setSetProducts([]); }}
-                                        style={{ fontSize: 12, color: '#8c8c8c', borderColor: '#d9d9d9' }}
-                                    >
-                                        Ürün Ekleme
-                                    </Button>
-                                </Space>
-                            }
-                            extra={
-                                <Button type="primary" icon={<PlusOutlined />} onClick={addSetProduct}>
-                                    Ürün Ekle
-                                </Button>
-                            }
-                            style={{ marginBottom: 24 }}
-                        >
-                            <>
-                                {setProducts.length === 0 && (
-                                    <div style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>
-                                        <Typography.Text type="secondary">
-                                            Henüz ürün eklenmedi. "Ürün Ekle" butonuna tıklayarak takıma ait ürünleri ekleyin.
-                                        </Typography.Text>
-                                    </div>
-                                )}
-
-                                <Collapse accordion>
-                                    {setProducts.map((sp, idx) => (
-                                        <Panel
-                                            key={idx}
-                                            header={
-                                                <Space>
-                                                    <Typography.Text strong>
-                                                        {sp.name || `Ürün ${idx + 1}`}
-                                                    </Typography.Text>
-                                                    {sp.sku && (
-                                                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                                            SKU: {sp.sku}
-                                                        </Typography.Text>
-                                                    )}
-                                                    {sp.parsedMaterials.length > 0 && (
-                                                        <Typography.Text type="success" style={{ fontSize: 12 }}>
-                                                            ({sp.parsedMaterials.length} materyal)
-                                                        </Typography.Text>
-                                                    )}
-                                                </Space>
-                                            }
-                                            extra={
-                                                <Popconfirm
-                                                    title="Bu ürünü kaldırmak istediğinize emin misiniz?"
-                                                    onConfirm={(e) => { e?.stopPropagation(); removeSetProduct(idx); }}
-                                                    onCancel={(e) => e?.stopPropagation()}
-                                                >
-                                                    <Button
-                                                        type="text"
-                                                        danger
-                                                        icon={<DeleteOutlined />}
-                                                        size="small"
-                                                        onClick={(e) => e.stopPropagation()}
-                                                    />
-                                                </Popconfirm>
-                                            }
-                                        >
-                                            <Radio.Group
-                                                options={[
-                                                    { label: 'Yeni Ürün Oluştur', value: false },
-                                                    { label: 'Mevcut Ürün Seç', value: true }
-                                                ]}
-                                                value={sp.isExisting}
-                                                onChange={(e: any) => updateSetProduct(idx, 'isExisting', e.target.value)}
-                                                style={{ marginBottom: 16 }}
-                                                optionType="button"
-                                                buttonStyle="solid"
-                                            />
-
-                                            {sp.isExisting ? (
-                                                <div style={{ marginBottom: 16 }}>
-                                                    <Typography.Text strong>Mevcut Ürün Seç *</Typography.Text>
-                                                    <Select
-                                                        {...existingProductSelectProps}
-                                                        value={sp.existingProductId as any}
-                                                        onChange={(val, option: any) => {
-                                                            updateSetProduct(idx, 'existingProductId', val);
-                                                            updateSetProduct(idx, 'name', option?.label || '');
-                                                        }}
-                                                        style={{ width: '100%', marginTop: 4, maxWidth: 400, display: 'block' }}
-                                                        placeholder="Sistemdeki ürünlerden seçiniz"
-                                                        showSearch
-                                                        filterOption={(input, option) =>
-                                                            (option?.label?.toString() ?? '').toLowerCase().includes(input.toLowerCase())
-                                                        }
-                                                    />
-                                                    <Typography.Text type="secondary" style={{ display: 'block', marginTop: 8, fontSize: 13 }}>
-                                                        Not: Seçilen ürünün varyasyonları (eğer takımda tanımlanmışsa) takıma göre yeniden şekillenecektir.
-                                                    </Typography.Text>
-                                                </div>
-                                            ) : (
-                                                <Row gutter={24}>
-                                                    <Col xs={24} md={12}>
-                                                        <div style={{ marginBottom: 16 }}>
-                                                            <Typography.Text strong>Ürün Adı *</Typography.Text>
-                                                            <Input
-                                                                value={sp.name}
-                                                                onChange={(e) => updateSetProduct(idx, 'name', e.target.value)}
-                                                                placeholder="Ürün adı giriniz"
-                                                                style={{ marginTop: 4 }}
-                                                            />
-                                                        </div>
-                                                        <div style={{ marginBottom: 16 }}>
-                                                            <Typography.Text strong>SKU</Typography.Text>
-                                                            <Input
-                                                                value={sp.sku}
-                                                                onChange={(e) => updateSetProduct(idx, 'sku', e.target.value)}
-                                                                placeholder="Ürün SKU giriniz"
-                                                                style={{ marginTop: 4 }}
-                                                            />
-                                                        </div>
-                                                        <div style={{ marginBottom: 16 }}>
-                                                            <Typography.Text strong>Kategori</Typography.Text>
-                                                            <Select
-                                                                {...productCategorySelectProps}
-                                                                value={sp.categoryId as any}
-                                                                onChange={(val) => updateSetProduct(idx, 'categoryId', val)}
-                                                                style={{ width: '100%', marginTop: 4 }}
-                                                                placeholder="Kategori seçiniz"
-                                                                showSearch
-                                                                filterOption={(input, option) =>
-                                                                    (option?.label?.toString() ?? '').toLowerCase().includes(input.toLowerCase())
-                                                                }
-                                                            />
-                                                        </div>
-                                                        <div style={{ marginBottom: 16 }}>
-                                                            <Typography.Text strong>Açıklama</Typography.Text>
-                                                            <TextArea
-                                                                value={sp.description}
-                                                                onChange={(e) => updateSetProduct(idx, 'description', e.target.value)}
-                                                                placeholder="Ürün açıklaması"
-                                                                rows={3}
-                                                                style={{ marginTop: 4 }}
-                                                            />
-                                                        </div>
-                                                    </Col>
-                                                    <Col xs={24} md={12}>
-                                                        <div style={{ marginBottom: 16 }}>
-                                                            <Typography.Text strong>Ürün GLB Dosyası</Typography.Text>
-                                                            <Upload
-                                                                accept=".glb,.gltf"
-                                                                maxCount={1}
-                                                                showUploadList={false}
-                                                                beforeUpload={(file) => {
-                                                                    handleSetProductModel(idx, file);
-                                                                    return false;
-                                                                }}
-                                                            >
-                                                                <Button icon={<UploadOutlined />} style={{ marginTop: 4, width: '100%' }} loading={sp.parsingGLB}>
-                                                                    {sp.modelFile ? sp.modelFile.name : 'GLB Dosyası Seç'}
-                                                                </Button>
-                                                            </Upload>
-                                                            {sp.parsingGLB && (
-                                                                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                                                    GLB ayrıştırılıyor...
-                                                                </Typography.Text>
-                                                            )}
-                                                        </div>
-                                                        <div style={{ marginBottom: 16 }}>
-                                                            <Typography.Text strong>Ürün Görseli</Typography.Text>
-                                                            <Upload
-                                                                accept="image/*"
-                                                                maxCount={1}
-                                                                showUploadList={false}
-                                                                beforeUpload={(file) => {
-                                                                    handleSetProductThumbnail(idx, file);
-                                                                    return false;
-                                                                }}
-                                                            >
-                                                                <Button icon={<UploadOutlined />} style={{ marginTop: 4, width: '100%' }}>
-                                                                    {sp.thumbnailFile ? sp.thumbnailFile.name : 'Görsel Seç'}
-                                                                </Button>
-                                                            </Upload>
-                                                            {sp.thumbnailPreview && (
-                                                                <img
-                                                                    src={sp.thumbnailPreview}
-                                                                    alt="preview"
-                                                                    style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, marginTop: 8, border: '1px solid #d9d9d9' }}
-                                                                />
-                                                            )}
-                                                        </div>
-                                                        {sp.parsedMaterials.length > 0 && (
-                                                            <div>
-                                                                <Typography.Text strong>Bulunan Materyaller</Typography.Text>
-                                                                <div style={{ marginTop: 4 }}>
-                                                                    {sp.parsedMaterials.map((mat, mIdx) => (
-                                                                        <Typography.Text
-                                                                            key={mIdx}
-                                                                            style={{ display: 'block', fontSize: 12, color: '#595959' }}
-                                                                        >
-                                                                            • {mat.name} ({mat.id})
-                                                                        </Typography.Text>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </Col>
-                                                </Row>
-                                            )}
-
-                                            {/* Shared variants info */}
-                                            {managedMaterials.length > 0 && (
-                                                <Card size="small" style={{ marginTop: 16, background: '#f6ffed', border: '1px solid #b7eb8f' }}>
-                                                    <Typography.Text type="success">
-                                                        <CheckCircleOutlined style={{ marginRight: 8 }} />
-                                                        Takımda tanımlanan {managedMaterials.length} materyalin varyasyonları bu ürüne otomatik uygulanacak.
-                                                    </Typography.Text>
-                                                </Card>
-                                            )}
-                                        </Panel>
-                                    ))}
-                                </Collapse>
-                            </>
-                        </Card>
-                    )}
-
-                    {/* Navigation buttons */}
-                    <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between' }}>
-                        <Button
-                            icon={<ArrowLeftOutlined />}
                             onClick={() => setCurrentStep(1)}
                             size="large"
                         >
-                            Geri: Varyasyonlar
+                            Geri: Ürün Seçme
                         </Button>
 
                         <Button
@@ -1878,10 +2138,12 @@ export const SetCreate = () => {
                             size="large"
                             loading={saving}
                         >
-                            Takımı ve Ürünleri Kaydet
+                            Takımı Kaydet
                         </Button>
                     </div>
                 </div>
+
+                {/* ═══════════════════════════════════════════════════════════ */}
             </Form>
 
             {/* Media Modal */}

@@ -92,9 +92,6 @@ interface SetProductItem {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export const SetEdit = () => {
-    // ── Navigation ──
-    const navigate = useNavigate();
-
     // ── Identity ──
     const { data: identity } = useGetIdentity<{
         id: string;
@@ -187,12 +184,14 @@ export const SetEdit = () => {
         resource: "products",
         optionLabel: "name",
         optionValue: "id",
+        meta: { select: "id, name, thumbnail_url, product_category_id, product_categories(id, name)" },
         filters: effectiveCompanyId ? [
             { field: "company_id", operator: "eq", value: effectiveCompanyId },
-            { field: "set_id", operator: "null", value: null } // Optional: only show products not in a set, but user might want to move it. Let's just fetch all company products for now.
         ] : [],
         queryOptions: { enabled: !!effectiveCompanyId },
     });
+
+    const navigate = useNavigate();
 
     // ── Steps ──
     const [currentStep, setCurrentStep] = useState(0);
@@ -202,9 +201,9 @@ export const SetEdit = () => {
     const [selectedModelFile, setSelectedModelFile] = useState<File | null>(null);
     const [previewThumbnail, setPreviewThumbnail] = useState<string | null>(null);
     const [previewModelUrl, setPreviewModelUrl] = useState<string | null>(null);
-    // Orijinal R2 URL'leri — blob preview'dan ayrı tutulur, kayıt sırasında kullanılır
     const [existingThumbnailUrl, setExistingThumbnailUrl] = useState<string | null>(null);
     const [existingModelUrl, setExistingModelUrl] = useState<string | null>(null);
+    const [productCategoryFilters, setProductCategoryFilters] = useState<Record<number, string | undefined>>({});
 
     // ── Media Picker State ──
     const [mediaModalVisible, setMediaModalVisible] = useState(false);
@@ -304,7 +303,7 @@ export const SetEdit = () => {
 
         setLoading(true);
         try {
-            // 0. Set verisini Supabase'den direkt çek
+            // 0. Direkt Supabase'den set verisini çek (Refine cache bypass)
             const { data: record, error: setError } = await supabaseClient
                 .from('sets')
                 .select('*')
@@ -315,6 +314,7 @@ export const SetEdit = () => {
                 throw new Error('Set verisi alınamadı: ' + (setError?.message || 'bulunamadı'));
             }
 
+            // Form alanlarını doldur
             formProps.form?.setFieldsValue({
                 name: record.name,
                 sku: record.sku,
@@ -325,7 +325,7 @@ export const SetEdit = () => {
                 custom_attributes: record.custom_attributes,
             });
 
-            // 1. Company bilgilerini çek
+            // 1. Company setup - set'in company_id'si üzerinden direkt çek
             const companyId = record.company_id;
             const companyRes = companyId
                 ? await supabaseClient.from('companies').select('storage_bucket, storage_domain, company_name').eq('id', companyId).single()
@@ -350,229 +350,135 @@ export const SetEdit = () => {
 
             const activeDomainFetch = (activeDomain || import.meta.env.VITE_R2_PUBLIC_URL || '').trim();
 
-            const ensureFullUrl = (url: any): string | null => {
+            // Helper — tam HTTPS URL üret
+            // "https://domain/path"  → olduğu gibi
+            // "domain.com/path"      → "https://domain.com/path"
+            // "path/file.png"        → activeDomainFetch + "/" + path
+            // blob: / null           → null
+            const buildUrl = (url: any): string | null => {
                 if (!url || typeof url !== 'string') return null;
-                const trimmed = url.trim();
-                if (!trimmed || trimmed === 'null' || trimmed === 'undefined' || trimmed === '{}') return null;
-                if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:') || trimmed.startsWith('blob:')) return trimmed;
-                const domain = activeDomainFetch.endsWith('/') ? activeDomainFetch.slice(0, -1) : activeDomainFetch;
-                const cleanDomain = domain.startsWith('http') ? domain : `https://${domain}`;
-                const path = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
-                return `${cleanDomain}${path}`.replace(/([^:]\/)\/+/g, '$1');
-            };
-
-            // R2 SDK ile blob URL oluşturur — CORS bypass. Hata olursa orijinal URL döner.
-            const safeToBlob = async (url: string | null): Promise<string | null> => {
-                if (!url) return null;
-                if (url.startsWith('blob:') || url.startsWith('data:')) return url;
-                try {
-                    return await downloadR2FileAsBlob(url, activeBucket, activeDomain);
-                } catch (e) {
-                    console.warn('R2 blob indirme başarısız:', url);
-                    return url;
+                const s = url.trim();
+                if (!s || s === 'null' || s === 'undefined' || s === '{}') return null;
+                if (s.startsWith('blob:') || s.startsWith('data:')) return null;
+                const c = s.replace(/[?&]v=\d+(&|$)/g, '$1').replace(/[?&]$/g, '');
+                if (c.startsWith('http://') || c.startsWith('https://')) return c;
+                // Protokolsüz tam URL (domain.com/path)
+                const firstSlash = c.indexOf('/');
+                const head = firstSlash > 0 ? c.substring(0, firstSlash) : c;
+                if (head.includes('.')) return `https://${c}`;
+                // Relative path
+                if (activeDomainFetch) {
+                    const d = activeDomainFetch.startsWith('http') ? activeDomainFetch : `https://${activeDomainFetch}`;
+                    return `${d.replace(/\/$/, '')}/${c.replace(/^\/+/, '')}`;
                 }
+                return null;
             };
 
             // 2. Custom attributes
             if (record.custom_attributes) {
                 try {
-                    const parsed = typeof record.custom_attributes === 'string'
-                        ? JSON.parse(record.custom_attributes)
-                        : record.custom_attributes;
+                    const parsed = typeof record.custom_attributes === 'string' ? JSON.parse(record.custom_attributes) : record.custom_attributes;
                     setCustomAttributes(parsed);
                 } catch (e) { console.error('Error parsing attributes', e); }
             }
 
-            // 3. Thumbnail
+            // 3. Thumbnail preview
             if (record.thumbnail_url) {
-                let thumbSrc = record.thumbnail_url;
-                try {
-                    if (typeof thumbSrc === 'string' && thumbSrc.startsWith('{')) {
-                        thumbSrc = JSON.parse(thumbSrc).url || thumbSrc;
-                    } else if (typeof thumbSrc === 'object' && thumbSrc !== null) {
-                        thumbSrc = (thumbSrc as any).url || thumbSrc;
-                    }
-                } catch (e) { /* ignore */ }
-                const thumbFull = ensureFullUrl(thumbSrc);
-                if (thumbFull) {
-                    setExistingThumbnailUrl(thumbFull);
-                    setPreviewThumbnail(thumbFull);
-                    safeToBlob(thumbFull).then(b => { if (b) setPreviewThumbnail(b); }).catch(() => { });
-                }
+                const thumbUrl = buildUrl(record.thumbnail_url);
+                if (thumbUrl) setPreviewThumbnail(thumbUrl);
             }
 
-            // 4. Model URL sakla
-            if (record.model_url) {
-                const modelFull = ensureFullUrl(record.model_url);
-                if (modelFull) setExistingModelUrl(modelFull);
-            }
-
-            // 5. Bağlı ürünleri çek
-            const { data: setProductLinks } = await supabaseClient
-                .from('set_products')
-                .select('product_id, display_order')
-                .eq('set_id', record.id)
-                .order('display_order');
-
-            const linkedProductIds = (setProductLinks || []).map((sp: any) => sp.product_id);
-            const firstProductId = linkedProductIds[0] || null;
-
-            // 6. Varyasyon verisini çek:
-            //    - Bağlı ürün varsa → product_materials/product_variants/variant_textures (güncel)
-            //    - Bağlı ürün yoksa → set_materials/set_variants/set_variant_textures
-            let dbMappedRaw: any[] = [];
-
-            if (firstProductId) {
-                // ── Ürün tablolarından çek (her zaman güncel) ──
-                console.log('Varyasyonlar ürün tablosundan çekiliyor, productId:', firstProductId);
-                const { data: prodMaterials, error: prodMatErr } = await supabaseClient
-                    .from('product_materials')
-                    .select(`
+            // 4. Fetch DB materials first (same pattern as product edit)
+            const { data: dbMaterials, error: matError } = await supabaseClient
+                .from('set_materials')
+                .select(`
+                    id,
+                    material_id,
+                    name,
+                    set_variants (
                         id,
-                        material_id,
-                        name,
-                        product_variants (
-                            id,
-                            variant_name,
-                            is_original,
-                            swatch_url,
-                            variant_textures (
-                                base_color_url,
-                                normal_url,
-                                orm_url
-                            )
-                        )
-                    `)
-                    .eq('product_id', firstProductId);
+                        variant_name,
+                        is_original,
+                        swatch_url
+                    )
+                `)
+                .eq('set_id', record.id);
 
-                if (prodMatErr) console.error('Product materials fetch error:', prodMatErr);
+            if (matError) console.error('DB materials fetch error:', matError);
 
-                dbMappedRaw = (prodMaterials || []).map((mat: any) => ({
-                    dbId: mat.id,
-                    material: { id: mat.material_id, name: mat.name, index: 0, baseColorTexture: null, normalTexture: null, ormTexture: null },
-                    displayName: mat.name,
-                    isManaged: true,
-                    variants: (mat.product_variants || []).map((v: any) => {
-                        const tex = Array.isArray(v.variant_textures)
-                            ? v.variant_textures[0] || {}
-                            : v.variant_textures || {};
-                        const isOriginal = v.is_original === true || v.variant_name === 'Orijinal' || v.variant_name === 'Original';
-                        const baseColor = ensureFullUrl(tex.base_color_url);
-                        const normal = ensureFullUrl(tex.normal_url);
-                        const orm = ensureFullUrl(tex.orm_url);
-                        const swatch = ensureFullUrl(v.swatch_url) || baseColor;
-                        return {
-                            dbId: v.id,
-                            variantName: v.variant_name,
-                            isOriginal,
-                            swatchFile: null, swatchPreview: swatch,
-                            baseColorFile: null, baseColorPreview: baseColor,
-                            normalFile: null, normalPreview: normal,
-                            ormFile: null, ormPreview: orm,
-                        };
-                    }),
-                }));
-
-                // Ürün tablosunda veri yoksa set tablolarına fallback
-                if (dbMappedRaw.length === 0) {
-                    console.log('Ürün tablosunda varyasyon yok, set tablosuna fallback');
-                    const { data: setMats } = await supabaseClient
-                        .from('set_materials')
-                        .select(`id, material_id, name, set_variants (id, variant_name, is_original, swatch_url, set_variant_textures (base_color_url, normal_url, orm_url))`)
-                        .eq('set_id', record.id);
-                    dbMappedRaw = (setMats || []).map((mat: any) => ({
-                        dbId: mat.id,
-                        material: { id: mat.material_id, name: mat.name, index: 0, baseColorTexture: null, normalTexture: null, ormTexture: null },
-                        displayName: mat.name,
-                        isManaged: true,
-                        variants: (mat.set_variants || []).map((v: any) => {
-                            const tex = Array.isArray(v.set_variant_textures) ? v.set_variant_textures[0] || {} : v.set_variant_textures || {};
-                            const isOriginal = v.is_original === true || v.variant_name === 'Orijinal' || v.variant_name === 'Original';
-                            const baseColor = ensureFullUrl(tex.base_color_url);
-                            const normal = ensureFullUrl(tex.normal_url);
-                            const orm = ensureFullUrl(tex.orm_url);
-                            const swatch = ensureFullUrl(v.swatch_url) || baseColor;
-                            return { dbId: v.id, variantName: v.variant_name, isOriginal, swatchFile: null, swatchPreview: swatch, baseColorFile: null, baseColorPreview: baseColor, normalFile: null, normalPreview: normal, ormFile: null, ormPreview: orm };
-                        }),
-                    }));
-                }
-            } else {
-                // ── Ürün yok → set tablolarından çek ──
-                console.log('Bağlı ürün yok, varyasyonlar set tablosundan çekiliyor');
-                const { data: setMats, error: setMatErr } = await supabaseClient
-                    .from('set_materials')
-                    .select(`
-                        id,
-                        material_id,
-                        name,
-                        set_variants (
-                            id,
-                            variant_name,
-                            is_original,
-                            swatch_url,
-                            set_variant_textures (
-                                base_color_url,
-                                normal_url,
-                                orm_url
-                            )
-                        )
-                    `)
-                    .eq('set_id', record.id);
-
-                if (setMatErr) console.error('Set materials fetch error:', setMatErr);
-
-                dbMappedRaw = (setMats || []).map((mat: any) => ({
-                    dbId: mat.id,
-                    material: { id: mat.material_id, name: mat.name, index: 0, baseColorTexture: null, normalTexture: null, ormTexture: null },
-                    displayName: mat.name,
-                    isManaged: true,
-                    variants: (mat.set_variants || []).map((v: any) => {
-                        const tex = Array.isArray(v.set_variant_textures) ? v.set_variant_textures[0] || {} : v.set_variant_textures || {};
-                        const isOriginal = v.is_original === true || v.variant_name === 'Orijinal' || v.variant_name === 'Original';
-                        const baseColor = ensureFullUrl(tex.base_color_url);
-                        const normal = ensureFullUrl(tex.normal_url);
-                        const orm = ensureFullUrl(tex.orm_url);
-                        const swatch = ensureFullUrl(v.swatch_url) || baseColor;
-                        return { dbId: v.id, variantName: v.variant_name, isOriginal, swatchFile: null, swatchPreview: swatch, baseColorFile: null, baseColorPreview: baseColor, normalFile: null, normalPreview: normal, ormFile: null, ormPreview: orm };
-                    }),
-                }));
-            }
-
-            // 7. Tüm variant görsellerini SDK üzerinden blob'a çevir (await — race condition yok)
-            const dbMapped: MaterialWithVariants[] = await Promise.all(
-                dbMappedRaw.map(async (mat: any) => ({
-                    ...mat,
-                    variants: await Promise.all(
-                        mat.variants.map(async (v: any) => ({
-                            ...v,
-                            swatchPreview: await safeToBlob(v.swatchPreview),
-                            baseColorPreview: await safeToBlob(v.baseColorPreview),
-                            normalPreview: await safeToBlob(v.normalPreview),
-                            ormPreview: await safeToBlob(v.ormPreview),
-                        }))
-                    ),
-                }))
+            // Tüm set_variant ID'lerini topla → ayrı sorgu ile texture'ları çek (nested join unreliable)
+            const allSetVariantIds: string[] = (dbMaterials || []).flatMap((m: any) =>
+                (m.set_variants || []).map((v: any) => v.id)
             );
+            let setTexMap: Record<string, any> = {};
+            if (allSetVariantIds.length > 0) {
+                const { data: setTexRows } = await supabaseClient
+                    .from('set_variant_textures')
+                    .select('variant_id, base_color_url, normal_url, orm_url')
+                    .in('variant_id', allSetVariantIds);
+                setTexMap = Object.fromEntries((setTexRows || []).map((t: any) => [t.variant_id, t]));
+            }
 
+            const dbMapped: MaterialWithVariants[] = (dbMaterials || []).map((dbMat: any) => ({
+                dbId: dbMat.id,
+                material: {
+                    id: dbMat.material_id,
+                    name: dbMat.name,
+                    index: 0,
+                    baseColorTexture: null,
+                    normalTexture: null,
+                    ormTexture: null,
+                },
+                displayName: dbMat.name,
+                isManaged: true,
+                variants: (dbMat.set_variants || []).map((v: any) => {
+                    const tex = setTexMap[v.id] || {};
+
+                    const isOriginal = v.is_original === true || v.variant_name === 'Orijinal' || v.variant_name === 'Original';
+                    const baseColor = buildUrl(tex.base_color_url);
+                    const normal = buildUrl(tex.normal_url);
+                    const orm = buildUrl(tex.orm_url);
+                    const swatch = buildUrl(v.swatch_url) || baseColor;
+
+                    return {
+                        dbId: v.id,
+                        variantName: v.variant_name,
+                        isOriginal,
+                        swatchFile: null,
+                        swatchPreview: swatch,
+                        baseColorFile: null,
+                        baseColorPreview: baseColor,
+                        normalFile: null,
+                        normalPreview: normal,
+                        ormFile: null,
+                        ormPreview: orm,
+                    };
+                }),
+            }));
+
+            // 5. Show DB materials immediately (don't wait for GLB)
             if (dbMapped.length > 0) {
                 setMaterialsWithVariants(dbMapped);
             }
 
-            // 8. Model preview + GLB parse
+            // 6. Model preview + GLB parse (for 3D viewer and enriching material data)
             if (record.model_url) {
-                setPreviewModelUrl(record.model_url);
+                const modelUrl = buildUrl(record.model_url) || record.model_url;
+                setPreviewModelUrl(modelUrl);
+
+                // Download & parse GLB
                 try {
                     setParsingGLB(true);
-                    const modelBlobUrl = await downloadR2FileAsBlob(record.model_url, activeBucket, activeDomain);
-                    setPreviewModelUrl(modelBlobUrl);
+                    const blobUrl = await downloadR2FileAsBlob(modelUrl, activeBucket, activeDomain);
+                    setPreviewModelUrl(blobUrl);
 
-                    const response = await fetch(modelBlobUrl);
+                    const response = await fetch(blobUrl);
                     const blob = await response.blob();
                     const fileObj = new File([blob], 'model.glb', { type: 'model/gltf-binary' });
                     const parsed = await parseGLB(fileObj);
                     setParsedMaterials(parsed.materials);
 
-                    // Merge: mevcut blob URL'leri koru, GLB bilgileriyle zenginleştir
+                    // Atomic merge: same pattern as product edit
                     const finalMaterials: MaterialWithVariants[] = parsed.materials.map(glbMat => {
                         const match = dbMapped.find(m => {
                             const dbId = String(m.material.id || '').trim().toLowerCase();
@@ -601,7 +507,6 @@ export const SetEdit = () => {
                                 } : v),
                             };
                         }
-
                         return {
                             material: glbMat,
                             displayName: glbMat.name,
@@ -610,7 +515,7 @@ export const SetEdit = () => {
                                 variantName: 'Orijinal',
                                 isOriginal: true,
                                 swatchFile: null,
-                                swatchPreview: glbFallback.baseColor,
+                                swatchPreview: null,
                                 baseColorFile: null,
                                 baseColorPreview: glbFallback.baseColor,
                                 normalFile: null,
@@ -624,15 +529,23 @@ export const SetEdit = () => {
                     setMaterialsWithVariants(finalMaterials);
                 } catch (e: any) {
                     console.error('GLB parse error:', e);
+                    // Fallback to DB results if GLB parse fails
                     if (dbMapped.length > 0) setMaterialsWithVariants(dbMapped);
                 } finally {
                     setParsingGLB(false);
                 }
             } else {
+                // No model - just show DB materials
                 setMaterialsWithVariants(dbMapped);
             }
 
-            // 9. Bağlı ürünleri yükle (UI için)
+            // 7. Load linked products
+            const { data: setProductLinks } = await supabaseClient
+                .from('set_products')
+                .select('product_id, display_order')
+                .eq('set_id', record.id)
+                .order('display_order');
+
             if (setProductLinks && setProductLinks.length > 0) {
                 setIncludeProducts(true);
                 const productIds = setProductLinks.map((sp: any) => sp.product_id);
@@ -672,7 +585,7 @@ export const SetEdit = () => {
             message.error('Veriler yüklenirken hata oluştu: ' + e.message);
         } finally {
             setLoading(false);
-            initializingRef.current = false;
+            initializingRef.current = false; // Reset so it can re-init if needed
         }
     };
 
@@ -702,7 +615,7 @@ export const SetEdit = () => {
     const handleThumbnailSelect = (file: File) => {
         setSelectedThumbnailFile(file);
         setPreviewThumbnail(URL.createObjectURL(file));
-        setExistingThumbnailUrl(null); // yeni dosya yüklenecek
+        setExistingThumbnailUrl(null);
         return false;
     };
 
@@ -710,7 +623,6 @@ export const SetEdit = () => {
         try {
             setParsingGLB(true);
             setSelectedModelFile(file);
-            setExistingModelUrl(null); // yeni dosya yüklenecek
             setPreviewModelUrl(URL.createObjectURL(file));
 
             const parsed = await parseGLB(file);
@@ -904,7 +816,6 @@ export const SetEdit = () => {
         } else if (target === 'model') {
             const url = file.url;
             setSelectedR2Model(url);
-            setExistingModelUrl(url);
             setSelectedModelFile(null);
 
             try {
@@ -973,8 +884,8 @@ export const SetEdit = () => {
             setSaving(true);
 
             // 1. Upload Set GLB and thumbnail
-            // existingThumbnailUrl/existingModelUrl: mevcut R2 URL (blob: değil)
-            // Yeni dosya veya R2 seçimi varsa üzerine yazar
+            // thumbnailUrl ve modelUrl, initializeSet tarafından state'e yüklenir
+            // Yeni dosya seçildiyse upload edilir, seçilmediyse mevcut state URL kullanılır
             let thumbnailUrl: string | null = existingThumbnailUrl;
             let modelUrl: string | null = existingModelUrl;
             const setFolder = `sets/${setId}`;
@@ -1013,19 +924,9 @@ export const SetEdit = () => {
             };
             await onFinish(updatePayload);
 
-            // 3. Varyasyonları set tablolarına kaydet
             await saveMaterialsAndVariantsForSet(setId, setFolder);
-
-            // 3b. Mevcut bağlı ürünlere varyasyonları senkronize et
-            //     Böylece ürün ve takım her zaman aynı varyasyon verisine sahip olur
-            const existingLinkedProductIds = setProducts
-                .filter(sp => sp.isExisting && sp.existingProductId)
-                .map(sp => sp.existingProductId!);
-            if (existingLinkedProductIds.length > 0) {
-                await Promise.all(existingLinkedProductIds.map(async (pid) => {
-                    await saveMaterialsAndVariantsForProduct(pid, `products/${pid}`);
-                }));
-            }
+            const linkedPids = setProducts.filter(sp => sp.isExisting && sp.existingProductId).map(sp => sp.existingProductId!);
+            if (linkedPids.length > 0) await Promise.all(linkedPids.map(pid => saveMaterialsAndVariantsForProduct(pid, `products/${pid}`)));
 
             // 4. Clear existing product links and re-insert
             await supabaseClient.from('set_products').delete().eq('set_id', setId);
@@ -1174,7 +1075,7 @@ export const SetEdit = () => {
                 const variantFolder = `${baseFolder}/materials/${sanitizedMatId}/${sanitizedVariantName}`;
 
                 try {
-                    const uploadOrKeep = async (file: File | null | undefined, preview: string | null | undefined, fileName: string) => {
+                    const uploadOrKeep = async (file: File | null | undefined, preview: string | null | undefined, fileName: string): Promise<string | null> => {
                         if (file) {
                             return await uploadToR2(file, variantFolder, effectiveCompanyName, selectedCompanyBucket, selectedCompanyDomain);
                         }
@@ -1190,9 +1091,9 @@ export const SetEdit = () => {
                                 return null;
                             }
                         }
-                        if (preview && preview.startsWith('http')) return preview;
-                        if (preview && !preview.startsWith('data:') && !preview.startsWith('blob:')) return preview;
-                        return null;
+                        if (!preview) return null;
+                        // HTTPS URL: cachebust timestamp'ini temizleyerek kaydet
+                        return preview.replace(/[?&]v=\d+(&|$)/, '$1').replace(/[?&]$/, '');
                     };
 
                     const [swatchUrl, baseColorUrl, normalUrl, ormUrl] = await Promise.all([
@@ -1271,7 +1172,7 @@ export const SetEdit = () => {
                 const variantFolder = `${baseFolder}/materials/${sanitizedMatId}/${sanitizedVariantName}`;
 
                 try {
-                    const uploadOrKeep = async (file: File | null | undefined, preview: string | null | undefined, fileName: string) => {
+                    const uploadOrKeep = async (file: File | null | undefined, preview: string | null | undefined, fileName: string): Promise<string | null> => {
                         if (file) {
                             return await uploadToR2(file, variantFolder, effectiveCompanyName, selectedCompanyBucket, selectedCompanyDomain);
                         }
@@ -1287,7 +1188,9 @@ export const SetEdit = () => {
                                 return null;
                             }
                         }
-                        return preview;
+                        if (!preview) return null;
+                        // HTTPS URL: cachebust timestamp'ini temizleyerek kaydet
+                        return preview.replace(/[?&]v=\d+(&|$)/, '$1').replace(/[?&]$/, '');
                     };
 
                     const [swatchUrl, baseColorUrl, normalUrl, ormUrl] = await Promise.all([
@@ -1331,51 +1234,185 @@ export const SetEdit = () => {
     // ── Navigation ──
 
     const goToStep2 = () => {
-        formProps.form?.validateFields().then(() => {
-            // Allow if either GLB parsed OR DB materials already loaded
-            if (parsedMaterials.length === 0 && materialsWithVariants.length === 0) {
-                message.warning('Lütfen önce bir GLB dosyası yükleyiniz');
-                return;
-            }
-            setCurrentStep(1);
-        }).catch(() => {
-            message.error('Lütfen zorunlu alanları doldurunuz');
-        });
+        formProps.form?.validateFields().then(() => { setCurrentStep(1); })
+            .catch(() => { message.error('Lütfen zorunlu alanları doldurunuz'); });
     };
 
+    const goToStep3 = async () => {
+        const ep = setProducts.find(sp => sp.isExisting && sp.existingProductId);
+        if (ep?.existingProductId) { await loadVariantsFromProduct(ep.existingProductId); }
+        else if (parsedMaterials.length === 0 && materialsWithVariants.length === 0) {
+            message.warning('Lütfen ürün GLB dosyasını yükleyiniz veya mevcut ürün seçiniz'); return;
+        }
+        setCurrentStep(2);
+    };
+
+    const loadVariantsFromProduct = async (productId: string) => {
+        try {
+            const rawDomain = (selectedCompanyDomain || import.meta.env.VITE_R2_PUBLIC_URL || '').trim().replace(/\/$/, '');
+            const safeDomain = rawDomain
+                ? (rawDomain.startsWith('http') ? rawDomain : `https://${rawDomain}`)
+                : '';
+
+            const buildUrl = (url: string | null | undefined): string | null => {
+                if (!url || typeof url !== 'string') return null;
+                const s = url.trim();
+                if (!s || s === 'null' || s === 'undefined') return null;
+                if (s.startsWith('blob:') || s.startsWith('data:')) return null;
+                const c = s.replace(/[?&]v=\d+(&|$)/g, '$1').replace(/[?&]$/g, '');
+                if (c.startsWith('http://') || c.startsWith('https://')) return c;
+                // Protokolsüz tam URL: "pub-xxx.r2.dev/path/file.png"
+                const firstSlash = c.indexOf('/');
+                const head = firstSlash > 0 ? c.substring(0, firstSlash) : c;
+                if (head.includes('.')) return `https://${c}`;
+                // Relative path
+                if (safeDomain) return `${safeDomain}/${c.replace(/^\/+/, '')}`;
+                return null;
+            };
+
+            message.loading({ content: 'Varyasyonlar yükleniyor...', key: 'lv' });
+
+            // Step 1: materials + variants (no nested variant_textures — FK join unreliable)
+            const { data: mats, error } = await supabaseClient.from('product_materials')
+                .select('id, material_id, name, product_variants(id, variant_name, is_original, swatch_url)')
+                .eq('product_id', productId);
+
+            if (error) throw error;
+            if (!mats || mats.length === 0) { message.warning({ content: 'Varyasyon bulunamadı.', key: 'lv' }); return; }
+
+            // Step 2: tüm variant ID'lerini al → variant_textures'ı ayrı sorgula
+            const allVariantIds: string[] = mats.flatMap((m: any) =>
+                (m.product_variants || []).map((v: any) => v.id)
+            );
+
+            let texMap: Record<string, any> = {};
+            if (allVariantIds.length > 0) {
+                const { data: texRows } = await supabaseClient
+                    .from('variant_textures')
+                    .select('variant_id, base_color_url, normal_url, orm_url')
+                    .in('variant_id', allVariantIds);
+                texMap = Object.fromEntries((texRows || []).map((t: any) => [t.variant_id, t]));
+            }
+
+            const mapped: MaterialWithVariants[] = mats.map((mat: any) => {
+                const allVariantsForMat = (mat.product_variants || []).map((v: any) => {
+                    const tex = texMap[v.id] || {};
+                    const isOriginal = v.is_original === true || v.variant_name === 'Orijinal' || v.variant_name === 'Original';
+                    return {
+                        variantName: v.variant_name, isOriginal,
+                        swatchFile: null, swatchPreview: buildUrl(v.swatch_url),
+                        baseColorFile: null, baseColorPreview: buildUrl(tex.base_color_url),
+                        normalFile: null, normalPreview: buildUrl(tex.normal_url),
+                        ormFile: null, ormPreview: buildUrl(tex.orm_url),
+                    };
+                });
+
+                // GLB parse edilmişse eksik texture'ları doldur
+                const glbMat = parsedMaterials.find(p =>
+                    p.id?.toLowerCase() === mat.material_id?.toLowerCase() ||
+                    p.name?.toLowerCase() === mat.name?.toLowerCase()
+                );
+
+                const enriched = allVariantsForMat.map((v: any) => {
+                    if (v.isOriginal && glbMat) {
+                        return {
+                            ...v,
+                            baseColorPreview: v.baseColorPreview || glbMat.baseColorTexture?.url || null,
+                            normalPreview: v.normalPreview || glbMat.normalTexture?.url || null,
+                            ormPreview: v.ormPreview || glbMat.ormTexture?.url || null,
+                            swatchPreview: v.swatchPreview || glbMat.baseColorTexture?.url || null,
+                        };
+                    }
+                    return v;
+                });
+
+                const finalVariants = enriched.length > 0 ? enriched : (glbMat ? [{
+                    variantName: 'Orijinal', isOriginal: true,
+                    swatchFile: null, swatchPreview: glbMat.baseColorTexture?.url || null,
+                    baseColorFile: null, baseColorPreview: glbMat.baseColorTexture?.url || null,
+                    normalFile: null, normalPreview: glbMat.normalTexture?.url || null,
+                    ormFile: null, ormPreview: glbMat.ormTexture?.url || null,
+                }] : [{ variantName: 'Orijinal', isOriginal: true, swatchFile: null, swatchPreview: null, baseColorFile: null, baseColorPreview: null, normalFile: null, normalPreview: null, ormFile: null, ormPreview: null }]);
+
+                return {
+                    material: {
+                        id: mat.material_id,
+                        name: mat.name,
+                        index: 0,
+                        baseColorTexture: glbMat?.baseColorTexture || null,
+                        normalTexture: glbMat?.normalTexture || null,
+                        ormTexture: glbMat?.ormTexture || null,
+                    },
+                    displayName: mat.name, isManaged: true,
+                    variants: finalVariants,
+                };
+            });
+
+            // GLB'de olup DB'de kayıtlı olmayan materyalleri ekle
+            const mappedIds = new Set(mapped.map(m => m.material.id?.toLowerCase()));
+            const extraFromGlb: MaterialWithVariants[] = parsedMaterials
+                .filter(g => !mappedIds.has(g.id?.toLowerCase()) && !mappedIds.has(g.name?.toLowerCase()))
+                .map(g => ({
+                    material: g, displayName: g.name, isManaged: false,
+                    variants: [{ variantName: 'Orijinal', isOriginal: true, swatchFile: null, swatchPreview: g.baseColorTexture?.url || null, baseColorFile: null, baseColorPreview: g.baseColorTexture?.url || null, normalFile: null, normalPreview: g.normalTexture?.url || null, ormFile: null, ormPreview: g.ormTexture?.url || null }],
+                }));
+
+            setMaterialsWithVariants([...mapped, ...extraFromGlb]);
+            message.success({ content: `${mats.length} materyal yüklendi`, key: 'lv' });
+        } catch (e: any) { message.error({ content: 'Hata: ' + e.message, key: 'lv' }); }
+    };
     // ── Thumbnail preview helper ──
-    const renderTextureThumb = (url: string | null, label: string) => {
-        if (!url) return null;
+    const renderTextureThumb = (url: string | null, label: string, fallbackUrl?: string | null) => {
+        if (!url && !fallbackUrl) return null;
+        const src = url || fallbackUrl!;
         return (
-            <Image
-                src={url}
-                alt={label}
-                width={48}
-                height={48}
-                style={{
-                    objectFit: 'cover',
-                    borderRadius: 4,
-                    border: '1px solid #d9d9d9',
-                    marginTop: 4
-                }}
-                preview={{ mask: 'Büyüt' }}
-            />
+            <Tooltip title={label}>
+                <img
+                    src={src}
+                    alt={label}
+                    style={{
+                        width: 48,
+                        height: 48,
+                        objectFit: 'cover',
+                        borderRadius: 4,
+                        border: '1px solid #d9d9d9',
+                        marginTop: 4,
+                        display: 'inline-block',
+                        cursor: 'zoom-in',
+                    }}
+                    onClick={() => window.open(src, '_blank')}
+                    onError={(e: any) => {
+                        const target = e.target as HTMLImageElement;
+                        if (fallbackUrl && target.src !== fallbackUrl && !target.dataset.triedFallback) {
+                            target.dataset.triedFallback = '1';
+                            target.src = fallbackUrl;
+                            return;
+                        }
+                        target.style.display = 'none';
+                        const fb = document.createElement('div');
+                        fb.style.cssText = 'width:48px;height:48px;background:#fff1f0;border:1px solid #ffccc7;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#ff4d4f;margin-top:4px;flex-direction:column;gap:2px;';
+                        fb.innerHTML = `<span style="font-size:16px">⚠</span><span>${label}</span>`;
+                        target.parentNode?.insertBefore(fb, target.nextSibling);
+                    }}
+                />
+            </Tooltip>
         );
     };
 
     const renderSmallThumb = (url: string | null, label: string) => {
-        if (!url) return <div style={{ width: 24, height: 24, background: '#f0f0f0', borderRadius: 2 }} />;
+        if (!url) return <div style={{ width: 24, height: 24, background: '#f0f0f0', borderRadius: 2, display: 'inline-block' }} />;
         return (
             <Tooltip title={label}>
                 <img
                     src={url}
                     alt={label}
-                    style={{
-                        width: 24,
-                        height: 24,
-                        borderRadius: 2,
-                        objectFit: 'cover',
-                        border: '1px solid #d9d9d9'
+                    style={{ width: 24, height: 24, borderRadius: 2, objectFit: 'cover', border: '1px solid #d9d9d9', display: 'inline-block' }}
+                    onError={(e: any) => {
+                        e.target.style.display = 'none';
+                        const fb = document.createElement('div');
+                        fb.style.cssText = 'width:24px;height:24px;background:#ffe7e7;border-radius:2px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#ff4d4f;';
+                        fb.textContent = '!';
+                        e.target.parentNode?.insertBefore(fb, e.target.nextSibling);
                     }}
                 />
             </Tooltip>
@@ -1401,8 +1438,8 @@ export const SetEdit = () => {
                     style={{ marginBottom: 24 }}
                     items={[
                         { title: 'Temel Bilgiler' },
-                        { title: 'Model & Varyasyon' },
                         { title: 'Takıma Ait Ürünler' },
+                        { title: 'Model & Varyasyon' },
                     ]}
                 />
 
@@ -1647,15 +1684,326 @@ export const SetEdit = () => {
                                 size="large"
                                 disabled={parsedMaterials.length === 0 && materialsWithVariants.length === 0}
                             >
-                                Sonraki: Varyasyonlar
+                                Sonraki: Takıma Ait Ürünler
                             </Button>
                         </div>
                     </div>
 
                     {/* ═══════════════════════════════════════════════════════════ */}
-                    {/* STEP 2: MODEL BİLGİLERİ & VARYASYON YÖNETİMİ               */}
+                    {/* STEP 2: TAKIMA AİT ÜRÜNLER                                */}
                     {/* ═══════════════════════════════════════════════════════════ */}
                     <div style={{ display: currentStep === 1 ? 'block' : 'none' }}>
+                        {!includeProducts ? (
+                            <Card
+                                style={{
+                                    marginBottom: 24,
+                                    border: '2px dashed #d9d9d9',
+                                    borderRadius: 12,
+                                    background: '#fafafa',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                }}
+                                bodyStyle={{ padding: '40px 32px' }}
+                                hoverable
+                                onClick={() => setIncludeProducts(true)}
+                            >
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{
+                                        width: 64,
+                                        height: 64,
+                                        borderRadius: '50%',
+                                        background: 'linear-gradient(135deg, #f5f0ff 0%, #fff7e6 100%)',
+                                        border: '2px solid #d9d9d9',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        margin: '0 auto 16px',
+                                        fontSize: 28,
+                                    }}>
+                                        📦
+                                    </div>
+                                    <Typography.Title level={5} style={{ marginBottom: 8, color: '#262626' }}>
+                                        Takıma Özel Ürün Ekle
+                                    </Typography.Title>
+                                    <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 20, fontSize: 14 }}>
+                                        Bu takıma bağlı özel ürünler ekleyebilirsiniz. Varyasyonlar ürünlere otomatik uygulanır.
+                                    </Typography.Text>
+                                    <Button type="primary" icon={<PlusOutlined />} size="large">
+                                        Evet, Ürün Eklemek İstiyorum
+                                    </Button>
+                                    <div style={{ marginTop: 12 }}>
+                                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                            İstemiyorsanız bu adımı atlayabilirsiniz — varyasyonlar takım üzerinde kaydedilecektir.
+                                        </Typography.Text>
+                                    </div>
+                                </div>
+                            </Card>
+                        ) : (
+                            <Card
+                                title={
+                                    <Space>
+                                        <span>Takıma Ait Ürünler</span>
+                                        <Button
+                                            size="small"
+                                            onClick={() => { setIncludeProducts(false); setSetProducts([]); }}
+                                            style={{ fontSize: 12, color: '#8c8c8c', borderColor: '#d9d9d9' }}
+                                        >
+                                            Ürün Ekleme
+                                        </Button>
+                                    </Space>
+                                }
+                                extra={
+                                    <Button type="primary" icon={<PlusOutlined />} onClick={addSetProduct}>
+                                        Ürün Ekle
+                                    </Button>
+                                }
+                                style={{ marginBottom: 24 }}
+                            >
+                                <>
+
+                                    {setProducts.length === 0 && (
+                                        <div style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>
+                                            <Typography.Text type="secondary">
+                                                Henüz ürün eklenmedi. "Ürün Ekle" butonuna tıklayarak takıma ait ürünleri ekleyin.
+                                            </Typography.Text>
+                                        </div>
+                                    )}
+
+                                    <Collapse accordion>
+                                        {setProducts.map((sp, idx) => (
+                                            <Panel
+                                                key={idx}
+                                                header={
+                                                    <Space>
+                                                        <Typography.Text strong>
+                                                            {sp.name || `Ürün ${idx + 1}`}
+                                                        </Typography.Text>
+                                                        {sp.sku && (
+                                                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                                SKU: {sp.sku}
+                                                            </Typography.Text>
+                                                        )}
+                                                        {sp.parsedMaterials.length > 0 && (
+                                                            <Typography.Text type="success" style={{ fontSize: 12 }}>
+                                                                ({sp.parsedMaterials.length} materyal)
+                                                            </Typography.Text>
+                                                        )}
+                                                    </Space>
+                                                }
+                                                extra={
+                                                    <Popconfirm
+                                                        title="Bu ürünü kaldırmak istediğinize emin misiniz?"
+                                                        onConfirm={(e) => { e?.stopPropagation(); removeSetProduct(idx); }}
+                                                        onCancel={(e) => e?.stopPropagation()}
+                                                    >
+                                                        <Button
+                                                            type="text"
+                                                            danger
+                                                            icon={<DeleteOutlined />}
+                                                            size="small"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        />
+                                                    </Popconfirm>
+                                                }
+                                            >
+                                                <Radio.Group
+                                                    options={[
+                                                        { label: 'Yeni Ürün Oluştur', value: false },
+                                                        { label: 'Mevcut Ürün Seç', value: true }
+                                                    ]}
+                                                    value={sp.isExisting}
+                                                    onChange={(e: any) => updateSetProduct(idx, 'isExisting', e.target.value)}
+                                                    style={{ marginBottom: 16 }}
+                                                    optionType="button"
+                                                    buttonStyle="solid"
+                                                />
+
+                                                {sp.isExisting ? (
+                                                    <div style={{ marginBottom: 16 }}>
+                                                        <Typography.Text strong>Mevcut Ürün Seç *</Typography.Text>
+                                                        <div style={{ display: 'flex', gap: 8, marginTop: 8, marginBottom: 8, alignItems: 'center' }}>
+                                                            <Typography.Text type="secondary" style={{ whiteSpace: 'nowrap', fontSize: 12 }}>Kategoriye göre:</Typography.Text>
+                                                            <Select allowClear placeholder="Tüm kategoriler" style={{ width: 200 }}
+                                                                value={productCategoryFilters[idx]}
+                                                                onChange={(val) => setProductCategoryFilters(prev => ({ ...prev, [idx]: val }))}
+                                                                options={Array.from(new Map(((existingProductsQuery?.data?.data as any[]) || []).filter((p: any) => p.product_categories?.id).map((p: any) => [p.product_categories.id, p.product_categories.name])).entries()).map(([id, name]) => ({ value: id, label: name }))}
+                                                            />
+                                                        </div>
+                                                        <Select value={sp.existingProductId as any}
+                                                            onChange={(val) => {
+                                                                const prod = ((existingProductsQuery?.data?.data as any[]) || []).find((p: any) => p.id === val) as any;
+                                                                updateSetProduct(idx, 'existingProductId', val);
+                                                                updateSetProduct(idx, 'name', prod?.name || '');
+                                                            }}
+                                                            style={{ width: '100%', display: 'block' }} placeholder="Sistemdeki ürünlerden seçiniz"
+                                                            showSearch optionLabelProp="label"
+                                                            filterOption={(input, option: any) => (option?.pname ?? '').toLowerCase().includes(input.toLowerCase())}
+                                                        >
+                                                            {((existingProductsQuery?.data?.data as any[]) || []).filter((p: any) => !productCategoryFilters[idx] || p.product_category_id === productCategoryFilters[idx]).map((p: any) => (
+                                                                <Select.Option key={p.id} value={p.id} pname={p.name} label={p.name}>
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                                                        {p.thumbnail_url
+                                                                            ? <img src={p.thumbnail_url} alt={p.name} style={{ width: 32, height: 32, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }} onError={(e: any) => { e.target.style.display = 'none'; }} />
+                                                                            : <div style={{ width: 32, height: 32, borderRadius: 4, background: '#f0f0f0', flexShrink: 0 }} />}
+                                                                        <div><div style={{ fontWeight: 500, fontSize: 13 }}>{p.name}</div>
+                                                                            {p.product_categories?.name && <div style={{ fontSize: 11, color: '#888' }}>{p.product_categories.name}</div>}</div>
+                                                                    </div>
+                                                                </Select.Option>
+                                                            ))}
+                                                        </Select>
+                                                        <Typography.Text type="secondary" style={{ display: 'block', marginTop: 6, fontSize: 12 }}>
+                                                            ✓ Sonraki adımda bu ürünün varyasyonları otomatik yüklenecek.
+                                                        </Typography.Text>
+                                                    </div>
+                                                ) : (
+                                                    <Row gutter={24}>
+                                                        <Col xs={24} md={12}>
+                                                            <div style={{ marginBottom: 16 }}>
+                                                                <Typography.Text strong>Ürün Adı *</Typography.Text>
+                                                                <Input
+                                                                    value={sp.name}
+                                                                    onChange={(e) => updateSetProduct(idx, 'name', e.target.value)}
+                                                                    placeholder="Ürün adı giriniz"
+                                                                    style={{ marginTop: 4 }}
+                                                                />
+                                                            </div>
+                                                            <div style={{ marginBottom: 16 }}>
+                                                                <Typography.Text strong>SKU</Typography.Text>
+                                                                <Input
+                                                                    value={sp.sku}
+                                                                    onChange={(e) => updateSetProduct(idx, 'sku', e.target.value)}
+                                                                    placeholder="Ürün SKU giriniz"
+                                                                    style={{ marginTop: 4 }}
+                                                                />
+                                                            </div>
+                                                            <div style={{ marginBottom: 16 }}>
+                                                                <Typography.Text strong>Kategori</Typography.Text>
+                                                                <Select
+                                                                    {...productCategorySelectProps}
+                                                                    value={sp.categoryId as any}
+                                                                    onChange={(val) => updateSetProduct(idx, 'categoryId', val)}
+                                                                    style={{ width: '100%', marginTop: 4 }}
+                                                                    placeholder="Kategori seçiniz"
+                                                                    showSearch
+                                                                    filterOption={(input, option) =>
+                                                                        (option?.label?.toString() ?? '').toLowerCase().includes(input.toLowerCase())
+                                                                    }
+                                                                />
+                                                            </div>
+                                                            <div style={{ marginBottom: 16 }}>
+                                                                <Typography.Text strong>Açıklama</Typography.Text>
+                                                                <TextArea
+                                                                    value={sp.description}
+                                                                    onChange={(e) => updateSetProduct(idx, 'description', e.target.value)}
+                                                                    placeholder="Ürün açıklaması"
+                                                                    rows={3}
+                                                                    style={{ marginTop: 4 }}
+                                                                />
+                                                            </div>
+                                                        </Col>
+                                                        <Col xs={24} md={12}>
+                                                            <div style={{ marginBottom: 16 }}>
+                                                                <Typography.Text strong>Ürün GLB Dosyası</Typography.Text>
+                                                                <Upload
+                                                                    accept=".glb,.gltf"
+                                                                    maxCount={1}
+                                                                    showUploadList={false}
+                                                                    beforeUpload={(file) => {
+                                                                        handleSetProductModel(idx, file);
+                                                                        return false;
+                                                                    }}
+                                                                >
+                                                                    <Button icon={<UploadOutlined />} style={{ marginTop: 4, width: '100%' }} loading={sp.parsingGLB}>
+                                                                        {sp.modelFile ? sp.modelFile.name : 'GLB Dosyası Seç'}
+                                                                    </Button>
+                                                                </Upload>
+                                                                {sp.parsingGLB && (
+                                                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                                        GLB ayrıştırılıyor...
+                                                                    </Typography.Text>
+                                                                )}
+                                                            </div>
+                                                            <div style={{ marginBottom: 16 }}>
+                                                                <Typography.Text strong>Ürün Görseli</Typography.Text>
+                                                                <Upload
+                                                                    accept="image/*"
+                                                                    maxCount={1}
+                                                                    showUploadList={false}
+                                                                    beforeUpload={(file) => {
+                                                                        handleSetProductThumbnail(idx, file);
+                                                                        return false;
+                                                                    }}
+                                                                >
+                                                                    <Button icon={<UploadOutlined />} style={{ marginTop: 4, width: '100%' }}>
+                                                                        {sp.thumbnailFile ? sp.thumbnailFile.name : 'Görsel Seç'}
+                                                                    </Button>
+                                                                </Upload>
+                                                                {sp.thumbnailPreview && (
+                                                                    <img
+                                                                        src={sp.thumbnailPreview}
+                                                                        alt="preview"
+                                                                        style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, marginTop: 8, border: '1px solid #d9d9d9' }}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                            {sp.parsedMaterials.length > 0 && (
+                                                                <div>
+                                                                    <Typography.Text strong>Bulunan Materyaller</Typography.Text>
+                                                                    <div style={{ marginTop: 4 }}>
+                                                                        {sp.parsedMaterials.map((mat, mIdx) => (
+                                                                            <Typography.Text
+                                                                                key={mIdx}
+                                                                                style={{ display: 'block', fontSize: 12, color: '#595959' }}
+                                                                            >
+                                                                                • {mat.name} ({mat.id})
+                                                                            </Typography.Text>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </Col>
+                                                    </Row>
+                                                )}
+
+                                                {/* Shared variants info */}
+                                                {managedMaterials.length > 0 && (
+                                                    <Card size="small" style={{ marginTop: 16, background: '#f6ffed', border: '1px solid #b7eb8f' }}>
+                                                        <Typography.Text type="success">
+                                                            <CheckCircleOutlined style={{ marginRight: 8 }} />
+                                                            Takımda tanımlanan {managedMaterials.length} materyalin varyasyonları bu ürüne otomatik uygulanacak.
+                                                        </Typography.Text>
+                                                    </Card>
+                                                )}
+                                            </Panel>
+                                        ))}
+                                    </Collapse>
+                                </>
+                            </Card>
+                        )}
+
+                        {/* Navigation buttons */}
+                        <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between' }}>
+                            <Button
+                                icon={<ArrowLeftOutlined />}
+                                onClick={() => setCurrentStep(0)}
+                                size="large"
+                            >
+                                Geri: Temel Bilgiler
+                            </Button>
+
+                            <Button
+                                type="primary"
+                                icon={<ArrowRightOutlined />}
+                                onClick={goToStep3}
+                                size="large"
+                            >
+                                Sonraki: Model & Varyasyon
+                            </Button>
+                        </div>
+                    </div>
+                    {/* STEP 2: MODEL BİLGİLERİ & VARYASYON YÖNETİMİ               */}
+                    {/* ═══════════════════════════════════════════════════════════ */}
+                    <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
 
                         {/* Panel 1: Model Bilgileri (Material Selection) */}
                         <Card title="Model Bilgileri" style={{ marginBottom: 24 }}>
@@ -1820,7 +2168,7 @@ export const SetEdit = () => {
                                                                         </Upload>
                                                                         <Button size="small" icon={<FolderOpenOutlined />} onClick={() => openVariantR2Picker(matIdx, varIdx, 'swatch')} title="R2'den seç">R2</Button>
                                                                     </Space>
-                                                                    {renderTextureThumb(variant.swatchPreview, 'Swatch')}
+                                                                    {renderTextureThumb(variant.swatchPreview, 'Swatch', matItem.material.baseColorTexture?.url)}
                                                                 </Col>
 
                                                                 {/* BaseColor */}
@@ -1830,9 +2178,9 @@ export const SetEdit = () => {
                                                                     </div>
                                                                     {variant.isOriginal ? (
                                                                         <div>
-                                                                            {variant.baseColorPreview ? (
+                                                                            {(variant.baseColorPreview || matItem.material.baseColorTexture?.url) ? (
                                                                                 <>
-                                                                                    {renderTextureThumb(variant.baseColorPreview, 'BaseColor')}
+                                                                                    {renderTextureThumb(variant.baseColorPreview, 'BaseColor', matItem.material.baseColorTexture?.url)}
                                                                                     <div style={{ fontSize: 11, color: '#52c41a', marginTop: 4 }}>
                                                                                         🔒 GLB'den
                                                                                     </div>
@@ -1859,7 +2207,7 @@ export const SetEdit = () => {
                                                                                 </Upload>
                                                                                 <Button size="small" icon={<FolderOpenOutlined />} onClick={() => openVariantR2Picker(matIdx, varIdx, 'baseColor')} title="R2'den seç">R2</Button>
                                                                             </Space>
-                                                                            {renderTextureThumb(variant.baseColorPreview, 'BaseColor')}
+                                                                            {renderTextureThumb(variant.baseColorPreview, 'BaseColor', matItem.material.baseColorTexture?.url)}
                                                                         </>
                                                                     )}
                                                                 </Col>
@@ -1871,9 +2219,9 @@ export const SetEdit = () => {
                                                                     </div>
                                                                     {variant.isOriginal ? (
                                                                         <div>
-                                                                            {variant.normalPreview ? (
+                                                                            {(variant.normalPreview || matItem.material.normalTexture?.url) ? (
                                                                                 <>
-                                                                                    {renderTextureThumb(variant.normalPreview, 'Normal')}
+                                                                                    {renderTextureThumb(variant.normalPreview, 'Normal', matItem.material.normalTexture?.url)}
                                                                                     <div style={{ fontSize: 11, color: '#52c41a', marginTop: 4 }}>
                                                                                         🔒 GLB'den
                                                                                     </div>
@@ -1900,7 +2248,7 @@ export const SetEdit = () => {
                                                                                 </Upload>
                                                                                 <Button size="small" icon={<FolderOpenOutlined />} onClick={() => openVariantR2Picker(matIdx, varIdx, 'normal')} title="R2'den seç">R2</Button>
                                                                             </Space>
-                                                                            {renderTextureThumb(variant.normalPreview, 'Normal')}
+                                                                            {renderTextureThumb(variant.normalPreview, 'Normal', matItem.material.normalTexture?.url)}
                                                                         </>
                                                                     )}
                                                                 </Col>
@@ -1912,9 +2260,9 @@ export const SetEdit = () => {
                                                                     </div>
                                                                     {variant.isOriginal ? (
                                                                         <div>
-                                                                            {variant.ormPreview ? (
+                                                                            {(variant.ormPreview || matItem.material.ormTexture?.url) ? (
                                                                                 <>
-                                                                                    {renderTextureThumb(variant.ormPreview, 'ORM')}
+                                                                                    {renderTextureThumb(variant.ormPreview, 'ORM', matItem.material.ormTexture?.url)}
                                                                                     <div style={{ fontSize: 11, color: '#52c41a', marginTop: 4 }}>
                                                                                         🔒 GLB'den
                                                                                     </div>
@@ -1941,7 +2289,7 @@ export const SetEdit = () => {
                                                                                 </Upload>
                                                                                 <Button size="small" icon={<FolderOpenOutlined />} onClick={() => openVariantR2Picker(matIdx, varIdx, 'orm')} title="R2'den seç">R2</Button>
                                                                             </Space>
-                                                                            {renderTextureThumb(variant.ormPreview, 'ORM')}
+                                                                            {renderTextureThumb(variant.ormPreview, 'ORM', matItem.material.ormTexture?.url)}
                                                                         </>
                                                                     )}
                                                                 </Col>
@@ -1970,307 +2318,10 @@ export const SetEdit = () => {
                         <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between' }}>
                             <Button
                                 icon={<ArrowLeftOutlined />}
-                                onClick={() => setCurrentStep(0)}
-                                size="large"
-                            >
-                                Geri: Temel Bilgiler
-                            </Button>
-
-                            <Button
-                                type="primary"
-                                icon={<ArrowRightOutlined />}
-                                onClick={() => setCurrentStep(2)}
-                                size="large"
-                            >
-                                Sonraki: Takıma Ait Ürünler
-                            </Button>
-                        </div>
-                    </div>
-
-                    {/* ═══════════════════════════════════════════════════════════ */}
-                    {/* STEP 3: TAKIMA AİT ÜRÜNLER                                */}
-                    {/* ═══════════════════════════════════════════════════════════ */}
-                    <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
-                        {!includeProducts ? (
-                            <Card
-                                style={{
-                                    marginBottom: 24,
-                                    border: '2px dashed #d9d9d9',
-                                    borderRadius: 12,
-                                    background: '#fafafa',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s',
-                                }}
-                                bodyStyle={{ padding: '40px 32px' }}
-                                hoverable
-                                onClick={() => setIncludeProducts(true)}
-                            >
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{
-                                        width: 64,
-                                        height: 64,
-                                        borderRadius: '50%',
-                                        background: 'linear-gradient(135deg, #f5f0ff 0%, #fff7e6 100%)',
-                                        border: '2px solid #d9d9d9',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        margin: '0 auto 16px',
-                                        fontSize: 28,
-                                    }}>
-                                        📦
-                                    </div>
-                                    <Typography.Title level={5} style={{ marginBottom: 8, color: '#262626' }}>
-                                        Takıma Özel Ürün Ekle
-                                    </Typography.Title>
-                                    <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 20, fontSize: 14 }}>
-                                        Bu takıma bağlı özel ürünler ekleyebilirsiniz. Varyasyonlar ürünlere otomatik uygulanır.
-                                    </Typography.Text>
-                                    <Button type="primary" icon={<PlusOutlined />} size="large">
-                                        Evet, Ürün Eklemek İstiyorum
-                                    </Button>
-                                    <div style={{ marginTop: 12 }}>
-                                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                            İstemiyorsanız bu adımı atlayabilirsiniz — varyasyonlar takım üzerinde kaydedilecektir.
-                                        </Typography.Text>
-                                    </div>
-                                </div>
-                            </Card>
-                        ) : (
-                            <Card
-                                title={
-                                    <Space>
-                                        <span>Takıma Ait Ürünler</span>
-                                        <Button
-                                            size="small"
-                                            onClick={() => { setIncludeProducts(false); setSetProducts([]); }}
-                                            style={{ fontSize: 12, color: '#8c8c8c', borderColor: '#d9d9d9' }}
-                                        >
-                                            Ürün Ekleme
-                                        </Button>
-                                    </Space>
-                                }
-                                extra={
-                                    <Button type="primary" icon={<PlusOutlined />} onClick={addSetProduct}>
-                                        Ürün Ekle
-                                    </Button>
-                                }
-                                style={{ marginBottom: 24 }}
-                            >
-                                <>
-
-                                    {setProducts.length === 0 && (
-                                        <div style={{ textAlign: 'center', padding: '40px 0', color: '#999' }}>
-                                            <Typography.Text type="secondary">
-                                                Henüz ürün eklenmedi. "Ürün Ekle" butonuna tıklayarak takıma ait ürünleri ekleyin.
-                                            </Typography.Text>
-                                        </div>
-                                    )}
-
-                                    <Collapse accordion>
-                                        {setProducts.map((sp, idx) => (
-                                            <Panel
-                                                key={idx}
-                                                header={
-                                                    <Space>
-                                                        <Typography.Text strong>
-                                                            {sp.name || `Ürün ${idx + 1}`}
-                                                        </Typography.Text>
-                                                        {sp.sku && (
-                                                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                                                SKU: {sp.sku}
-                                                            </Typography.Text>
-                                                        )}
-                                                        {sp.parsedMaterials.length > 0 && (
-                                                            <Typography.Text type="success" style={{ fontSize: 12 }}>
-                                                                ({sp.parsedMaterials.length} materyal)
-                                                            </Typography.Text>
-                                                        )}
-                                                    </Space>
-                                                }
-                                                extra={
-                                                    <Popconfirm
-                                                        title="Bu ürünü kaldırmak istediğinize emin misiniz?"
-                                                        onConfirm={(e) => { e?.stopPropagation(); removeSetProduct(idx); }}
-                                                        onCancel={(e) => e?.stopPropagation()}
-                                                    >
-                                                        <Button
-                                                            type="text"
-                                                            danger
-                                                            icon={<DeleteOutlined />}
-                                                            size="small"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        />
-                                                    </Popconfirm>
-                                                }
-                                            >
-                                                <Radio.Group
-                                                    options={[
-                                                        { label: 'Yeni Ürün Oluştur', value: false },
-                                                        { label: 'Mevcut Ürün Seç', value: true }
-                                                    ]}
-                                                    value={sp.isExisting}
-                                                    onChange={(e: any) => updateSetProduct(idx, 'isExisting', e.target.value)}
-                                                    style={{ marginBottom: 16 }}
-                                                    optionType="button"
-                                                    buttonStyle="solid"
-                                                />
-
-                                                {sp.isExisting ? (
-                                                    <div style={{ marginBottom: 16 }}>
-                                                        <Typography.Text strong>Mevcut Ürün Seç *</Typography.Text>
-                                                        <Select
-                                                            {...existingProductSelectProps}
-                                                            value={sp.existingProductId as any}
-                                                            onChange={(val, option: any) => {
-                                                                updateSetProduct(idx, 'existingProductId', val);
-                                                                updateSetProduct(idx, 'name', option?.label || '');
-                                                            }}
-                                                            style={{ width: '100%', marginTop: 4, maxWidth: 400, display: 'block' }}
-                                                            placeholder="Sistemdeki ürünlerden seçiniz"
-                                                            showSearch
-                                                            filterOption={(input, option) =>
-                                                                (option?.label?.toString() ?? '').toLowerCase().includes(input.toLowerCase())
-                                                            }
-                                                        />
-                                                        <Typography.Text type="secondary" style={{ display: 'block', marginTop: 8, fontSize: 13 }}>
-                                                            Not: Seçilen ürünün varyasyonları (eğer takımda tanımlanmışsa) takıma göre yeniden şekillenecektir.
-                                                        </Typography.Text>
-                                                    </div>
-                                                ) : (
-                                                    <Row gutter={24}>
-                                                        <Col xs={24} md={12}>
-                                                            <div style={{ marginBottom: 16 }}>
-                                                                <Typography.Text strong>Ürün Adı *</Typography.Text>
-                                                                <Input
-                                                                    value={sp.name}
-                                                                    onChange={(e) => updateSetProduct(idx, 'name', e.target.value)}
-                                                                    placeholder="Ürün adı giriniz"
-                                                                    style={{ marginTop: 4 }}
-                                                                />
-                                                            </div>
-                                                            <div style={{ marginBottom: 16 }}>
-                                                                <Typography.Text strong>SKU</Typography.Text>
-                                                                <Input
-                                                                    value={sp.sku}
-                                                                    onChange={(e) => updateSetProduct(idx, 'sku', e.target.value)}
-                                                                    placeholder="Ürün SKU giriniz"
-                                                                    style={{ marginTop: 4 }}
-                                                                />
-                                                            </div>
-                                                            <div style={{ marginBottom: 16 }}>
-                                                                <Typography.Text strong>Kategori</Typography.Text>
-                                                                <Select
-                                                                    {...productCategorySelectProps}
-                                                                    value={sp.categoryId as any}
-                                                                    onChange={(val) => updateSetProduct(idx, 'categoryId', val)}
-                                                                    style={{ width: '100%', marginTop: 4 }}
-                                                                    placeholder="Kategori seçiniz"
-                                                                    showSearch
-                                                                    filterOption={(input, option) =>
-                                                                        (option?.label?.toString() ?? '').toLowerCase().includes(input.toLowerCase())
-                                                                    }
-                                                                />
-                                                            </div>
-                                                            <div style={{ marginBottom: 16 }}>
-                                                                <Typography.Text strong>Açıklama</Typography.Text>
-                                                                <TextArea
-                                                                    value={sp.description}
-                                                                    onChange={(e) => updateSetProduct(idx, 'description', e.target.value)}
-                                                                    placeholder="Ürün açıklaması"
-                                                                    rows={3}
-                                                                    style={{ marginTop: 4 }}
-                                                                />
-                                                            </div>
-                                                        </Col>
-                                                        <Col xs={24} md={12}>
-                                                            <div style={{ marginBottom: 16 }}>
-                                                                <Typography.Text strong>Ürün GLB Dosyası</Typography.Text>
-                                                                <Upload
-                                                                    accept=".glb,.gltf"
-                                                                    maxCount={1}
-                                                                    showUploadList={false}
-                                                                    beforeUpload={(file) => {
-                                                                        handleSetProductModel(idx, file);
-                                                                        return false;
-                                                                    }}
-                                                                >
-                                                                    <Button icon={<UploadOutlined />} style={{ marginTop: 4, width: '100%' }} loading={sp.parsingGLB}>
-                                                                        {sp.modelFile ? sp.modelFile.name : 'GLB Dosyası Seç'}
-                                                                    </Button>
-                                                                </Upload>
-                                                                {sp.parsingGLB && (
-                                                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                                                        GLB ayrıştırılıyor...
-                                                                    </Typography.Text>
-                                                                )}
-                                                            </div>
-                                                            <div style={{ marginBottom: 16 }}>
-                                                                <Typography.Text strong>Ürün Görseli</Typography.Text>
-                                                                <Upload
-                                                                    accept="image/*"
-                                                                    maxCount={1}
-                                                                    showUploadList={false}
-                                                                    beforeUpload={(file) => {
-                                                                        handleSetProductThumbnail(idx, file);
-                                                                        return false;
-                                                                    }}
-                                                                >
-                                                                    <Button icon={<UploadOutlined />} style={{ marginTop: 4, width: '100%' }}>
-                                                                        {sp.thumbnailFile ? sp.thumbnailFile.name : 'Görsel Seç'}
-                                                                    </Button>
-                                                                </Upload>
-                                                                {sp.thumbnailPreview && (
-                                                                    <img
-                                                                        src={sp.thumbnailPreview}
-                                                                        alt="preview"
-                                                                        style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, marginTop: 8, border: '1px solid #d9d9d9' }}
-                                                                    />
-                                                                )}
-                                                            </div>
-                                                            {sp.parsedMaterials.length > 0 && (
-                                                                <div>
-                                                                    <Typography.Text strong>Bulunan Materyaller</Typography.Text>
-                                                                    <div style={{ marginTop: 4 }}>
-                                                                        {sp.parsedMaterials.map((mat, mIdx) => (
-                                                                            <Typography.Text
-                                                                                key={mIdx}
-                                                                                style={{ display: 'block', fontSize: 12, color: '#595959' }}
-                                                                            >
-                                                                                • {mat.name} ({mat.id})
-                                                                            </Typography.Text>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </Col>
-                                                    </Row>
-                                                )}
-
-                                                {/* Shared variants info */}
-                                                {managedMaterials.length > 0 && (
-                                                    <Card size="small" style={{ marginTop: 16, background: '#f6ffed', border: '1px solid #b7eb8f' }}>
-                                                        <Typography.Text type="success">
-                                                            <CheckCircleOutlined style={{ marginRight: 8 }} />
-                                                            Takımda tanımlanan {managedMaterials.length} materyalin varyasyonları bu ürüne otomatik uygulanacak.
-                                                        </Typography.Text>
-                                                    </Card>
-                                                )}
-                                            </Panel>
-                                        ))}
-                                    </Collapse>
-                                </>
-                            </Card>
-                        )}
-
-                        {/* Navigation buttons */}
-                        <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between' }}>
-                            <Button
-                                icon={<ArrowLeftOutlined />}
                                 onClick={() => setCurrentStep(1)}
                                 size="large"
                             >
-                                Geri: Varyasyonlar
+                                Geri: Takıma Ait Ürünler
                             </Button>
 
                             <Button
@@ -2280,10 +2331,12 @@ export const SetEdit = () => {
                                 size="large"
                                 loading={saving}
                             >
-                                Takımı ve Ürünleri Kaydet
+                                Takımı Kaydet
                             </Button>
                         </div>
                     </div>
+
+                    {/* ═══════════════════════════════════════════════════════════ */}
                 </Form>
 
                 {/* Media Modal */}
