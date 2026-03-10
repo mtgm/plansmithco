@@ -50,6 +50,18 @@
             "value": "Standard 2x4 Lumber, Plywood, Caster, Screw"
           }
         ]
+      },
+      {
+        "id": "prod_1773184672195",
+        "name": "27-Gal Tote Rack (6-Bin)",
+        "sku": "3x2-STR",
+        "thumbnail": "/assets-r2/Storage Tote Racks/3x2 Storage Tote Rack/3x4-STR-Render-1.jpg",
+        "description": "Does it fit your space? 🛠️\n\nThis is a DIGITAL BUILD PLAN. Get the blueprints to build this rack this weekend.\n\n✅ COMPATIBLE BINS:\n\n• Home Depot HDX (27-Gal)\n\n• Lowe's Commander (27-Gal)\n\n• Husky & Sterilite Industrial\n\nTap the button below to download the PDF plans instantly from Etsy.",
+        "listingUrl": "https://www.etsy.com/shop/PlanSmithCoDIY",
+        "masterModel": "/assets-r2/Storage Tote Racks/3x2 Storage Tote Rack/3x2-STR-2k_v1.glb",
+        "price": 0,
+        "variantGroups": [],
+        "customAttributes": []
       }
     ]
   }
