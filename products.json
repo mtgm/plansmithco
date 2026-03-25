@@ -66,7 +66,7 @@
             "items": [
               {
                 "name": "Orijinal",
-                "value": "Yatay_Baglanti.001_baseColor.png",
+                "value": "/assets-r2/textures/1x2V3/ray_baseColor.png",
                 "textureConfig": {
                   "materialName": "Yatay_Baglanti.001",
                   "baseColor": "Yatay_Baglanti.001_baseColor.png"
