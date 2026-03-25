@@ -60,7 +60,68 @@
         "listingUrl": "https://www.etsy.com/shop/PlanSmithCoDIY",
         "masterModel": "/assets-r2/Storage Tote Racks/3x2 Storage Tote Rack/3x2-STR-2k_v1.glb",
         "price": 0,
-        "variantGroups": [],
+        "variantGroups": [
+          {
+            "groupName": "Yatay_Baglanti.001",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "Yatay_Baglanti.001_baseColor.png",
+                "textureConfig": {
+                  "materialName": "Yatay_Baglanti.001",
+                  "baseColor": "Yatay_Baglanti.001_baseColor.png"
+                }
+              },
+              {
+                "name": "Yeni",
+                "value": "/assets-r2/textures/1x2V3/dikme_baseColor.png",
+                "textureConfig": {
+                  "materialName": "Yatay_Baglanti.001",
+                  "baseColor": "/assets-r2/textures/1x2V3/dikme_baseColor.png"
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "Dikmeler.001",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "Dikmeler.001_baseColor.png",
+                "textureConfig": {
+                  "materialName": "Dikmeler.001",
+                  "baseColor": "Dikmeler.001_baseColor.png"
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "Raylar.001",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "Raylar.001_baseColor.png",
+                "textureConfig": {
+                  "materialName": "Raylar.001",
+                  "baseColor": "Raylar.001_baseColor.png"
+                }
+              }
+            ]
+          },
+          {
+            "groupName": "Ust_Tabla.001",
+            "items": [
+              {
+                "name": "Orijinal",
+                "value": "Ust_Tabla.001_baseColor.png",
+                "textureConfig": {
+                  "materialName": "Ust_Tabla.001",
+                  "baseColor": "Ust_Tabla.001_baseColor.png"
+                }
+              }
+            ]
+          }
+        ],
         "customAttributes": []
       }
     ]
