@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
+:root {
+    /* Muted Texts & Borders */
+    --text-main: #2C2520;
+    --text-muted: #6B6259;
+    --border-color: rgba(44, 37, 32, 0.08);
+    --border-light: rgba(44, 37, 32, 0.04);
+    
+    /* Backgrounds */
+    --bg-app: #FAF8F5;
+    --bg-card: rgba(255, 252, 248, 0.75);
+    --bg-elevated: rgba(255, 255, 255, 0.6);
+    --bg-input: #FFFFFF;
+    
+    /* Accents */
+    --accent: #F59E0B;
+    --accent-dark: #C05621;
+    --accent-bg: rgba(245, 158, 11, 0.12);
+    --accent-border: rgba(245, 158, 11, 0.22);
+    
+    /* Glass Effects */
+    --glass-bg: rgba(255, 252, 248, 0.75);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.65);
+    --glass-blur: blur(24px);
+    --glass-shadow: 0 8px 30px rgba(44, 37, 32, 0.08);
+    
+    /* Variables for specific components */
+    --input-border: rgba(44, 37, 32, 0.1);
+    
+    /* Layout */
+    --radius-card: 20px;
+    --sidebar-w: 240px;
+}
+
+[data-theme="dark"] {
+    /* Muted Texts & Borders */
+    --text-main: #ECECEC;
+    --text-muted: #999999;
+    --border-color: rgba(255, 255, 255, 0.06);
+    --border-light: rgba(255, 255, 255, 0.03);
+    
+    /* Backgrounds */
+    --bg-app: #0F0F0F;
+    --bg-card: rgba(255, 255, 255, 0.03);
+    --bg-elevated: rgba(255, 255, 255, 0.05);
+    --bg-input: rgba(255, 255, 255, 0.02);
+    
+    /* Accents */
+    --accent: #F59E0B;
+    --accent-dark: #FCD34D;
+    --accent-bg: rgba(245, 158, 11, 0.15);
+    --accent-border: rgba(245, 158, 11, 0.3);
+    
+    /* Glass Effects */
+    --glass-bg: rgba(15, 15, 15, 0.9);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.06);
+    --glass-blur: blur(20px);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    
+    /* Variables for specific components */
+    --input-border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-main);
+    background-color: var(--bg-app);
+    min-height: 100vh;
+}
+
+/* Let's keep the ambient background gradients only for light mode */
+[data-theme="light"] body, :root body {
+    background-image:
+        radial-gradient(at 10% 0%, hsla(35, 100%, 96%, 1) 0, transparent 50%),
+        radial-gradient(at 90% 0%, hsla(50, 100%, 94%, 1) 0, transparent 50%),
+        radial-gradient(at 50% 100%, hsla(20, 100%, 96%, 1) 0, transparent 50%);
+    background-attachment: fixed;
+}
+
+[data-theme="dark"] body {
+    background-image: none;
+}
