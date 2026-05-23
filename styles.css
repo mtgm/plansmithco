@@ -1,141 +1,2393 @@
-/* styles.css - Premium UI */
+/* --- TASARIM SİSTEMİ --- */
 :root {
-  --primary-color: #111; /* Siyah Premium */
-  --bg-color: #f9f9f9;
-  --text-color: #333;
+    /* === LOGO RENKLERİ === */
+    --logo-gold: #f59e0b;
+    --logo-navy: #111827;
+
+    /* === ANA RENKLER === */
+    --accent-color: #f59e0b;
+    --primary-dark: var(--logo-navy);
+    --bg-color: #eef2f6;
+
+    /* === TEXT PALETTE === */
+    --primary-darkest: #030712;
+    --primary-medium: #374151;
+    --primary-light: #6b7280;
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #9ca3af;
+
+    /* === ACCENT PALETTE === */
+    --accent-primary: #f59e0b;
+    --accent-hover: #f59e0b;
+    --accent-light: #fffbeb;
+
+    /* === GLASS SYSTEM (Premium / Frosty) === */
+    /* Daha "buzlu" ve kalın cam hissi için gradient + noise */
+    --glass-bg: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.70) 0%,
+            rgba(255, 255, 255, 0.40) 100%);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.65);
+    --glass-shadow:
+        0 8px 32px 0 rgba(31, 38, 135, 0.15),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    /* İç parlama */
+    --glass-blur: blur(20px) saturate(180%);
+
+    /* Child elements on glass (lighter / distinct) */
+    --surface-glass: rgba(255, 255, 255, 0.5);
+    --surface-glass-hover: rgba(255, 255, 255, 0.75);
+    --surface-glass-active: rgba(255, 255, 255, 0.9);
+
+    --border-light: rgba(255, 255, 255, 0.5);
+    --border-medium: rgba(255, 255, 255, 0.7);
+
+    --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+    --radius-xl: 24px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  background-color: var(--bg-color);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
+    margin: 0;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    background-color: #eef2f6;
+    /* Derinlik katan gradient arka plan */
+    background-image:
+        radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.15) 0px, transparent 50%);
+    background-attachment: fixed;
+    background-size: cover;
+    display: flex;
 }
 
-/* --- 1. YÜKLEME EKRANI (LOADER) --- */
-#loader-container {
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background-color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999; /* En üstte */
-  transition: opacity 0.5s ease-out; /* Kayboluş efekti */
+/* === BASE TYPOGRAPHY & ELEMENTS === */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--text-primary);
+    margin: 0 0 16px 0;
 }
 
-/* Logo Animasyonu */
-.brand-logo {
-  width: 360px; /* Logo boyutu */
-  height: auto;
-  object-fit: contain;
-  margin-bottom: 20px;
-  animation: pulse 2s infinite ease-in-out;
+p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0 0 16px 0;
 }
 
-.loading-text {
-  font-size: 14px;
-  color: #888;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  font-weight: 500;
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: color 0.2s;
 }
 
-/* Nefes Alma Efekti */
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.8; }
-  100% { transform: scale(1); opacity: 1; }
+a:hover {
+    color: var(--accent-hover);
 }
 
-/* Loader Gizleme Sınıfı */
-.hidden {
-  opacity: 0;
-  pointer-events: none;
+small {
+    color: var(--text-muted);
 }
 
-/* --- 2. MODEL VIEWER --- */
+label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+input,
+button,
+select,
+textarea {
+    font-family: inherit;
+    color: var(--text-primary);
+}
+
+/* Lists */
+ul,
+ol {
+    color: var(--text-secondary);
+}
+
+strong,
+b {
+    color: var(--text-primary);
+}
+
+#main-layout {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    padding: 12px;
+    gap: 12px;
+    transition: padding-right 0.3s ease;
+}
+
+#main-layout.panel-open {
+    padding-right: 428px;
+    /* 400px panel width + 16px gap + 12px base padding */
+}
+
+/* --- SOL PANEL --- */
+#sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+    border-radius: var(--radius-xl);
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--glass-shadow);
+    z-index: 10;
+    overflow: hidden;
+}
+
+#brand-header {
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    gap: 8px;
+    flex-shrink: 0;
+    background: transparent;
+    /* Camın kendisi zaten sidebar'da */
+    border-bottom: 1px solid var(--border-light);
+}
+
+.brand-info {
+    text-align: left;
+}
+
+
+#back-btn {
+    display: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border-medium);
+    background: var(--surface-glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    color: var(--text-primary);
+}
+
+#back-btn:hover {
+    background: var(--surface-glass-hover);
+    border-color: var(--border-medium);
+}
+
+#panel-product-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary) !important;
+    margin-bottom: 4px;
+}
+
+.brand-name {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.brand-tagline {
+    font-size: 12px;
+    color: var(--text-secondary);
+    /* Daha yumuşak */
+    font-weight: 600;
+}
+
+.brand-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent-color);
+    font-weight: 600;
+    background: rgba(245, 158, 11, 0.10);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.section-divider {
+    height: 10px;
+    background: var(--surface-glass-hover);
+    margin: 0 16px;
+}
+
+.cat-list-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-muted) !important;
+    padding: 16px 20px 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#back-arrow {
+    display: none;
+    color: var(--text-muted);
+}
+
+.logo-box {
+    width: 90px;
+    height: 90px;
+    border-radius: 8px;
+    border: 1px solid var(--border-medium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-glass-hover);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    margin-left: auto;
+}
+
+.logo-box img {
+    width: 100%;
+}
+
+#content-area {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    padding-bottom: 20px;
+}
+
+/* Kategori List */
+#category-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 16px 20px;
+}
+
+.cat-card {
+    background: var(--surface-glass);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.cat-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+    pointer-events: none;
+}
+
+.cat-card:hover {
+    border-color: var(--border-medium);
+    background: var(--surface-glass-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.cat-card:hover::before {
+    transform: translateX(100%);
+}
+
+.cat-thumb {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--border-light);
+}
+
+.cat-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.cat-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.cat-count {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* Category Info Panel */
+.category-info-panel {
+    display: none;
+    padding: 0 16px;
+    margin-bottom: 16px;
+}
+
+.category-panel-title {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.category-panel-count {
+    margin: 0 0 12px 0;
+    font-size: 12px;
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+/* Category Description Collapsed State - ONLY clamp properties */
+.category-desc-collapsed {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Base styles for category description (both collapsed and expanded) */
+#category-desc {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.3);
+    /* Slightly flatter for text readability */
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    text-align: justify;
+    hyphens: auto;
+}
+
+.desc-wrapper {
+    position: relative;
+}
+
+.desc-toggle-btn {
+    display: none;
+    margin-top: 8px;
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.desc-toggle-btn:hover {
+    color: var(--accent-hover);
+}
+
+/* Search Wrapper */
+.search-wrapper {
+    padding: 8px 16px 16px;
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 28px;
+    top: 24.5px;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+#search-input {
+    width: 100%;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.4);
+    box-shadow: none;
+    /* Temiz görünüm */
+    color: var(--text-primary);
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s;
+    padding-left: 36px;
+    padding-right: 12px;
+}
+
+#search-input:focus {
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: var(--accent-color);
+}
+
+/* Ürün Detay */
+#product-view {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+}
+
+#product-detail-area {
+    padding: 24px;
+    border-bottom: 1px solid var(--surface-glass);
+    background: transparent;
+}
+
+#p-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    line-height: 1.2;
+    color: var(--text-primary);
+}
+
+/* AÇIKLAMA ALANI (Accordion) */
+#desc-wrapper {
+    position: relative;
+    margin-bottom: 16px;
+    margin-top: 8px;
+}
+
+#p-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    transition: all 0.3s ease;
+}
+
+/* Panel Product Description Collapsed State - ONLY clamp properties */
+.panel-product-desc-collapsed {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+}
+
+/* Ürün açıklaması wrapper (detail panel) */
+#panel-product-desc-wrapper {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+/* Base styles for panel product description (both collapsed and expanded) */
+#panel-product-description {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    padding: 12px;
+    background: var(--surface-glass);
+    border: 1px solid var(--border-medium);
+    border-radius: 8px;
+    text-align: justify;
+    hyphens: auto;
+}
+
+.desc-collapsed {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    padding-right: 24px;
+    color: var(--text-muted);
+    /* Ok için yer */
+}
+
+#desc-toggle-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-color);
+    transition: transform 0.3s;
+}
+
+.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/* AKSİYON SATIRI */
+.action-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    margin-top: 16px;
+}
+
+#p-price {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    /* Changed for better contrast on glass */
+}
+
+.buy-btn {
+    background: var(--primary-dark);
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.buy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+#p-learn-more {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid transparent;
+}
+
+#p-learn-more:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.4);
+    border-color: var(--border-light);
+}
+
+/* Alt Liste (Kompakt) */
+#product-list {
+    padding: 10px 16px 20px;
+}
+
+.prod-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: var(--surface-glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.prod-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+    pointer-events: none;
+}
+
+.prod-item:hover {
+    background: var(--surface-glass-hover);
+    border-color: var(--border-medium);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.prod-item:hover::before {
+    transform: translateX(100%);
+}
+
+.prod-item.active {
+    background: rgba(255, 255, 255, 0.6);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 1px var(--accent-color), 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+.prod-thumb {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--border-light);
+    object-fit: cover;
+}
+
+.prod-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.prod-name {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    font-weight: 600;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.prod-price {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+#panel-product-desc-toggle {
+    display: none;
+    margin-top: 4px;
+    margin-left: 12px;
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 0;
+}
+
+#panel-product-desc-toggle.show {
+    display: block !important;
+}
+
+#panel-product-desc-toggle:hover {
+    text-decoration: underline;
+    color: var(--accent-hover);
+}
+
+/* --- DETAIL PANEL CUSTOM ATTRIBUTES (Accordion Style) --- */
+#custom-attributes-container {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.custom-attr-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.custom-attr-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 4px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: color 0.2s;
+}
+
+.custom-attr-header:hover {
+    color: var(--surface-solid);
+}
+
+.custom-attr-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.custom-attr-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.custom-attr-arrow {
+    transition: transform 0.3s ease;
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+}
+
+.custom-attr-item.open .custom-attr-arrow {
+    transform: rotate(180deg);
+}
+
+.custom-attr-content {
+    height: 0;
+    overflow: hidden;
+    transition: height 0.3s ease;
+}
+
+.custom-attr-content-inner {
+    padding: 8px 4px 16px 32px;
+    /* Indent content */
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    text-align: justify;
+    hyphens: auto;
+}
+
+/* --- SAĞ PANEL (3D SAHNE) --- */
+#stage-wrapper {
+    flex: 1;
+    position: relative;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: var(--radius-xl);
+    border: var(--glass-border);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--glass-shadow);
+}
+
+#default-poster {
+    position: absolute;
+    inset: 0;
+    background: url('/scene.jpg') center/cover no-repeat;
+    opacity: 0.5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 20%);
+    mask-image: linear-gradient(to right, transparent 0%, black 20%);
+}
+
+#default-poster img,
+#default-poster span {
+    display: none;
+    /* Hide logo and text */
+}
+
 model-viewer {
-  width: 100%;
-  height: 100%;
-  --poster-color: transparent;
-  background-color: var(--bg-color);
+    width: 100%;
+    flex: 1;
+    --poster-color: transparent;
 }
 
-/* --- 3. AR BUTONU --- */
-#ar-btn {
-  display: none; /* JS ile açılacak */
-  position: fixed;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  
-  background-color: var(--primary-color);
-  color: #fff;
-  
-  padding: 14px 28px;
-  border-radius: 50px; /* Hap şeklinde */
-  border: none;
-  
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2); /* Premium Gölge */
-  cursor: pointer;
-  z-index: 100;
-  transition: transform 0.2s, box-shadow 0.2s;
-  
-  /* İçerik hizalama */
-  display: flex;
-  align-items: center;
-  gap: 10px;
+model-viewer::part(default-ar-button) {
+    display: none;
 }
 
-#ar-btn:active {
-  transform: translateX(-50%) scale(0.95); /* Tıklama efekti */
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+/* --- KONTROL PANELİ (DOCK LAYOUT) --- */
+#controls-dock {
+    background: #fff;
+    border-top: 1px solid #e2e8f0;
+    padding: 0;
+    z-index: 20;
+    transition: transform 0.3s;
+    display: flex;
+    flex-direction: column;
 }
 
-/* AR İkonu (Buton içi) */
-#ar-btn::before {
-  content: '';
-  display: block;
-  width: 20px;
-  height: 20px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M3 4c0-1.1.9-2 2-2h4v2H5v4H3V4zm0 16c0 1.1.9 2 2 2h4v-2H5v-4H3v4zm18-16c0-1.1-.9-2-2-2h-4v2h4v4h2V4zm0 16c0 1.1-.9 2-2 2h-4v-2h4v-4h2v4zM12 7l-5 3v5l5 3 5-3v-5l-5-3zm-3 4.35l3 1.8 3-1.8V15l-3 1.8-3-1.8v-3.65z'/%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
+.hidden-dock {
+    transform: translateY(100%);
+    display: none !important;
 }
 
-/* Hata Mesajı Kutusu */
-#error-toast {
-  display: none;
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #ff3b30;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-weight: 600;
-  box-shadow: 0 5px 20px rgba(255, 59, 48, 0.3);
-  z-index: 2000;
-  font-size: 14px;
+/* Hide Mobile Tabs by default (Desktop) */
+#mobile-variant-tabs {
+    display: none;
 }
 
-#ar-btn {
-    /* Varsayılan genellikle 12px-16px civarıdır. */
-    /* Bunu artırarak yukarı taşırsın. */
-    bottom: 100px; 
-    
-    /* Eğer sağdan/soldan hizalama sorunu yaşarsan: */
-    left: 50%;
-    transform: translateX(-50%);
-    position: absolute; /* Model-viewer bunu genelde override eder ama garanti olsun */
+/* Search Input */
+#search-input {
+    width: 100%;
+    padding: 10px 12px;
+    padding-left: 36px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #f1f5f9;
+    transition: all 0.2s;
+}
+
+#search-input::placeholder {
+    color: #94a3b8;
+}
+
+#search-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+/* Sekmeler */
+#tabs-container {
+    display: flex;
+    gap: 12px;
+    padding: 8px 16px 0 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--text-primary);
+}
+
+.tab-btn {
+    padding: 6px 4px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-btn.active {
+    color: var(--surface-solid);
+    border-bottom-color: var(--accent-color);
+}
+
+/* Spinner Animation */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--text-primary);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* Alt İçerik: Varyasyonlar + AR Butonu */
+#dock-content {
+    display: flex;
+    align-items: center;
+    height: 85px;
+    padding: 0 16px;
+}
+
+#active-variants-container {
+    flex: 1;
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    align-items: center;
+    height: 100%;
+    padding-right: 12px;
+}
+
+.variant-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.v-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 2px solid var(--text-secondary);
+    background-size: cover;
+    background-position: center;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.variant-item.selected .v-btn {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(212, 165, 116, 0.3);
+}
+
+.v-label {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+    max-width: 50px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.variant-item.selected .v-label {
+    color: var(--accent-color);
+}
+
+/* AR Butonu (Sağ Tarafta Sabit) */
+#ar-area {
+    width: 60px;
+    height: 60px;
+    border-left: 1px solid #f1f5f9;
+    padding-left: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+#dock-ar-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--primary-dark);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#dock-ar-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
+}
+
+.ar-label {
+    font-size: 9px;
+    font-weight: 800;
+    color: #f8fafc;
+}
+
+#loader-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+/* Hakkımızda Section */
+#about-section {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    pointer-events: none;
+}
+
+#about-section.hidden {
+    display: none;
+}
+
+.about-content {
+    max-width: 500px;
+    padding: 48px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+    pointer-events: all;
+}
+
+.about-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+}
+
+.about-content h2 {
+    font-size: 28px;
+    font-weight: 800;
+    color: #f8fafc;
+    margin: 0 0 8px 0;
+}
+
+.about-content p {
+    font-size: 14px;
+    color: #e2e8f0;
+    margin: 0 0 16px 0;
+    line-height: 1.6;
+}
+
+.about-description {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--text-primary);
+}
+
+/* --- RESPONSIVE --- */
+@media (min-width: 901px) {
+    #ar-area {
+        display: none;
+    }
+
+    #desc-toggle-btn {
+        display: none !important;
+    }
+
+    .desc-collapsed {
+        -webkit-line-clamp: unset !important;
+        line-clamp: unset !important;
+    }
+
+    /* Hide mobile back button on desktop */
+    #mobile-back-btn {
+        display: none !important;
+    }
+}
+
+/* MOBILE LAYOUT (Split Screen: AR Top / Info Bottom) */
+@media (max-width: 900px) {
+    #main-layout {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        height: 100dvh;
+        padding: 0;
+        gap: 0;
+        background: transparent;
+        overflow: hidden;
+    }
+
+    /* 1. AR View - Hidden by default, shown when product active */
+    #stage-wrapper {
+        display: none;
+        order: 1;
+        width: 100%;
+        flex: 1;
+        min-height: 0;
+        /* User requested FLAT borders like ar-view.html */
+        border-radius: 0;
+        border: none;
+        border-bottom: 1px solid var(--border-light);
+        z-index: 5;
+        background: transparent;
+    }
+
+    /* 2. Sidebar (Lists) - Full Screen by default */
+    #sidebar {
+        order: 2;
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        border: none;
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        background: var(--bg-color);
+        /* Ensure opaque background */
+    }
+
+    /* STATE: Product Active (Split Screen) */
+    #main-layout.mobile-product-active #stage-wrapper {
+        display: flex;
+    }
+
+    #main-layout.mobile-product-active #sidebar {
+        display: none;
+    }
+
+    /* 3. Detail Panel - Bottom 50% originally, now Dynamic */
+    #detail-panel {
+        display: none;
+        order: 2;
+        position: relative;
+        bottom: auto;
+        left: auto;
+        right: auto;
+        top: auto;
+        width: 100%;
+        height: 50vh;
+        height: 50dvh;
+
+        /* Match AR View: Flat Top */
+        border-radius: 0;
+        /* User said "flat", but ar-view has 20px top radius. I will use 20px per code. -> UPDATED: User explicitly requested NO radius. */
+        transform: none;
+        transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+        /* THEME: Milky Glass */
+        background: var(--glass-bg);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        border-top: var(--glass-border);
+        border-bottom: none;
+        border-left: none;
+        /* Full width */
+        border-right: none;
+        /* Fix double radius by clipping children */
+        overflow: hidden;
+
+        z-index: 50;
+        flex-direction: column;
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+        /* Softer shadow */
+        flex-shrink: 0;
+    }
+
+    /* Show panel when product is active */
+    #main-layout.mobile-product-active #detail-panel {
+        display: flex;
+    }
+
+    #main-layout.mobile-product-active #detail-panel.show {
+        transform: none;
+    }
+
+    /* Mobile specific adjustments inside panel */
+    #panel-header {
+        text-align: center;
+        padding-bottom: 8px;
+    }
+
+    #panel-header .product-title-row {
+        justify-content: center;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    #panel-product-name {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .panel-tab {
+        padding: 12px;
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+
+    .panel-tab.active {
+        color: var(--text-primary);
+        border-bottom-color: var(--accent-color);
+    }
+
+    /* Mobile Collapsed State */
+    #detail-panel.collapsed {
+        height: 80px !important;
+        /* Slightly taller for handle visibility */
+        transform: none !important;
+        overflow: hidden;
+    }
+
+    #detail-panel.collapsed #panel-close-btn {
+        background: var(--accent-color) !important;
+        color: white !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    }
+
+    #main-layout.panel-open {
+        padding-right: 0 !important;
+    }
+
+    #detail-panel:not(.collapsed) #panel-close-btn {
+        transform: rotate(90deg);
+        background: var(--surface-glass-active);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-sm);
+        border: none;
+    }
+
+    /* Mobile Back Button (In AR View) */
+    #mobile-back-btn {
+        position: absolute;
+        top: 24px;
+        right: 24px;
+        /* Move to right like ar-view if needed, or keep left? Standard is left. */
+        left: 24px;
+        right: auto;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        /* Circle like ar-view */
+        background: var(--surface-glass);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-primary);
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 20;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* --- MOBILE VARIANT TABS (Modern Horizontal) --- */
+    #mobile-variant-tabs {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        padding: 0 16px 12px 16px;
+        margin-bottom: 0;
+        border-bottom: 1px solid var(--border-light);
+        border-top: 1px solid var(--border-light);
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    #mobile-variant-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .mobile-tabs-container {
+        position: relative;
+        display: flex;
+        align-items: left;
+        margin-bottom: 0px;
+        width: 100%;
+
+
+
+        /* Slight bg for tab strip */
+    }
+
+    /* Scroll Arrow Buttons - Glass Style */
+    .tab-arrow {
+        position: absolute;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--surface-glass);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--border-light);
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        padding: 0;
+        transition: all 0.2s;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .tab-arrow:hover {
+        background: var(--surface-glass-hover);
+    }
+
+    .tab-arrow.left {
+        left: 8px;
+    }
+
+    .tab-arrow.right {
+        right: 8px;
+    }
+
+    .mobile-variant-tab {
+        flex: 0 0 auto;
+        padding: 12px 0;
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        position: relative;
+        transition: color 0.3s ease;
+    }
+
+    .mobile-variant-tab.active {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    .mobile-variant-tab.active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--accent-color);
+        border-radius: 3px 3px 0 0;
+    }
+
+    #variant-accordion-container .accordion-header {
+        display: none !important;
+    }
+
+    #variant-accordion-container .variant-accordion-item:not(.open) {
+        display: none;
+    }
+
+    #variant-accordion-container .variant-accordion-item {
+        border: none;
+        background: transparent;
+        margin: 0;
+        padding: 0;
+    }
+
+    #main-layout.mobile-product-active #detail-panel {
+        display: flex;
+    }
+
+    #main-layout.mobile-product-active #detail-panel.show {
+        transform: none;
+    }
+
+    /* Mobile specific adjustments inside panel */
+    #panel-header {
+        text-align: center;
+        padding-bottom: 8px;
+
+
+    }
+
+    #panel-header .product-title-row {
+        justify-content: center;
+        flex-direction: column;
+        gap: 4px;
+
+    }
+
+    #panel-product-name {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .panel-tab {
+        padding: 12px;
+        font-size: 14px;
+        color: var(--text-secondary);
+
+    }
+
+    .panel-tab.active {
+        color: var(--text-primary);
+        border-bottom-color: var(--accent-color);
+    }
+
+    /* Mobile Collapsed State */
+    #detail-panel.collapsed {
+        height: 70px !important;
+        /* Slightly taller for handle visibility */
+        transform: none !important;
+        overflow: hidden;
+        border-radius: 0px;
+
+    }
+
+    #detail-panel.collapsed #panel-close-btn {
+        background: var(--accent-color) !important;
+        color: white !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    }
+
+    #main-layout.panel-open {
+        padding-right: 0 !important;
+    }
+
+    #detail-panel:not(.collapsed) #panel-close-btn {
+        transform: rotate(90deg);
+        background: var(--surface-glass-active);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-sm);
+        border: none;
+        background: var(--accent-color);
+
+    }
+
+    /* Mobile Back Button (In AR View) */
+    #mobile-back-btn {
+        position: absolute;
+        top: 24px;
+        right: 24px;
+        /* Move to right like ar-view if needed, or keep left? Standard is left. */
+        left: 24px;
+        right: auto;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        /* Circle like ar-view */
+        background: var(--surface-glass);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-primary);
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 20;
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* --- MOBILE VARIANT TABS (Modern Horizontal) --- */
+    #mobile-variant-tabs {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        padding: 0 16px 12px 16px;
+        margin-bottom: 0;
+        border-bottom: 1px solid var(--border-light);
+        border-top: 1px solid var(--border-light);
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    #mobile-variant-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .mobile-tabs-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        margin-bottom: 0px;
+        width: 100%;
+        background: var(--surface-glass);
+        background-color: transparent;
+        /* Slight bg for tab strip */
+    }
+
+    /* Scroll Arrow Buttons - Glass Style */
+    .tab-arrow {
+        position: absolute;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--surface-glass);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--border-light);
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        padding: 0;
+        transition: all 0.2s;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .tab-arrow:hover {
+        background: var(--surface-glass-hover);
+    }
+
+    .tab-arrow.left {
+        left: 8px;
+    }
+
+    .tab-arrow.right {
+        right: 8px;
+    }
+
+    /* --- MOBILE VARIANT TABS (Modern Glass Boxes) --- */
+    .mobile-variant-tab {
+        flex: 0 0 auto;
+        padding: 10px 16px;
+        background: var(--surface-glass);
+        border: 1px solid var(--border-light);
+        border-radius: 12px;
+        color: var(--text-secondary);
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: var(--shadow-sm);
+        margin-right: 8px;
+    }
+
+    .mobile-variant-tab:last-child {
+        margin-right: 0;
+    }
+
+    .mobile-variant-tab.active {
+        background: var(--primary-dark);
+        color: white;
+        border-color: var(--primary-dark);
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Remove old underline */
+    .mobile-variant-tab.active::after {
+        display: none;
+    }
+
+    #variant-accordion-container .accordion-header {
+        display: none !important;
+    }
+
+    #variant-accordion-container .variant-accordion-item:not(.open) {
+        display: none;
+    }
+
+    #variant-accordion-container .variant-accordion-item {
+        border: none;
+        background: transparent;
+        margin: 0;
+        padding: 0;
+    }
+
+    #variant-accordion-container .accordion-content {
+        padding-top: 16px;
+    }
+
+    /* Sticky Header Container */
+    #panel-sticky-header {
+        flex-shrink: 0;
+        background: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+
+        /* User Request: Distinct separator lines (Top & Bottom) */
+        border-top: 1px solid var(--border-light);
+        border-bottom: 1px solid var(--border-light);
+
+        z-index: 100;
+        border-radius: 0;
+        /* Flat, no radius */
+    }
+
+    /* Mobile Collapsed State Enhancements */
+    #detail-panel.collapsed #panel-tabs {
+        display: none !important;
+    }
+
+    #detail-panel.collapsed #panel-product-name {
+        margin-bottom: 0 !important;
+        font-size: 16px;
+        /* Slightly smaller when collapsed for neatness */
+    }
+
+    /* Expand header to fill collapsed panel (User Request) */
+    #detail-panel.collapsed #panel-header {
+        padding-bottom: 30px !important;
+
+    }
+
+    /* Variation Headers as Boxes (User Request) */
+    .variant-section-title {
+        background: var(--surface-glass);
+        border: 1px solid var(--border-light);
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: normal;
+        text-transform: none;
+        display: block;
+        box-shadow: var(--shadow-sm);
+        backdrop-filter: blur(10px);
+    }
+}
+
+
+/* ========================================
+   RIGHT DETAIL PANEL (Desktop Default)
+   ======================================== */
+@media (min-width: 901px) {
+    #detail-panel {
+        position: fixed;
+        right: 16px;
+        top: 16px;
+        width: 400px;
+        height: calc(100vh - 32px);
+        background: var(--surface-glass);
+        backdrop-filter: blur(30px) saturate(150%);
+        -webkit-backdrop-filter: blur(30px) saturate(150%);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-xl);
+        box-shadow: 0 8px 32px var(--shadow-lg);
+        z-index: 100;
+        overflow: hidden;
+        transform: translateX(calc(100% + 16px));
+        transition: transform 0.3s ease, width 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #detail-panel.show {
+        transform: translateX(0);
+    }
+
+    /* Daraltılmış panel durumu */
+    #detail-panel.collapsed {
+        width: 60px;
+        overflow: hidden;
+    }
+
+    /* Daraltılmış halde içeriği gizle */
+    #detail-panel.collapsed #panel-sticky-header,
+    #detail-panel.collapsed #panel-content-scroll {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+/* OLD Dock styles - cleanup/hide */
+#controls-dock {
+    display: none !important;
+}
+
+.hidden-dock {
+    display: none !important;
+}
+
+#panel-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border-medium);
+    border-radius: 50%;
+    background: var(--surface-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    font-size: 20px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    z-index: 10;
+    /* Only animate background and border, not position - prevents awkward sliding */
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 101 !important;
+}
+
+#panel-close-btn:hover {
+    background: var(--surface-glass-hover);
+    border-color: var(--accent-color);
+    color: var(--text-primary);
+}
+
+/* Daraltılmış halde buton - sadece stil değişikliği, pozisyon aynı */
+#detail-panel.collapsed #panel-close-btn {
+    /* Keep same position - no movement */
+    /* Override the parent's hidden state - keep button visible and clickable */
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    /* Make it more visible when collapsed */
+    background: var(--accent-primary);
+    border-color: var(--accent-color);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(212, 165, 116, 0.4);
+    /* Bring to front */
+    z-index: 101 !important;
+
+}
+
+/* Sticky Header Container */
+#panel-sticky-header {
+    flex-shrink: 0;
+    background: var(--surface-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 100;
+    opacity: 1;
+}
+
+/* Panel Header - Product Title */
+#panel-header {
+    padding: 20px 20px 16px;
+    border-bottom: none;
+    background: rgba(255, 255, 255, 0.8);
+
+
+}
+
+#panel-header .product-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+
+}
+
+#panel-header #panel-product-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--accent-color);
+}
+
+/* Tab Navigation */
+#panel-tabs {
+    display: flex;
+    padding: 0 16px;
+    gap: 4px;
+}
+
+.panel-tab {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    margin-bottom: -2px;
+}
+
+.panel-tab:hover {
+    color: var(--text-primary);
+    background: transparent;
+    border-radius: 8px 8px 0 0;
+}
+
+.panel-tab.active {
+    color: var(--text-primary);
+    background: var(--surface-glass);
+    border-bottom-color: var(--accent-color);
+}
+
+/* Scrollable Content Container */
+#panel-content-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+    padding: 20px;
+    animation: fadeIn 0.3s;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   BİLGİ TAB - Product Info
+   ======================================== */
+
+/* Product price in tab content */
+#tab-bilgi .product-price {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--accent-color);
+    margin-bottom: 16px;
+}
+
+.product-badge {
+    background: #10b981;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.product-price {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--accent-color);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.btn-primary {
+    background: var(--accent-hover);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    background: #d97706;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.btn-secondary {
+    background: #64748b;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background: #475569;
+}
+
+/* Accordion */
+.accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.accordion-item {
+    border: none;
+    border-bottom: 1px solid #e2e8f0;
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.accordion-header {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 16px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 600;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.accordion-header:hover {
+    color: var(--accent-color);
+}
+
+.accordion-header svg {
+    transition: transform 0.3s;
+}
+
+.accordion-item.open .accordion-header svg {
+    transform: rotate(180deg);
+}
+
+.accordion-content {
+    height: 0;
+    overflow: hidden;
+    transition: height 0.3s ease;
+}
+
+.accordion-item.open .accordion-content {
+    /* Height set by JavaScript */
+}
+
+.accordion-content p {
+    padding: 0 0 16px 0;
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    background: transparent;
+}
+
+/* ========================================
+   VARYASYON TAB - Variants
+   ======================================== */
+.variant-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.btn-action {
+    flex: 1;
+    padding: 10px 16px;
+    border: 1px solid var(--border-medium);
+    background: var(--surface-glass);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-action:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background: rgba(245, 158, 11, 0.05);
+}
+
+.variant-section {
+    margin-bottom: 24px;
+}
+
+.variant-section-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin: 0 0 12px 0;
+}
+
+.variant-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.option-count {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* Part Toggles */
+.part-toggles {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.part-toggle {
+    padding: 10px 18px;
+    border: 1px solid var(--border-medium);
+    background: var(--surface-glass);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.part-toggle:hover {
+    border-color: var(--text-secondary);
+}
+
+.part-toggle.active {
+    background: var(--accent-color);
+    color: var(--surface-solid);
+    border-color: var(--accent-color);
+}
+
+/* Color Swatches */
+.color-swatches {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.swatch-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.swatch {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.swatch-item:hover .swatch {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.swatch svg {
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.swatch-item.active .swatch svg {
+    opacity: 1;
+}
+
+.swatch-item span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* Variant Accordion Items - use same smooth animation as info accordions */
+#variant-accordion-container .accordion-content {
+    height: 0;
+    overflow: visible;
+    transition: height 0.3s ease;
+    padding: 0;
+}
+
+#variant-accordion-container .accordion-item.open .accordion-content {
+    /* Height set by JavaScript */
+    padding-bottom: 16px;
+}
+
+/* Configuration Card */
+.config-card {
+    background: var(--surface-glass-solid);
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.config-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.config-header span {
+    font-size: 18px;
+}
+
+.config-header h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.config-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.config-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 6px 0;
+}
+
+.config-item span:first-child {
+    color: var(--text-primary);
+}
+
+.config-item span:last-child {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ========================================
+   AR TAB - AR Instructions
+   ======================================== */
+.ar-intro-card {
+    background: var(--surface-glass);
+    border: 1px solid var(--border-medium);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.ar-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+}
+
+.ar-intro-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: var(--text-primary);
+}
+
+.ar-intro-card p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* === AR COMPONENTS (Synced from ar-view.html) === */
+.btn-ar {
+    width: 100%;
+    background: var(--text-primary);
+    /* Dark/Black like ar-view */
+    color: white;
+    border: none;
+    padding: 16px 20px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    transition: transform 0.2s;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-ar:active {
+    transform: scale(0.98);
+}
+
+.btn-ar:hover {
+    background: black;
+    /* slightly darker or same? ar-view uses text-primary which is usually black/dark gray */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.ar-steps {
+    margin-bottom: 20px;
+}
+
+.steps-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin: 0 0 12px 0;
+    padding-left: 4px;
+}
+
+.step-card {
+    background: var(--surface-glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.step-number {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.5);
+    /* Light glass */
+    color: var(--accent-color);
+    /* Orange text */
+    border: 1px solid var(--border-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    flex-shrink: 0;
+    font-size: 14px;
+}
+
+.step-card h5 {
+    font-size: 13px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: var(--text-primary);
+}
+
+.step-card p {
+    font-size: 11px;
+    line-height: 1.4;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.ar-requirements {
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid white;
+    box-shadow: var(--shadow-sm);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+}
+
+.req-icon {
+    font-size: 20px;
+}
+
+.ar-requirements h5 {
+    font-size: 13px;
+    font-weight: 700;
+    margin: 0 0 6px 0;
+    color: var(--text-primary);
+}
+
+.ar-requirements p {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* AR Panel Styles (QR Code) */
+#ar-qr-container {
+    display: none;
+    /* Hidden by default (Mobile) */
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    background: white;
+    padding: 16px;
+    border-radius: 16px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+#qrcode img {
+    display: block;
+}
+
+.qr-hint {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Desktop: Show QR, Hide Button */
+@media (min-width: 901px) {
+    #ar-qr-container {
+        display: flex;
+    }
+
+    .btn-ar {
+        display: none;
+    }
 }

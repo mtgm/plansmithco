@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PlanSmithCo - Product Card</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* === LOGO RENKLERİ === */
+            --logo-gold: #f59e0b;
+            --logo-navy: #000000;
+
+            /* === ANA RENKLER === */
+            --accent-color: #f59e0b;
+            --primary-dark: #111111;
+            --bg-color: #e8eaed;
+
+            /* === TEXT PALETTE === */
+            --primary-darkest: #000000;
+            --primary-medium: #333333;
+            --primary-light: #555555;
+            --text-primary: #111111;
+            --text-secondary: #444444;
+            --text-muted: #777777;
+
+            /* === ACCENT PALETTE === */
+            --accent-primary: #f59e0b;
+            --accent-hover: #d97706;
+            --accent-light: #fffbeb;
+
+            /* === GLASS SYSTEM (Milky / High Contrast) === */
+            --glass-bg: linear-gradient(180deg,
+                    rgba(255, 255, 255, 0.85) 0%,
+                    rgba(255, 255, 255, 0.65) 100%);
+            --glass-border: 1px solid #ffffff;
+            --glass-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 1);
+            --glass-blur: blur(40px) saturate(120%);
+
+            /* Child elements on glass */
+            --surface-glass: #ffffff;
+            --surface-glass-hover: #f8f9fa;
+            --surface-glass-active: #f1f3f4;
+
+            --border-light: rgba(0, 0, 0, 0.06);
+            --border-medium: rgba(0, 0, 0, 0.12);
+
+            --surface-solid: #ffffff;
+            --surface-dark: #111827;
+
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.08);
+
+            --radius-xl: 32px;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            background-color: #eef2f6;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+
+        #loader-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border-light);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #main-layout {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+        }
+
+        #stage-wrapper {
+            flex: 1;
+            min-height: 0;
+            position: relative;
+            display: flex;
+            border-radius: 0 0 24px 24px;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border-light);
+            background: transparent;
+            /* Changed from dark */
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            --poster-color: transparent;
+        }
+
+        #detail-panel {
+            height: 50vh;
+            height: 50dvh;
+            width: 100%;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-top: var(--glass-border);
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
+            transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            flex-shrink: 0;
+            position: relative;
+            z-index: 50;
+        }
+
+        #detail-panel.collapsed {
+            height: 80px !important;
+            /* Slightly taller for handle */
+            overflow: hidden;
+        }
+
+        #detail-panel.collapsed #panel-sticky-header,
+        #detail-panel.collapsed #panel-content-scroll {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #panel-close-btn {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 50%;
+            background: var(--surface-glass-active);
+            font-size: 20px;
+            color: var(--text-primary);
+            cursor: pointer;
+            z-index: 101;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        #detail-panel:not(.collapsed) #panel-close-btn {
+            transform: rotate(90deg);
+        }
+
+        #detail-panel.collapsed #panel-close-btn {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            background: var(--accent-color);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        }
+
+        #panel-sticky-header {
+            flex-shrink: 0;
+            background: transparent;
+            border-bottom: 1px solid var(--border-medium);
+            z-index: 100;
+            transition: opacity 0.2s;
+        }
+
+        #panel-header {
+            padding: 24px 24px 16px;
+        }
+
+        #panel-product-name {
+            font-size: 20px;
+            font-weight: 800;
+            margin: 0;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        #panel-tabs {
+            display: flex;
+            padding: 0 16px;
+            gap: 8px;
+        }
+
+        .panel-tab {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .panel-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .panel-tab.active {
+            color: var(--text-primary);
+            background: transparent;
+            border-bottom-color: var(--accent-color);
+        }
+
+        #panel-content-scroll {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: opacity 0.2s;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 24px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        #panel-product-description {
+            margin: 0;
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            padding: 16px;
+            background: var(--surface-glass);
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .panel-product-desc-collapsed {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .desc-toggle-btn {
+            display: none;
+            margin-top: 8px;
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .accordion {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .accordion-header {
+            width: 100%;
+            background: transparent;
+            border: none;
+            padding: 16px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .accordion-header svg {
+            transition: transform 0.3s;
+            color: var(--text-secondary);
+        }
+
+        .accordion-item.open .accordion-header svg {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            height: 0;
+            overflow: hidden;
+            transition: height 0.3s ease;
+        }
+
+        .accordion-content p {
+            padding: 0 0 16px 0;
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-primary {
+            background: var(--primary-dark);
+            color: white;
+            border: none;
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: var(--surface-glass-active);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .variant-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid var(--border-light);
+            background: var(--surface-glass);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .color-swatches {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .swatch-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .swatch {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 2px solid white;
+        }
+
+        .swatch svg {
+            opacity: 0;
+            filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+        }
+
+        .swatch-item.active .swatch svg {
+            opacity: 1;
+        }
+
+        .swatch-item.active .swatch {
+            box-shadow: 0 0 0 2px var(--accent-color);
+        }
+
+        .swatch-item span {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .swatch-item.active span {
+            color: var(--text-primary);
+        }
+
+        #variant-accordion-container .accordion-content {
+            overflow: visible;
+            padding: 0;
+        }
+
+        #variant-accordion-container .accordion-item.open .accordion-content {
+            padding-bottom: 16px;
+        }
+
+        .config-card {
+            background: var(--surface-glass);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            margin-top: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .config-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .config-header h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .config-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .config-item:last-child {
+            border-bottom: none;
+        }
+
+        .config-item span:first-child {
+            color: var(--text-secondary);
+        }
+
+        .config-item span:last-child {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .ar-intro-card {
+            background: var(--surface-glass);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .ar-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .ar-intro-card h3 {
+            font-size: 18px;
+            font-weight: 800;
+            margin: 0 0 8px 0;
+            color: var(--text-primary);
+        }
+
+        .ar-intro-card p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .btn-ar {
+            width: 100%;
+            background: var(--primary-dark);
+            color: white;
+            border: none;
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+        }
+
+        .ar-steps {
+            margin-bottom: 20px;
+        }
+
+        .steps-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin: 0 0 16px 0;
+        }
+
+        .step-card {
+            background: #ffffff;
+            border: none;
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            gap: 16px;
+            margin-bottom: 10px;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background: #f0f0f0;
+            color: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+
+        .step-card h5 {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+            color: var(--text-primary);
+        }
+
+        .step-card p {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .ar-requirements {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .ar-requirements h5 {
+            font-size: 13px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+            color: var(--accent-dark);
+        }
+
+        .ar-requirements p {
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .no-variants-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .no-variants-message .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .error-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+            height: 100%;
+        }
+
+        .error-state .error-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .error-state h2 {
+            font-size: 20px;
+            margin: 0 0 12px;
+            color: var(--text-primary);
+        }
+
+        .error-state p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* --- TABS & VARIANT STYLES --- */
+        #mobile-variant-tabs {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding: 0 4px 12px 4px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-light);
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        #mobile-variant-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .mobile-variant-tab {
+            flex: 0 0 auto;
+            padding: 8px 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .mobile-variant-tab.active {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .mobile-variant-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -9px;
+            /* Align with container border */
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #f59e0b;
+            border-radius: 3px 3px 0 0;
+            box-shadow: 0 -2px 10px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Hide Accordion Headers (using tabs now) */
+        .variant-accordion-item .accordion-header {
+            display: none !important;
+        }
+
+        /* Styles for variants content management */
+        .variant-accordion-item {
+            display: none;
+            /* Hidden by default */
+            border: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .variant-accordion-item.active-tab-content {
+            display: block;
+            /* Show only active */
+        }
+
+        .variant-accordion-item .accordion-content {
+            height: auto !important;
+            /* Always open */
+            padding: 0;
+            overflow: visible;
+        }
+
+        /* Hide default AR button */
+        model-viewer::part(default-ar-button) {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loader-overlay">
+        <div class="spinner"></div>
+    </div>
+    <div id="main-layout">
+        <div id="stage-wrapper">
+            <model-viewer id="mv" src="" ar ar-scale="fixed" ar-placement="floor" camera-controls
+                interaction-prompt="none" environment-image="/studio.hdr" shadow-intensity="1" exposure="1.5"
+                tone-mapping="neutral" loading="eager"></model-viewer>
+        </div>
+        <aside id="detail-panel">
+            <button id="panel-close-btn" onclick="togglePanelCollapse()">›</button>
+            <div id="panel-sticky-header">
+                <div id="panel-header">
+                    <h2 id="panel-product-name">Loading...</h2>
+                    <div id="panel-product-price"
+                        style="display:none; font-size:20px; font-weight:700; color:#f59e0b; margin-top:6px;"></div>
+                </div>
+                <div id="panel-tabs">
+                    <button class="panel-tab active" data-tab="varyasyon">Variations</button>
+                    <button class="panel-tab" data-tab="ar">AR</button>
+                </div>
+            </div>
+            <div id="panel-content-scroll">
+                <div id="tab-varyasyon" class="tab-content active">
+                    <div class="variant-actions"><button class="btn-action" onclick="resetVariants()">🔄
+                            Reset</button></div>
+                    <!-- New Tab Container -->
+                    <div id="mobile-variant-tabs"></div>
+                    <div id="variant-accordion-container"></div>
+                    <div id="config-card" class="config-card">
+                        <div class="config-header"><span>🛠️</span>
+                            <h4>Current Configuration</h4>
+                        </div>
+                        <div id="config-list" class="config-list"></div>
+                    </div>
+                </div>
+                <div id="tab-ar" class="tab-content">
+                    <div class="ar-intro-card">
+                        <div class="ar-icon">📱</div>
+                        <h3>View in AR</h3>
+                        <p id="ar-product-name">Experience this model in your real environment.</p>
+                    </div>
+                    <button class="btn-ar" onclick="activateAR()"><svg width="20" height="20" viewBox="0 0 24 24"
+                            fill="none" stroke="white" stroke-width="2">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
+                            </path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg> Start AR Mode</button>
+                    <div class="ar-steps">
+                        <h4 class="steps-title">HOW TO USE</h4>
+                        <div class="step-card">
+                            <div class="step-number">1</div>
+                            <div>
+                                <h5>Open Camera</h5>
+                                <p>Grant camera permission to start AR mode</p>
+                            </div>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">2</div>
+                            <div>
+                                <h5>Scan Surface</h5>
+                                <p>Point your camera at a flat surface</p>
+                            </div>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">3</div>
+                            <div>
+                                <h5>Place</h5>
+                                <p>Tap screen to place model</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ar-requirements">
+                        <div>ℹ️</div>
+                        <div>
+                            <h5>Requirements</h5>
+                            <p>ARCore/ARKit compatible device required.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        const viewer = document.getElementById('mv');
+        const loader = document.getElementById('loader-overlay');
+        let selectedProduct = null;
+        let allData = [];
+
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            let sku = params.get('sku');
+            if (!sku) {
+                const pathParts = window.location.pathname.split('/');
+                const mIndex = pathParts.indexOf('m');
+                // index.html kontrolü: dosya adı SKU olarak algılanmamalı
+                if (mIndex !== -1 && pathParts[mIndex + 1]) {
+                    const val = pathParts[mIndex + 1];
+                    if (val && val.toLowerCase() !== 'index.html') {
+                        sku = val;
+                    }
+                }
+            }
+            return { sku, config: params.get('config') };
+        }
+
+        async function init() {
+            const { sku, config } = getUrlParams();
+            if (!sku) { showError('Product not found', 'Valid SKU not found in URL (missing parameter). Please regenerate and scan QR code.'); return; }
+            try {
+                // Veriyi çek (Yedek dosyadaki orijinal yöntem)
+                const response = await fetch('/products.json');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP hatası! Durum: ${response.status}`);
+                }
+
+                allData = await response.json();
+                let foundProduct = null;
+                for (const cat of allData) {
+                    const p = cat.products.find(x => x && x.sku && x.sku.toString() === sku.toString());
+                    if (p) { foundProduct = p; break; }
+                }
+                if (!foundProduct) { showError('Ürün bulunamadı', `"${sku}" SKU kodlu ürün veritabanında bulunamadı.`); return; }
+                selectedProduct = foundProduct;
+                loadProduct(foundProduct);
+                if (config) {
+                    try {
+                        const configObj = JSON.parse(config);
+                        setTimeout(() => applyConfig(configObj), 800);
+                    } catch (e) { console.error('Config parse error:', e); }
+                }
+            } catch (e) {
+                console.error('Init error:', e);
+                showError('Yükleme hatası', `Ürün verileri yüklenemedi.<br><small>${e.message}</small>`);
+            }
+        }
+
+        function loadProduct(product) {
+            document.getElementById('panel-product-name').textContent = product.name;
+            document.getElementById('panel-product-name').textContent = product.name;
+            const descEl = document.getElementById('panel-product-description');
+            if (descEl) descEl.innerHTML = product.description ? marked.parse(product.description) : '';
+            document.getElementById('ar-product-name').textContent = `${product.name} modelini gerçek ortamınızda deneyimleyin.`;
+            const buyLink = document.getElementById('panel-buy-link');
+            if (buyLink && product.listingUrl) buyLink.href = product.listingUrl;
+            const descToggle = document.getElementById('panel-product-desc-toggle');
+            if (descToggle) descToggle.style.display = product.description && product.description.length > 100 ? 'inline-block' : 'none';
+            const masterUrl = product.masterModel ? product.masterModel : `/api/engine?sku=${product.sku}`;
+            loadModel(masterUrl);
+            setupVariants(product);
+        }
+
+        let currentModelUrl = null; // Track current model to prevent redundant loads
+
+        async function loadModel(url) {
+            // Helper function: Reset textures to defaults
+            const resetToDefaults = () => {
+                if (selectedProduct && selectedProduct.variantGroups) {
+                    selectedProduct.variantGroups.forEach(g => {
+                        if (g.items[0] && g.items[0].textureConfig) {
+                            applyTextureConfig(g.items[0].textureConfig);
+                        }
+                    });
+                }
+            };
+
+            // CASE 1: Model already loaded (Cache Hit)
+            if (currentModelUrl === url) {
+                console.log("Cache Hit. Model ready, resetting textures...");
+                loader.classList.add('hidden');
+
+                // CRITICAL: Reset textures even if model hasn't changed
+                // Wait a bit to ensure model is ready
+                setTimeout(() => {
+                    const { config } = getUrlParams();
+                    if (!config) {
+                        resetToDefaults();
+                    }
+                }, 100);
+
+                return;
+            }
+
+            // CASE 2: New model loading
+            try {
+                let finalUrl = url;
+                if (url.includes('/api/engine')) {
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    if (data.ok) finalUrl = data.url;
+                }
+
+                viewer.src = finalUrl;
+                currentModelUrl = url; // Update cache
+
+                viewer.addEventListener('load', () => {
+                    loader.classList.add('hidden');
+
+                    // Check if config exists in URL to avoid overwriting user selection with defaults
+                    const { config } = getUrlParams();
+                    if (!config) {
+                        resetToDefaults();
+                    }
+                }, { once: true });
+            } catch (e) {
+                console.error('Model load error:', e);
+                loader.classList.add('hidden');
+            }
+        }
+
+        function setupVariants(product) {
+            const accordionContainer = document.getElementById('variant-accordion-container');
+            const tabsContainer = document.getElementById('mobile-variant-tabs');
+            const configCard = document.getElementById('config-card');
+            const configList = document.getElementById('config-list');
+
+            // 1. Strict Cleanup - Always clear everything first
+            accordionContainer.innerHTML = '';
+            configList.innerHTML = '';
+            if (tabsContainer) {
+                tabsContainer.innerHTML = '';
+                tabsContainer.style.display = 'none';
+            }
+            if (configCard) configCard.style.display = 'none';
+
+            // 2. No Variants Check
+            if (!product.variantGroups || product.variantGroups.length === 0) {
+                accordionContainer.innerHTML = '<div class="no-variants-message"><div class="icon">🎨</div><p>Bu ürün için varyasyon seçeneği bulunmuyor.</p></div>';
+                return;
+            }
+
+            // 3. Setup for Variants
+            if (tabsContainer) tabsContainer.style.display = 'flex';
+            if (configCard) configCard.style.display = 'block';
+
+            product.variantGroups.forEach((group, index) => {
+                // 1. Create Tab Button
+                const tabBtn = document.createElement('button');
+                tabBtn.className = 'mobile-variant-tab' + (index === 0 ? ' active' : '');
+                tabBtn.textContent = group.groupName;
+                tabBtn.onclick = () => {
+                    // Switch Tabs
+                    document.querySelectorAll('.mobile-variant-tab').forEach(t => t.classList.remove('active'));
+                    tabBtn.classList.add('active');
+
+                    // Switch Content
+                    document.querySelectorAll('.variant-accordion-item').forEach((item, i) => {
+                        if (i === index) item.classList.add('active-tab-content');
+                        else item.classList.remove('active-tab-content');
+                    });
+                };
+                tabsContainer.appendChild(tabBtn);
+
+                // 2. Create Content Item (was Accordion Item)
+                const accordionItem = document.createElement('div');
+                // Use 'active-tab-content' class for visibility instead of open/accordion logic
+                accordionItem.className = 'accordion-item variant-accordion-item' + (index === 0 ? ' active-tab-content' : '');
+
+                // Keep structure simple - inner content container
+                const accordionContent = document.createElement('div');
+                accordionContent.className = 'accordion-content';
+
+                const swatchesContainer = document.createElement('div');
+                swatchesContainer.className = 'color-swatches';
+
+                group.items.forEach((item, itemIndex) => {
+                    const swatchItem = document.createElement('div');
+                    swatchItem.className = 'swatch-item' + (itemIndex === 0 ? ' active' : '');
+                    swatchItem.dataset.groupName = group.groupName;
+                    swatchItem.dataset.variantName = item.name;
+
+                    const swatch = document.createElement('div');
+                    swatch.className = 'swatch';
+                    if (item.type === 'color') swatch.style.backgroundColor = item.value;
+                    else { swatch.style.backgroundImage = `url('${item.value}')`; swatch.style.backgroundSize = 'cover'; }
+
+                    if (item.value === '#ffffff' || item.value === '#fff' || item.name.toLowerCase().includes('beyaz')) {
+                        swatch.style.border = '1px solid #ddd';
+                    }
+
+                    swatch.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+                    const label = document.createElement('span');
+                    label.textContent = item.name.split('(')[0].trim();
+
+                    swatchItem.onclick = () => {
+                        accordionContent.querySelectorAll('.swatch-item').forEach(s => s.classList.remove('active'));
+                        swatchItem.classList.add('active');
+                        updateConfigItem(group.groupName, item.name);
+                        if (item.textureConfig) applyTextureConfig(item.textureConfig);
+                    };
+
+                    swatchItem.appendChild(swatch);
+                    swatchItem.appendChild(label);
+                    swatchesContainer.appendChild(swatchItem);
+                });
+
+                accordionContent.appendChild(swatchesContainer);
+                accordionItem.appendChild(accordionContent);
+                accordionContainer.appendChild(accordionItem);
+
+                // Config List Item
+                const configItem = document.createElement('div');
+                configItem.className = 'config-item';
+                configItem.dataset.groupName = group.groupName;
+                configItem.innerHTML = `<span>${group.groupName}</span><span>${group.items[0] ? group.items[0].name.split('(')[0].trim() : '-'}</span>`;
+                configList.appendChild(configItem);
+            });
+
+            // Check arrows after rendering
+            setTimeout(checkScrollArrows, 100);
+        }
+
+        function updateConfigItem(groupName, variantName) {
+            const configItem = document.querySelector(`.config-item[data-group-name="${groupName}"]`);
+            if (configItem) {
+                const valueSpan = configItem.querySelector('span:last-child');
+                if (valueSpan) valueSpan.textContent = variantName.split('(')[0].trim();
+            }
+        }
+
+        async function applyTextureConfig(configs) {
+            if (!viewer.model) { console.warn('Model henüz yüklenmedi'); return; }
+            const configList = Array.isArray(configs) ? configs : [configs];
+            for (const cfg of configList) {
+                const material = viewer.model.materials.find(m => m.name === cfg.materialName);
+                if (!material) { console.warn('Material bulunamadı:', cfg.materialName); continue; }
+                try {
+                    if (cfg.baseColor) { const texture = await viewer.createTexture(cfg.baseColor); material.pbrMetallicRoughness.baseColorTexture.setTexture(texture); }
+                    if (cfg.normal) { const texture = await viewer.createTexture(cfg.normal); material.normalTexture.setTexture(texture); }
+                    if (cfg.orm) { const texture = await viewer.createTexture(cfg.orm); material.pbrMetallicRoughness.metallicRoughnessTexture.setTexture(texture); }
+                } catch (e) { console.error('Texture uygulama hatası:', e); }
+            }
+        }
+
+        function applyConfig(config) {
+            let attempts = 0;
+            const tryApply = () => {
+                if (!viewer.model && attempts < 15) { attempts++; setTimeout(tryApply, 300); return; }
+                const swatches = document.querySelectorAll('.swatch-item');
+                if (swatches.length === 0 && attempts < 15) { attempts++; setTimeout(tryApply, 300); return; }
+                Object.keys(config).forEach(groupName => {
+                    const variantName = config[groupName];
+                    const targetSwatch = Array.from(swatches).find(s => s.dataset.groupName === groupName && s.dataset.variantName.includes(variantName));
+                    if (targetSwatch && !targetSwatch.classList.contains('active')) targetSwatch.click();
+                });
+            };
+            setTimeout(tryApply, 500);
+        }
+
+        function resetVariants() {
+            if (!selectedProduct || !selectedProduct.variantGroups) return;
+            selectedProduct.variantGroups.forEach((group, groupIndex) => {
+                if (group.items[0]) {
+                    if (group.items[0].textureConfig) applyTextureConfig(group.items[0].textureConfig);
+                    updateConfigItem(group.groupName, group.items[0].name);
+                    const accordionItems = document.querySelectorAll('#variant-accordion-container .accordion-item');
+                    if (accordionItems[groupIndex]) {
+                        accordionItems[groupIndex].querySelectorAll('.swatch-item').forEach((s, i) => s.classList.toggle('active', i === 0));
+                    }
+                }
+            });
+            // Reset tabs to first one
+            const tabs = document.querySelectorAll('.mobile-variant-tab');
+            if (tabs.length > 0) tabs[0].click();
+        }
+
+        function togglePanelCollapse() {
+            const panel = document.getElementById('detail-panel');
+            const btn = document.getElementById('panel-close-btn');
+            panel.classList.toggle('collapsed');
+            if (panel.classList.contains('collapsed')) {
+                btn.innerHTML = '🛠️';
+            } else {
+                btn.innerHTML = '›';
+            }
+        }
+        function toggleProductDesc() {
+            const desc = document.getElementById('panel-product-description');
+            const btn = document.getElementById('panel-product-desc-toggle');
+            if (desc.classList.contains('panel-product-desc-collapsed')) { desc.classList.remove('panel-product-desc-collapsed'); btn.textContent = 'Read less'; }
+            else { desc.classList.add('panel-product-desc-collapsed'); btn.textContent = 'Read more'; }
+        }
+        function activateAR() { if (viewer.canActivateAR) viewer.activateAR(); else alert('AR bu cihazda desteklenmiyor.'); }
+        function shareProduct() {
+            if (navigator.share) navigator.share({ title: document.getElementById('panel-product-name').textContent, url: window.location.href }).catch(() => { });
+            else navigator.clipboard.writeText(window.location.href).then(() => alert('Link kopyalandı!')).catch(() => { });
+        }
+        function showError(title, message) {
+            loader.classList.add('hidden');
+            document.getElementById('detail-panel').innerHTML = `<div class="error-state"><div class="error-icon">⚠️</div><h2>${title}</h2><p>${message}</p></div>`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.panel-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabName = btn.dataset.tab;
+                    document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById(`tab-${tabName}`).classList.add('active');
+                });
+            });
+            init();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.accordion-header')) {
+                const item = e.target.closest('.accordion-item');
+                const content = item.querySelector('.accordion-content');
+                if (item.classList.contains('open')) {
+                    content.style.height = content.scrollHeight + 'px';
+                    content.offsetHeight;
+                    content.style.height = '0px';
+                    item.classList.remove('open');
+                } else {
+                    item.classList.add('open');
+                    content.style.height = 'auto';
+                }
+            }
+        });
+
+        window.togglePanelCollapse = togglePanelCollapse;
+        window.toggleProductDesc = toggleProductDesc;
+        window.shareProduct = shareProduct;
+        window.resetVariants = resetVariants;
+        window.activateAR = activateAR;
+        window.resetVariants = resetVariants;
+        window.activateAR = activateAR;
+
+        // --- MOBILE TABS SCROLL LOGIC ---
+        function scrollTabs(direction) {
+            const container = document.getElementById('mobile-variant-tabs');
+            if (!container) return;
+            const scrollAmount = 150; // Adjust as needed
+            if (direction === 'left') {
+                container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            } else {
+                container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
+        }
+
+        function checkScrollArrows() {
+            const container = document.getElementById('mobile-variant-tabs');
+            const leftArrow = document.getElementById('tab-arrow-left');
+            const rightArrow = document.getElementById('tab-arrow-right');
+
+            if (!container || !leftArrow || !rightArrow) return;
+
+            // Show/Hide Left Arrow
+            if (container.scrollLeft > 10) {
+                leftArrow.style.display = 'flex';
+            } else {
+                leftArrow.style.display = 'none';
+            }
+
+            // Show/Hide Right Arrow
+            // tolerance of 5px for float precision
+            if (container.scrollWidth - container.scrollLeft - container.clientWidth > 5) {
+                rightArrow.style.display = 'flex';
+            } else {
+                rightArrow.style.display = 'none';
+            }
+        }
+
+        // Attach scroll listener
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('mobile-variant-tabs');
+            if (container) {
+                container.addEventListener('scroll', checkScrollArrows);
+                window.addEventListener('resize', checkScrollArrows);
+            }
+        });
+
+        // Export for onclick
+        window.scrollTabs = scrollTabs;
+    </script>
+</body>
+
+</html>
