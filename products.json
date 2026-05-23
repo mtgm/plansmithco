@@ -62,18 +62,6 @@
         "price": 0,
         "variantGroups": [],
         "customAttributes": []
-      },
-      {
-        "id": "prod_1779564165882",
-        "name": "Yeni Ürün",
-        "sku": "3dprint",
-        "thumbnail": "/assets-r2/logov2.webp",
-        "description": "",
-        "listingUrl": "",
-        "masterModel": "/assets-r2/ewige liebe_Render_Project_blender.glb",
-        "price": 0,
-        "variantGroups": [],
-        "customAttributes": []
       }
     ]
   }
