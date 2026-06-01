@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plansmith | Ethereal Configurator</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@300;500;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+
+    <style>
+        :root {
+            /* COLOR PALETTE */
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            
+            --primary: #0F172A;       /* Ana Siyah */
+            --accent: #6366f1;        /* İndigo (Teknoloji) */
+            --highlight: #F43F5E;     /* Gül Rengi (Aksiyon) */
+            
+            /* GLASS VARIABLES */
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.8);
+            --glass-blur: blur(24px);
+            --glass-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.05);
+            
+            --radius-nav: 100px;
+            --radius-card: 32px;
+            --radius-el: 16px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text-main);
+            width: 100vw;
+            min-height: 100vh;
+            overflow-x: hidden;
+            
+            /* DYNAMIC BACKGROUND */
+            background-color: #F8FAFC;
+            background-image: 
+                radial-gradient(at 10% 10%, hsla(250, 50%, 94%, 1) 0, transparent 55%), 
+                radial-gradient(at 90% 10%, hsla(330, 60%, 95%, 1) 0, transparent 55%), 
+                radial-gradient(at 50% 90%, hsla(200, 60%, 94%, 1) 0, transparent 55%);
+        }
+
+        /* --- 1. FLOATING HEADER (NAVIGASYON) --- */
+        .nav-container {
+            position: fixed; top: 24px; left: 0; width: 100%;
+            display: flex; justify-content: center;
+            z-index: 100;
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            padding: 12px 32px;
+            border-radius: var(--radius-nav);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            
+            display: flex; align-items: center; gap: 40px;
+            width: 90%; max-width: 1400px;
+            justify-content: space-between;
+        }
+
+        .brand-logo { 
+            font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 800; 
+            letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; cursor: pointer;
+        }
+        
+        /* Orta Linkler */
+        .nav-links { display: flex; gap: 8px; }
+        .nav-link {
+            text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 600;
+            padding: 8px 20px; border-radius: 100px; transition: all 0.2s;
+        }
+        .nav-link:hover { color: var(--text-main); background: rgba(0,0,0,0.03); }
+        .nav-link.active { background: var(--text-main); color: white; }
+
+        /* Sağ İkonlar */
+        .nav-actions { display: flex; gap: 16px; }
+        .icon-btn {
+            width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.05);
+            display: grid; place-items: center; font-size: 20px; cursor: pointer; transition: all 0.2s;
+            background: white; color: var(--text-main);
+        }
+        .icon-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .cart-count { 
+            position: absolute; top: -2px; right: -2px; width: 16px; height: 16px; 
+            background: var(--highlight); color: white; font-size: 10px; font-weight: 700; border-radius: 50%; 
+            display: grid; place-items: center; border: 2px solid white;
+        }
+
+        /* --- 2. MAIN LAYOUT (CONFIGURATOR) --- */
+        .main-stage {
+            padding-top: 110px; /* Header boşluğu */
+            padding-bottom: 40px;
+            width: 95%; max-width: 1600px; margin: 0 auto;
+            height: 100vh; /* Ekranı doldur */
+            
+            display: grid;
+            grid-template-columns: 1.4fr 1fr; /* Sol geniş */
+            gap: 24px;
+        }
+
+        /* LEFT: 3D VIEWER (GLASS CARD) */
+        .viewer-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur); border: var(--glass-border);
+            border-radius: var(--radius-card);
+            box-shadow: var(--glass-shadow);
+            position: relative; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        model-viewer {
+            width: 100%; height: 100%;
+            --poster-color: transparent;
+            filter: drop-shadow(0 40px 80px rgba(0,0,0,0.15));
+        }
+
+        /* Viewer Tools (Zoom/AR) */
+        .viewer-tools {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 12px;
+            background: rgba(255,255,255,0.8); padding: 8px; border-radius: 100px;
+            backdrop-filter: blur(10px); border: 1px solid white;
+        }
+        .v-tool {
+            width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+            display: grid; place-items: center; color: var(--text-main); font-size: 20px;
+            transition: background 0.2s;
+        }
+        .v-tool:hover { background: rgba(0,0,0,0.05); }
+
+        /* RIGHT: CONFIG PANEL (GLASS CARD) */
+        .config-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur); border: var(--glass-border);
+            border-radius: var(--radius-card);
+            box-shadow: var(--glass-shadow);
+            display: flex; flex-direction: column;
+            overflow: hidden; /* Scroll içeride olsun */
+        }
+
+        .scroll-content {
+            flex: 1; overflow-y: auto;
+            padding: 40px;
+        }
+        .scroll-content::-webkit-scrollbar { width: 6px; }
+        .scroll-content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+
+        /* ÜRÜN BAŞLIĞI */
+        .p-overline { 
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; 
+            color: var(--accent); margin-bottom: 12px; display: block;
+        }
+        .p-title { font-family: 'Outfit', sans-serif; font-size: 40px; font-weight: 700; line-height: 1.1; margin-bottom: 16px; }
+        .p-desc { font-size: 15px; color: var(--text-muted); line-height: 1.6; margin-bottom: 30px; }
+
+        /* VARYASYON GRUPLARI */
+        .group-label { font-size: 12px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Malzeme Kartları (Grid) */
+        .mat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+        
+        .mat-option {
+            background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.6);
+            padding: 12px; border-radius: var(--radius-el); cursor: pointer;
+            transition: all 0.2s; position: relative;
+        }
+        .mat-option:hover { background: rgba(255,255,255,0.9); transform: translateY(-2px); }
+        .mat-option.active { 
+            background: white; border-color: var(--text-main); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+        }
+        
+        .mat-img { width: 100%; height: 100px; object-fit: cover; border-radius: 10px; margin-bottom: 12px; }
+        .mat-name { font-weight: 700; font-size: 14px; display: block; }
+        .mat-price { font-size: 12px; color: var(--text-muted); }
+
+        /* Renkler (Yuvarlak) */
+        .color-row { display: flex; gap: 12px; margin-bottom: 32px; }
+        .color-circle {
+            width: 48px; height: 48px; border-radius: 50%; cursor: pointer;
+            border: 3px solid rgba(255,255,255,0.5); position: relative; transition: transform 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .color-circle:hover { transform: scale(1.1); }
+        .color-circle.active { border-color: white; box-shadow: 0 0 0 2px var(--text-main); }
+
+        /* FOOTER (SABİT ALT) */
+        .config-footer {
+            padding: 24px 40px;
+            border-top: 1px solid rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.4);
+            backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .price-box span:first-child { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px; }
+        .price-box span:last-child { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 700; color: var(--text-main); }
+
+        .btn-add {
+            background: var(--primary); color: white; border: none;
+            padding: 16px 40px; border-radius: 100px; font-size: 15px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2); transition: all 0.2s;
+        }
+        .btn-add:hover { background: #222; transform: translateY(-2px); box-shadow: 0 12px 25px rgba(15, 23, 42, 0.3); }
+
+        /* RESPONSIVE */
+        @media (max-width: 1000px) {
+            .nav-container { top: 10px; }
+            .glass-nav { padding: 10px 20px; width: 95%; }
+            .nav-links { display: none; } /* Mobilde menüyü gizle */
+            .main-stage { grid-template-columns: 1fr; height: auto; padding-top: 100px; display: block; }
+            .viewer-card { height: 50vh; margin-bottom: 20px; border-radius: 20px; }
+            .config-card { height: auto; border-radius: 20px; overflow: visible; }
+            .scroll-content { padding: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="nav-container">
+        <nav class="glass-nav">
+            <div class="brand-logo">
+                <i class="ph-fill ph-cube-transparent" style="color:var(--accent)"></i>
+                Plansmith.
+            </div>
+
+            <div class="nav-links">
+                <a href="#" class="nav-link">Ana Sayfa</a>
+                <a href="#" class="nav-link active">Mağaza</a>
+                <a href="#" class="nav-link">Koleksiyonlar</a>
+                <a href="#" class="nav-link">İletişim</a>
+            </div>
+
+            <div class="nav-actions">
+                <div class="icon-btn"><i class="ph ph-magnifying-glass"></i></div>
+                <div class="icon-btn" style="position:relative;">
+                    <i class="ph ph-shopping-bag"></i>
+                    <span class="cart-count">2</span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-stage">
+        
+        <section class="viewer-card">
+            <model-viewer 
+                id="viewer"
+                src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
+                camera-controls auto-rotate shadow-intensity="1.5" exposure="1" environment-image="neutral"
+            >
+            </model-viewer>
+
+            <div class="viewer-tools">
+                <div class="v-tool" title="AR Modu"><i class="ph-fill ph-cube-focus"></i></div>
+                <div class="v-tool" title="Tam Ekran"><i class="ph ph-corners-out"></i></div>
+                <div class="v-tool" title="Fotoğraf Çek"><i class="ph ph-camera"></i></div>
+            </div>
+        </section>
+
+        <section class="config-card">
+            
+            <div class="scroll-content">
+                <span class="p-overline">Digital Plan</span>
+                <h1 class="p-title">Modular Storage System</h1>
+                <p class="p-desc">
+                    Minimalist, modern ve tamamen modüler. Kendi atölyenizi kurmak için ihtiyacınız olan dijital üretim dosyaları.
+                </p>
+
+                <div class="config-group">
+                    <label class="group-label">İskelet Malzemesi</label>
+                    <div class="mat-grid">
+                        <div class="mat-option active" onclick="selectOpt(this)">
+                            <img src="https://images.unsplash.com/photo-1517646331032-9e8563c523a1?w=300&q=80" class="mat-img">
+                            <span class="mat-name">Doğal Çam</span>
+                            <span class="mat-price">Dahil</span>
+                        </div>
+                        <div class="mat-option" onclick="selectOpt(this)">
+                            <img src="https://images.unsplash.com/photo-1542887800-24f6050b57fa?w=300&q=80" class="mat-img">
+                            <span class="mat-name">Akçaağaç</span>
+                            <span class="mat-price">+ ₺450</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-group">
+                    <label class="group-label">Aksan Rengi</label>
+                    <div class="color-row">
+                        <div class="color-circle active" style="background:#0F172A"></div>
+                        <div class="color-circle" style="background:#E2E8F0"></div>
+                        <div class="color-circle" style="background:#F43F5E"></div>
+                        <div class="color-circle" style="background:#3B82F6"></div>
+                    </div>
+                </div>
+
+                <div style="background:rgba(255,255,255,0.4); padding:16px; border-radius:12px; font-size:13px; color:var(--text-muted); display:flex; gap:10px;">
+                    <i class="ph-fill ph-info" style="font-size:18px;"></i>
+                    <span>Bu ürün dijital bir dosyadır. Satın alma sonrası anında indirme linki gönderilir.</span>
+                </div>
+
+            </div>
+
+            <div class="config-footer">
+                <div class="price-box">
+                    <span>Toplam Tutar</span>
+                    <span>₺ 4,350</span>
+                </div>
+                <button class="btn-add">
+                    Sepete Ekle <i class="ph-bold ph-arrow-right"></i>
+                </button>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        function selectOpt(el) {
+            document.querySelectorAll('.mat-option').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+        }
+    </script>
+</body>
+</html>

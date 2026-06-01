@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plansmith | Ethereal Catalogue</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        :root {
+            /* ETHEREAL PALETTE (Referans koddan alındı) */
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --accent: #6366f1;        /* Indigo */
+            --highlight: #ec4899;     /* Pink */
+            
+            /* GLASS BOX VARIABLES */
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+            --glass-blur: blur(40px);
+            --glass-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.15);
+            
+            --radius-box: 24px;
+            --radius-elem: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text-main);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            
+            /* AURORA BACKGROUND (Referans ile aynı) */
+            background-color: #F1F5F9;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,90%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 100%, hsla(330, 60%, 94%, 1) 0, transparent 50%), 
+                radial-gradient(at 50% 50%, hsla(230, 60%, 96%, 1) 0, transparent 50%);
+            
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* --- THE MAIN BOX --- */
+        .app-box {
+            width: 94%; max-width: 1600px;
+            height: 92vh;
+            
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            border-radius: var(--radius-box);
+            box-shadow: var(--glass-shadow);
+            
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- HEADER (Referans ile aynı) --- */
+        .box-header {
+            height: 80px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 40px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .logo { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; color: var(--text-main); display: flex; gap: 10px; align-items: center; text-decoration: none; }
+        
+        .nav-menu { display: flex; gap: 32px; }
+        .nav-item { font-size: 14px; font-weight: 600; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+        .nav-item:hover, .nav-item.active { color: var(--accent); }
+
+        .nav-icons { display: flex; gap: 16px; }
+        .icon-btn { width: 40px; height: 40px; border-radius: var(--radius-elem); background: rgba(255,255,255,0.5); display: grid; place-items: center; cursor: pointer; transition: all 0.2s; font-size: 20px; color: var(--text-main); }
+        .icon-btn:hover { background: white; color: var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+        /* --- CATALOGUE LAYOUT --- */
+        .catalog-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 260px 1fr; /* Sidebar | Grid */
+            overflow: hidden;
+        }
+
+        /* SIDEBAR (Filtreler) */
+        .sidebar {
+            padding: 30px 40px;
+            border-right: 1px solid rgba(0,0,0,0.05);
+            overflow-y: auto;
+            background: rgba(248, 250, 252, 0.3);
+        }
+
+        .filter-head { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
+        
+        .f-group { margin-bottom: 30px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 20px; }
+        .f-group:last-child { border: none; }
+        
+        .f-label { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; display: block; text-transform: uppercase; }
+        
+        .check-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer; color: var(--text-main); font-size: 14px; transition: color 0.2s; }
+        .check-item:hover { color: var(--accent); }
+        .checkbox { 
+            width: 18px; height: 18px; border: 1px solid #CBD5E1; border-radius: 4px; background: white; 
+            display: grid; place-items: center; transition: all 0.2s;
+        }
+        .check-item.active .checkbox { background: var(--accent); border-color: var(--accent); color: white; }
+        .check-item.active .checkbox::after { content: '\2713'; font-size: 10px; font-weight: bold; }
+
+        /* PRODUCT GRID AREA */
+        .grid-area {
+            padding: 30px 40px;
+            overflow-y: auto;
+        }
+        /* Custom Scrollbar */
+        .grid-area::-webkit-scrollbar { width: 6px; }
+        .grid-area::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+
+        .banner {
+            background: linear-gradient(135deg, #EEF2FF 0%, #FDF4FF 100%);
+            border-radius: var(--radius-elem);
+            padding: 30px; margin-bottom: 30px;
+            border: 1px solid #E2E8F0;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .banner h1 { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
+        .banner p { font-size: 14px; color: var(--text-muted); max-width: 500px; }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 24px;
+        }
+
+        /* PRODUCT CARD (Adapted from .flat-card) */
+        .prod-card {
+            background: white; border: 1px solid #E2E8F0;
+            border-radius: var(--radius-elem);
+            overflow: hidden;
+            cursor: pointer; transition: all 0.2s;
+            position: relative;
+            display: flex; flex-direction: column;
+        }
+
+        .prod-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.15);
+        }
+
+        .img-box {
+            width: 100%; aspect-ratio: 1;
+            background: #F8FAFC;
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .p-img { width: 80%; height: auto; transition: transform 0.3s; mix-blend-mode: multiply; }
+        .prod-card:hover .p-img { transform: scale(1.05); }
+
+        .badge-new {
+            position: absolute; top: 12px; left: 12px;
+            font-size: 10px; font-weight: 700; color: white;
+            background: var(--highlight); padding: 4px 8px; border-radius: 6px;
+            text-transform: uppercase;
+        }
+
+        .details { padding: 16px; flex: 1; display: flex; flex-direction: column; }
+        
+        .p-cat { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
+        .p-name { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; line-height: 1.2; }
+        .p-meta { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+        
+        .p-footer { margin-top: auto; padding-top: 12px; border-top: 1px solid #F1F5F9; display: flex; justify-content: space-between; align-items: center; }
+        .p-price { font-size: 16px; font-weight: 700; color: var(--text-main); }
+        
+        .btn-add {
+            width: 32px; height: 32px; border-radius: 8px; background: #F1F5F9;
+            display: grid; place-items: center; color: var(--text-main); transition: all 0.2s;
+        }
+        .prod-card:hover .btn-add { background: var(--accent); color: white; }
+
+        /* Responsive */
+        @media (max-width: 1000px) {
+            .app-box { height: auto; min-height: 95vh; margin: 20px 0; }
+            .catalog-content { grid-template-columns: 1fr; display: block; }
+            .sidebar { display: none; } /* Mobilde filtreyi gizle */
+            .grid-area { padding: 20px; }
+            .nav-menu { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-box">
+        
+        <header class="box-header">
+            <a href="#" class="logo">
+                <i class="ph-fill ph-cube-transparent" style="color:var(--accent); font-size:28px;"></i>
+                Plansmith.
+            </a>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active">Mağaza</a>
+                <a href="#" class="nav-item">Koleksiyonlar</a>
+                <a href="#" class="nav-item">Topluluk</a>
+                <a href="#" class="nav-item">İletişim</a>
+            </nav>
+
+            <div class="nav-icons">
+                <div class="icon-btn"><i class="ph ph-magnifying-glass"></i></div>
+                <div class="icon-btn"><i class="ph ph-shopping-bag"></i></div>
+            </div>
+        </header>
+
+        <div class="catalog-content">
+            
+            <aside class="sidebar">
+                <div class="filter-head">Filtreleme <i class="ph ph-faders"></i></div>
+                
+                <div class="f-group">
+                    <span class="f-label">Kategori</span>
+                    <div class="check-item active"><span class="checkbox"></span> Depolama (12)</div>
+                    <div class="check-item"><span class="checkbox"></span> Tezgahlar (8)</div>
+                    <div class="check-item"><span class="checkbox"></span> Duvar Sistemleri (5)</div>
+                </div>
+
+                <div class="f-group">
+                    <span class="f-label">Zorluk Seviyesi</span>
+                    <div class="check-item"><span class="checkbox"></span> Başlangıç</div>
+                    <div class="check-item active"><span class="checkbox"></span> Orta Seviye</div>
+                    <div class="check-item"><span class="checkbox"></span> İleri Seviye</div>
+                </div>
+
+                <div class="f-group">
+                    <span class="f-label">Dosya Tipi</span>
+                    <div class="check-item active"><span class="checkbox"></span> PDF Plan</div>
+                    <div class="check-item active"><span class="checkbox"></span> CNC (DXF)</div>
+                </div>
+            </aside>
+
+            <section class="grid-area">
+                
+                <div class="banner">
+                    <div>
+                        <h1>Dijital Atölye Planları</h1>
+                        <p>Kendi mobilyalarınızı üretmek için ihtiyacınız olan profesyonel çizimler.</p>
+                    </div>
+                    <div class="icon-btn" style="background:white;"><i class="ph-duotone ph-sparkle" style="color:var(--highlight)"></i></div>
+                </div>
+
+                <div class="products">
+                    
+                    <div class="prod-card">
+                        <span class="badge-new">YENİ</span>
+                        <div class="img-box">
+                            <img src="https://via.placeholder.com/300x300/F1F5F9/aaaaaa?text=Rack" class="p-img">
+                        </div>
+                        <div class="details">
+                            <span class="p-cat">Depolama</span>
+                            <h3 class="p-name">Ethereal Rack System</h3>
+                            <p class="p-meta">Modüler • 42 Parça</p>
+                            <div class="p-footer">
+                                <span class="p-price">₺ 4,350</span>
+                                <div class="btn-add"><i class="ph-bold ph-plus"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="prod-card">
+                        <div class="img-box">
+                            <img src="https://via.placeholder.com/300x300/F1F5F9/aaaaaa?text=Workbench" class="p-img">
+                        </div>
+                        <div class="details">
+                            <span class="p-cat">Tezgah</span>
+                            <h3 class="p-name">Pro Workbench MK-I</h3>
+                            <p class="p-meta">Ağır Hizmet • 120cm</p>
+                            <div class="p-footer">
+                                <span class="p-price">₺ 6,200</span>
+                                <div class="btn-add"><i class="ph-bold ph-plus"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="prod-card">
+                        <div class="img-box">
+                            <img src="https://via.placeholder.com/300x300/F1F5F9/aaaaaa?text=Wall+Unit" class="p-img">
+                        </div>
+                        <div class="details">
+                            <span class="p-cat">Duvar</span>
+                            <h3 class="p-name">French Cleat System</h3>
+                            <p class="p-meta">Sonsuz Eklenti</p>
+                            <div class="p-footer">
+                                <span class="p-price">₺ 1,850</span>
+                                <div class="btn-add"><i class="ph-bold ph-plus"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="prod-card">
+                        <div class="img-box">
+                            <img src="https://via.placeholder.com/300x300/F1F5F9/aaaaaa?text=Saw+Cart" class="p-img">
+                        </div>
+                        <div class="details">
+                            <span class="p-cat">İstasyon</span>
+                            <h3 class="p-name">Mobile Saw Cart</h3>
+                            <p class="p-meta">Tekerlekli • Katlanır</p>
+                            <div class="p-footer">
+                                <span class="p-price">₺ 3,100</span>
+                                <div class="btn-add"><i class="ph-bold ph-plus"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+</body>
+</html>

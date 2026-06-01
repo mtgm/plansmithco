@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plansmith | Warm Sun Catalogue</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@300;500;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../../css/theme-warm-sun.css">
+
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+
+</head>
+
+<body>
+
+    <header class="nav-container">
+        <nav class="glass-nav">
+            <a href="#" class="brand-logo"><i class="ph-fill ph-sun-horizon" style="color:var(--accent)"></i>
+                Plansmith.</a>
+            <div class="nav-links">
+                <a href="#" class="active">Mağaza</a>
+                <a href="#">Projeler</a>
+                <a href="#">Atölye</a>
+            </div>
+            <div class="nav-actions">
+                <div class="icon-btn"><i class="ph ph-magnifying-glass"></i></div>
+                <div class="icon-btn"><i class="ph ph-bag"></i></div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="catalog-container">
+
+        <aside class="filter-panel">
+            <div class="filter-head">Filtrele <i class="ph ph-sliders"></i></div>
+
+            <div class="f-group">
+                <span class="f-label">Kategori</span>
+                <div class="check-item active"><span class="checkbox"></span> Depolama Sistemleri</div>
+                <div class="check-item"><span class="checkbox"></span> Çalışma Tezgahları</div>
+                <div class="check-item"><span class="checkbox"></span> Duvar Üniteleri</div>
+            </div>
+
+            <div class="f-group">
+                <span class="f-label">Malzeme</span>
+                <div class="check-item"><span class="checkbox"></span> Kontrplak</div>
+                <div class="check-item active"><span class="checkbox"></span> Masif Ahşap</div>
+                <div class="check-item"><span class="checkbox"></span> MDF</div>
+            </div>
+
+            <div class="f-group">
+                <span class="f-label">Fiyat</span>
+                <input type="range" style="width:100%; accent-color:var(--accent);">
+                <div
+                    style="display:flex; justify-content:space-between; font-size:12px; margin-top:8px; color:var(--text-muted);">
+                    <span>₺0</span><span>₺10k+</span>
+                </div>
+            </div>
+        </aside>
+
+        <div class="product-grid">
+            <!-- Ürünler buraya dinamik olarak js/pages/productList.js tarafından eklenecek -->
+        </div>
+
+    </main>
+
+    </main>
+
+    <!-- Core Scripts -->
+    <script src="../../js/core/utils.js"></script>
+    <script src="../../js/core/DataManager.js"></script>
+
+    <!-- Page Specific Script -->
+    <script src="../../js/pages/productList.js"></script>
+</body>
+
+</html>

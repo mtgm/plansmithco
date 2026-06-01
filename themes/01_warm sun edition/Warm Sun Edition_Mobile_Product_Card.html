@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Plansmith | Warm AR Experience</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../../css/theme-warm-sun.css">
+
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+
+
+</head>
+
+<body>
+
+    <section class="ar-stage">
+
+        <div class="btn-back"><i class="ph-bold ph-arrow-left"></i></div>
+
+        <model-viewer src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+            ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz" ar
+            ar-modes="scene-viewer webxr quick-look" camera-controls auto-rotate shadow-intensity="1.5" exposure="1"
+            environment-image="neutral">
+            <button slot="ar-button" class="custom-ar-btn">
+                <i class="ph-bold ph-cube-focus"></i>
+                AR Modunu Başlat
+            </button>
+        </model-viewer>
+    </section>
+
+    <section class="guide-section">
+
+        <div class="guide-header">
+            <span class="g-tag">Artırılmış Gerçeklik</span>
+            <h1 class="g-title">Odanızda Görün</h1>
+            <p class="g-desc">Bu ürünü satın almadan önce kendi mekanınızda, gerçek boyutlarıyla deneyimleyin.</p>
+        </div>
+
+        <div class="steps-box">
+
+            <div class="step-row">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <h4>Butona Dokun</h4>
+                    <p>Yukarıdaki turuncu "AR Modunu Başlat" butonuna tıklayarak kamerayı açın.</p>
+                </div>
+            </div>
+
+            <div class="step-row">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <h4>Zemini Tara</h4>
+                    <p>Telefonunuzu yere doğru tutun ve zemini algılaması için hafifçe hareket ettirin.</p>
+                </div>
+            </div>
+
+            <div class="step-row">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <h4>Yerleştir</h4>
+                    <p>Model belirdiğinde parmağınızla sürükleyerek istediğiniz yere konumlandırın.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Core Scripts -->
+    <script src="../../js/core/utils.js"></script>
+    <script src="../../js/core/DataManager.js"></script>
+
+    <!-- Page Script -->
+    <script src="../../js/pages/productCard.js"></script>
+</body>
+
+</html>

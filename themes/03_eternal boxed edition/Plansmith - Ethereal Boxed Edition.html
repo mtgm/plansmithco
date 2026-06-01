@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plansmith | Ethereal Boxed</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+
+    <style>
+        :root {
+            /* ETHEREAL PALETTE */
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --accent: #6366f1;        /* Indigo */
+            --highlight: #ec4899;     /* Pink */
+            
+            /* GLASS BOX VARIABLES */
+            --glass-bg: rgba(255, 255, 255, 0.85); /* Daha opak, net beyaz */
+            --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+            --glass-blur: blur(40px);
+            --glass-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.15); /* İndigo gölge */
+            
+            --radius-box: 24px;       /* Ana kutu köşesi */
+            --radius-elem: 12px;      /* İç element köşesi */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text-main);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            
+            /* AURORA BACKGROUND (Body'de duruyor, kutunun arkasından görünecek) */
+            background-color: #F1F5F9;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,90%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 100%, hsla(330, 60%, 94%, 1) 0, transparent 50%), 
+                radial-gradient(at 50% 50%, hsla(230, 60%, 96%, 1) 0, transparent 50%);
+            
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* --- THE MAIN BOX (HER ŞEY BURADA) --- */
+        .app-box {
+            width: 94%; max-width: 1600px;
+            height: 92vh; /* Sayfayı tam kaplamasın, boşluk kalsın */
+            
+            /* Glass Style */
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            border: var(--glass-border);
+            border-radius: var(--radius-box);
+            box-shadow: var(--glass-shadow);
+            
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- 1. HEADER (KUTUNUN İÇİNDE) --- */
+        .box-header {
+            height: 80px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 40px;
+            border-bottom: 1px solid rgba(0,0,0,0.05); /* Çok hafif ayraç */
+        }
+
+        .logo { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; color: var(--text-main); display: flex; gap: 10px; align-items: center; }
+        
+        .nav-menu { display: flex; gap: 32px; }
+        .nav-item { font-size: 14px; font-weight: 600; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+        .nav-item:hover, .nav-item.active { color: var(--accent); }
+
+        .nav-icons { display: flex; gap: 16px; }
+        .icon-btn { width: 40px; height: 40px; border-radius: var(--radius-elem); background: rgba(255,255,255,0.5); display: grid; place-items: center; cursor: pointer; transition: all 0.2s; font-size: 20px; color: var(--text-main); }
+        .icon-btn:hover { background: white; color: var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+        /* --- 2. CONTENT GRID --- */
+        .content-grid {
+            flex: 1; /* Kalan alanı kapla */
+            display: grid;
+            grid-template-columns: 1.4fr 1fr; /* Sol geniş, Sağ dar */
+            overflow: hidden;
+        }
+
+        /* LEFT: VIEWER (İç Kutu) */
+        .viewer-wrapper {
+            margin: 20px; /* Negatif alan */
+            border-radius: var(--radius-elem);
+            background: rgba(248, 250, 252, 0.5); /* Hafif farklı zemin */
+            border: 1px solid rgba(255,255,255,0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        model-viewer {
+            width: 100%; height: 100%;
+            --poster-color: transparent;
+            filter: drop-shadow(0 40px 80px rgba(99, 102, 241, 0.15)); /* Ethereal gölge */
+        }
+
+        .view-controls {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 10px;
+            background: white; padding: 8px; border-radius: var(--radius-elem);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .ctrl-btn { width: 36px; height: 36px; border: none; background: #F1F5F9; border-radius: 6px; cursor: pointer; color: var(--text-main); font-size: 18px; transition: all 0.2s; }
+        .ctrl-btn:hover { background: var(--accent); color: white; }
+
+        /* RIGHT: CONFIG PANEL */
+        .config-wrapper {
+            display: flex; flex-direction: column;
+            padding: 0 40px 40px 20px; /* Sol taraftan viewer ile mesafe */
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .scroll-area {
+            flex: 1; overflow-y: auto; padding-top: 30px;
+        }
+        .scroll-area::-webkit-scrollbar { width: 6px; }
+        .scroll-area::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+
+        /* Typography */
+        .badge { font-size: 11px; font-weight: 700; color: var(--highlight); background: rgba(236, 72, 153, 0.1); padding: 6px 10px; border-radius: 6px; display: inline-block; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
+        .title { font-family: 'Outfit', sans-serif; font-size: 42px; font-weight: 700; line-height: 1.1; margin-bottom: 12px; color: var(--text-main); }
+        .price { font-size: 24px; font-weight: 600; color: var(--text-muted); margin-bottom: 40px; display: block; }
+        
+        .label { font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--text-main); margin-bottom: 12px; display: block; letter-spacing: 0.5px; }
+
+        /* Cards (Düz ve Net) */
+        .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 40px; }
+        
+        .flat-card {
+            background: white; border: 1px solid #E2E8F0;
+            padding: 12px; border-radius: var(--radius-elem);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .flat-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+        
+        .flat-card.active { 
+            border-color: var(--accent); background: #EEF2FF; /* Indigo Light */
+            box-shadow: 0 0 0 1px var(--accent); 
+        }
+
+        .c-img { width: 100%; height: 90px; background: #F1F5F9; border-radius: 8px; margin-bottom: 10px; object-fit: cover; }
+        .c-title { font-weight: 700; font-size: 14px; display: block; }
+        .c-sub { font-size: 12px; color: var(--text-muted); }
+
+        /* Colors (Karemsi) */
+        .color-row { display: flex; gap: 12px; margin-bottom: 40px; }
+        .c-box {
+            width: 48px; height: 48px; border-radius: 10px; /* Squircle */
+            cursor: pointer; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .c-box:hover { transform: scale(1.1); }
+        .c-box.active { box-shadow: 0 0 0 2px var(--accent); }
+
+        /* Footer (Sticky Inside) */
+        .action-footer {
+            padding-top: 20px; border-top: 1px solid #E2E8F0;
+            display: flex; gap: 20px; align-items: center;
+        }
+        
+        .btn-gradient {
+            flex: 1; border: none;
+            background: linear-gradient(135deg, var(--accent) 0%, #818cf8 100%);
+            color: white; height: 56px; border-radius: var(--radius-elem);
+            font-size: 16px; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: opacity 0.2s;
+        }
+        .btn-gradient:hover { opacity: 0.9; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2); }
+
+        .btn-outline {
+            width: 56px; height: 56px; border: 1px solid #E2E8F0; background: white;
+            border-radius: var(--radius-elem); display: grid; place-items: center; font-size: 22px; cursor: pointer; color: var(--text-muted);
+        }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .app-box { height: auto; min-height: 95vh; margin: 20px 0; }
+            .content-grid { grid-template-columns: 1fr; display: block; }
+            .viewer-wrapper { height: 50vh; margin: 20px; }
+            .config-wrapper { padding: 0 20px 40px 20px; }
+            .nav-menu { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-box">
+        
+        <header class="box-header">
+            <div class="logo">
+                <i class="ph-fill ph-cube-transparent" style="color:var(--accent); font-size:28px;"></i>
+                Plansmith.
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active">Mağaza</a>
+                <a href="#" class="nav-item">Koleksiyonlar</a>
+                <a href="#" class="nav-item">Topluluk</a>
+                <a href="#" class="nav-item">İletişim</a>
+            </nav>
+
+            <div class="nav-icons">
+                <div class="icon-btn"><i class="ph ph-magnifying-glass"></i></div>
+                <div class="icon-btn"><i class="ph ph-shopping-bag"></i></div>
+            </div>
+        </header>
+
+        <main class="content-grid">
+            
+            <section class="viewer-wrapper">
+                <model-viewer 
+                    id="viewer"
+                    src="https://modelviewer.dev/shared-assets/models/Astronaut.glb" 
+                    camera-controls auto-rotate shadow-intensity="1.5" exposure="1" environment-image="neutral"
+                >
+                </model-viewer>
+                <div class="view-controls">
+                    <button class="ctrl-btn"><i class="ph-fill ph-cube-focus"></i></button>
+                    <button class="ctrl-btn"><i class="ph-fill ph-camera"></i></button>
+                </div>
+            </section>
+
+            <section class="config-wrapper">
+                <div class="scroll-area">
+                    
+                    <span class="badge">Digital Blueprint</span>
+                    <h1 class="title">Ethereal Rack System</h1>
+                    <span class="price">₺ 4,350</span>
+
+                    <label class="label">Malzeme</label>
+                    <div class="card-grid">
+                        <div class="flat-card active" onclick="select(this)">
+                            <img src="https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=300&q=80" class="c-img">
+                            <span class="c-title">Akçaağaç</span>
+                            <span class="c-sub">Standart</span>
+                        </div>
+                        <div class="flat-card" onclick="select(this)">
+                            <img src="https://images.unsplash.com/photo-1542887800-24f6050b57fa?w=300&q=80" class="c-img">
+                            <span class="c-title">Koyu Ceviz</span>
+                            <span class="c-sub">+ ₺350</span>
+                        </div>
+                    </div>
+
+                    <label class="label">Renk</label>
+                    <div class="color-row">
+                        <div class="c-box active" style="background:#6366f1"></div>
+                        <div class="c-box" style="background:#ec4899"></div>
+                        <div class="c-box" style="background:#1E293B"></div>
+                        <div class="c-box" style="background:#F1F5F9; border-color:#CBD5E1;"></div>
+                    </div>
+
+                    <p style="font-size:14px; color:var(--text-muted); line-height:1.6; margin-bottom:30px;">
+                        Bu dijital plan, modern CNC tezgahları ve el aletleri ile uyumludur. Satın alma sonrası PDF ve DXF formatında anında indirme linki gönderilir.
+                    </p>
+
+                </div>
+
+                <div class="action-footer">
+                    <button class="btn-outline"><i class="ph-fill ph-heart"></i></button>
+                    <button class="btn-gradient">
+                        Sepete Ekle <i class="ph-bold ph-arrow-right"></i>
+                    </button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        function select(el) {
+            document.querySelectorAll('.flat-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+        }
+        document.querySelectorAll('.c-box').forEach(b => {
+            b.addEventListener('click', function(){
+                document.querySelectorAll('.c-box').forEach(x => x.classList.remove('active'));
+                this.classList.add('active');
+            })
+        })
+    </script>
+</body>
+</html>
